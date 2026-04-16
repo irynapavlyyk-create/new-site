@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  background: #0A0A0F;
+  color: #E8E8F0;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 166, 35, 0.12), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 10% 30%, rgba(123, 97, 255, 0.08), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 60%, rgba(255, 107, 53, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+  .glass-strong {
+    @apply bg-white/[0.08] backdrop-blur-2xl border border-white/15 rounded-2xl;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold
+           bg-gradient-to-r from-amber to-orange text-black
+           hover:shadow-glow transition-all duration-300
+           hover:-translate-y-0.5;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-full font-medium
+           border border-white/20 text-ink
+           hover:bg-white/5 hover:border-white/30 transition-all;
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-amber via-orange to-violet bg-clip-text text-transparent;
+  }
+  .section {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28;
+  }
+  .h-display {
+    @apply font-display font-bold tracking-tight;
+  }
+}
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes spin-slow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 6s linear infinite; }

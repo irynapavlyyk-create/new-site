@@ -21,6 +21,13 @@ out/
 .env.local
 .env.*.local
 
+# Next.js
+.next/
+next-env.d.ts
+
+# TypeScript
+*.tsbuildinfo
+
 # Logs
 *.log
 npm-debug.log*
