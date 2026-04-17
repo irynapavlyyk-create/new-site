@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
@@ -11,6 +11,29 @@ import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardFallback />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <main className="min-h-screen flex items-center justify-center">
+      <div
+        className="w-16 h-16 rounded-full border-4 border-t-amber animate-spin"
+        style={{
+          borderLeftColor: "var(--border)",
+          borderRightColor: "var(--border)",
+          borderBottomColor: "var(--border)",
+        }}
+      />
+    </main>
+  );
+}
+
+function DashboardContent() {
   const { lang } = useI18n();
   const params = useSearchParams();
   const sessionId = params.get("session_id");

@@ -409,8 +409,14 @@ export const t = {
     downloadPdf: { en: "Download PDF", ru: "Скачать PDF" },
     week: { en: "Week", ru: "Неделя" },
   },
-} as const;
+};
 
-export function pick<T>(node: { en: T; ru: T }, lang: Lang): T {
-  return node[lang];
+type Mutable<T> = T extends readonly (infer U)[]
+  ? Mutable<U>[]
+  : T extends object
+    ? { -readonly [K in keyof T]: Mutable<T[K]> }
+    : T;
+
+export function pick<En, Ru>(node: { en: En; ru: Ru }, lang: Lang): Mutable<En | Ru> {
+  return (lang === "en" ? node.en : node.ru) as Mutable<En | Ru>;
 }

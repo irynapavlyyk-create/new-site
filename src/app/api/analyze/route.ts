@@ -75,13 +75,7 @@ Rules:
     const response = await anthropic.messages.create({
       model: MODEL,
       max_tokens: tier === "pro" ? 4000 : 1200,
-      system: [
-        {
-          type: "text",
-          text: system,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
+      system,
       messages: [{ role: "user", content: userPrompt }],
     });
 
