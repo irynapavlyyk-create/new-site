@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl *)",
+      "Bash(netstat -ano)",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(curl -s \"http://localhost:3000/_next/static/css/app/layout.css?v=1776430227552\")",
+      "Read(//tmp/**)",
+      "Bash(grep *)",
+      "Bash(awk '/text-ink/,/}/' /tmp/ef-css.txt)",
+      "Bash(taskkill //F //PID 28296)",
+      "Bash(awk '/\\\\.text-ink[^:]/,/}/' /tmp/ef-css2.txt)",
+      "Bash(awk '/\\\\.text-muted[^:]/,/}/' /tmp/ef-css2.txt)",
+      "Bash(tasklist //FI \"PID eq 35956\")",
+      "Bash(tasklist //FI \"PID eq 35388\")"
+    ]
+  }
+}

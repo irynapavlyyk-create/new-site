@@ -13,7 +13,7 @@ export default function ResultPage() {
   const router = useRouter();
   const { lang } = useI18n();
   const [report, setReport] = useState<FreeReport | null>(null);
-  const [loadingPay, setLoadingPay] = useState(false);
+  const [loadingTier, setLoadingTier] = useState<"pro" | "coach" | null>(null);
 
   useEffect(() => {
     const raw = typeof window !== "undefined" ? localStorage.getItem("ef_free_report") : null;
@@ -28,18 +28,19 @@ export default function ResultPage() {
     }
   }, [router]);
 
-  const unlock = async () => {
-    setLoadingPay(true);
+  const unlock = async (tier: "pro" | "coach") => {
+    setLoadingTier(tier);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier: "pro", lang }),
+        body: JSON.stringify({ tier, lang }),
       });
       const { url } = await res.json();
       if (url) window.location.href = url;
+      else setLoadingTier(null);
     } catch {
-      setLoadingPay(false);
+      setLoadingTier(null);
     }
   };
 
@@ -58,7 +59,7 @@ export default function ResultPage() {
 
           <FadeUp delay={100}>
             <div className="glass p-8 mb-6">
-              <h2 className="h-display text-xl mb-6 text-amber">⚡ {pick(t.result.leaks, lang)}</h2>
+              <h2 className="h-display text-xl font-bold mb-6 text-amber">⚡ {pick(t.result.leaks, lang)}</h2>
               <div className="space-y-4">
                 {report.topIssues.map((leak, i) => (
                   <div key={i} className="flex gap-4">
@@ -66,7 +67,7 @@ export default function ResultPage() {
                       {i + 1}
                     </div>
                     <div>
-                      <h3 className="font-display font-semibold mb-1">{leak.title}</h3>
+                      <h3 className="h-display text-lg font-bold mb-1">{leak.title}</h3>
                       <p className="text-muted text-sm leading-relaxed">{leak.description}</p>
                     </div>
                   </div>
@@ -77,7 +78,7 @@ export default function ResultPage() {
 
           <FadeUp delay={200}>
             <div className="glass p-8 mb-10">
-              <h2 className="h-display text-xl mb-6 text-violet">✦ {pick(t.result.tips, lang)}</h2>
+              <h2 className="h-display text-xl font-bold mb-6 text-violet">✦ {pick(t.result.tips, lang)}</h2>
               <ul className="space-y-3">
                 {report.tips.map((tip, i) => (
                   <li key={i} className="flex gap-3 text-sm">
@@ -98,28 +99,94 @@ export default function ResultPage() {
                 </h2>
                 <p className="text-center text-muted mb-6">{pick(t.result.lockedSub, lang)}</p>
 
-                <div className="relative mb-6">
-                  <div className="glass p-6 filter blur-sm select-none pointer-events-none">
-                    <div className="h-4 bg-white/10 rounded w-3/4 mb-3" />
-                    <div className="h-3 bg-white/5 rounded w-full mb-2" />
-                    <div className="h-3 bg-white/5 rounded w-5/6 mb-2" />
-                    <div className="h-3 bg-white/5 rounded w-4/6 mb-4" />
-                    <div className="h-4 bg-white/10 rounded w-1/2 mb-3" />
-                    <div className="h-3 bg-white/5 rounded w-full mb-2" />
-                    <div className="h-3 bg-white/5 rounded w-3/4" />
+                <div className="relative mb-6 overflow-hidden rounded-2xl">
+                  <div className="glass p-6 sm:p-8 select-none">
+                    <div className="h-display text-lg font-bold text-amber mb-4">
+                      {pick(t.result.teaser.heading, lang)}
+                    </div>
+                    <p className="text-ink leading-relaxed mb-3">
+                      {pick(t.result.teaser.line1, lang)}
+                    </p>
+                    <p className="text-ink leading-relaxed mb-4">
+                      {pick(t.result.teaser.line2, lang)}
+                    </p>
+                    <p
+                      className="text-ink leading-relaxed mb-3"
+                      style={{ filter: "blur(2px)", WebkitFilter: "blur(2px)" }}
+                    >
+                      {pick(t.result.teaser.line3, lang)}
+                    </p>
+                    <p
+                      className="text-ink leading-relaxed mb-3"
+                      style={{ filter: "blur(4px)", WebkitFilter: "blur(4px)" }}
+                    >
+                      {pick(t.result.teaser.line4, lang)}
+                    </p>
+                    <p
+                      className="text-ink leading-relaxed mb-3"
+                      style={{ filter: "blur(6px)", WebkitFilter: "blur(6px)" }}
+                    >
+                      {pick(t.result.teaser.line5, lang)}
+                    </p>
+                    <p
+                      className="text-ink leading-relaxed"
+                      style={{ filter: "blur(6px)", WebkitFilter: "blur(6px)" }}
+                    >
+                      {pick(t.result.teaser.line6, lang)}
+                    </p>
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-5xl">🔒</div>
+                  <div
+                    className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(to bottom, var(--preview-blur-from) 0%, var(--preview-blur-to) 85%)",
+                    }}
+                  />
+                  <div className="absolute inset-x-0 bottom-6 flex justify-center pointer-events-none">
+                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-amber to-orange shadow-glow">
+                      <span className="text-2xl" style={{ color: "var(--btn-text)" }}>🔒</span>
+                    </div>
                   </div>
                 </div>
 
-                <button
-                  onClick={unlock}
-                  disabled={loadingPay}
-                  className="btn-primary w-full text-lg py-4 animate-pulse-glow disabled:opacity-60"
-                >
-                  {loadingPay ? "…" : pick(t.result.unlock, lang)} →
-                </button>
+                <div className="text-center mb-6">
+                  <h3 className="h-display text-2xl sm:text-3xl font-bold mb-2">
+                    {pick(t.result.choose.title, lang)}
+                  </h3>
+                  <p className="text-muted text-sm">{pick(t.result.choose.subtitle, lang)}</p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 items-stretch">
+                  <PricingCard
+                    accent="amber"
+                    badge={pick(t.result.choose.pro.badge, lang)}
+                    name={pick(t.result.choose.pro.name, lang)}
+                    price={pick(t.result.choose.pro.price, lang)}
+                    period={pick(t.result.choose.pro.period, lang)}
+                    features={pick(t.result.choose.pro.features, lang)}
+                    cta={pick(t.result.choose.pro.cta, lang)}
+                    loading={loadingTier === "pro"}
+                    disabled={loadingTier !== null}
+                    onClick={() => unlock("pro")}
+                  />
+                  <PricingCard
+                    accent="violet"
+                    highlighted
+                    badge={pick(t.result.choose.coach.badge, lang)}
+                    name={pick(t.result.choose.coach.name, lang)}
+                    price={pick(t.result.choose.coach.price, lang)}
+                    period={pick(t.result.choose.coach.period, lang)}
+                    features={pick(t.result.choose.coach.features, lang)}
+                    cta={pick(t.result.choose.coach.cta, lang)}
+                    loading={loadingTier === "coach"}
+                    disabled={loadingTier !== null}
+                    onClick={() => unlock("coach")}
+                  />
+                </div>
+
+                <p className="text-center text-xs text-muted mt-5">
+                  {pick(t.result.choose.upgradeNote, lang)}
+                </p>
               </div>
             </div>
           </FadeUp>
@@ -127,5 +194,84 @@ export default function ResultPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+function PricingCard({
+  accent,
+  highlighted = false,
+  badge,
+  name,
+  price,
+  period,
+  features,
+  cta,
+  loading,
+  disabled,
+  onClick,
+}: {
+  accent: "amber" | "violet";
+  highlighted?: boolean;
+  badge: string;
+  name: string;
+  price: string;
+  period: string;
+  features: string[];
+  cta: string;
+  loading: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const isViolet = accent === "violet";
+  const checkColor = isViolet ? "text-violet" : "text-amber";
+  const badgeBg = isViolet
+    ? "bg-gradient-to-r from-violet to-orange"
+    : "bg-gradient-to-r from-amber to-orange";
+  const btnClass = isViolet
+    ? "w-full inline-flex items-center justify-center px-6 py-3.5 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glowViolet disabled:opacity-60 disabled:hover:translate-y-0"
+    : "btn-primary w-full py-3.5 disabled:opacity-60 disabled:hover:translate-y-0";
+  const btnStyle = isViolet ? { background: "rgb(var(--violet))" } : undefined;
+  const cardStyle = highlighted
+    ? {
+        borderWidth: "2px",
+        borderColor: "rgb(var(--violet))",
+        boxShadow: "0 0 50px rgba(123, 97, 255, 0.25)",
+      }
+    : undefined;
+
+  return (
+    <div
+      className="relative glass p-6 sm:p-7 h-full flex flex-col"
+      style={cardStyle}
+    >
+      <div
+        className={`absolute -top-3 left-1/2 -translate-x-1/2 ${badgeBg} text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap`}
+        style={{ color: "var(--btn-text)" }}
+      >
+        {badge}
+      </div>
+      <h4 className="h-display text-xl font-bold text-muted mt-2">{name}</h4>
+      <div className="mt-2 mb-1 flex items-baseline gap-2">
+        <span className="h-display text-4xl sm:text-5xl font-bold text-ink">{price}</span>
+      </div>
+      <p className="text-xs text-muted mb-5">{period}</p>
+      <ul className="space-y-2.5 mb-6 flex-1">
+        {features.map((f, i) => (
+          <li key={i} className="flex gap-2 text-sm">
+            <span className={`${checkColor} flex-shrink-0 font-bold`}>✓</span>
+            <span className="text-ink leading-snug">{f}</span>
+          </li>
+        ))}
+      </ul>
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className={btnClass}
+        style={btnStyle}
+      >
+        {loading ? "…" : <>{cta} →</>}
+      </button>
+    </div>
   );
 }

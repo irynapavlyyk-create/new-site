@@ -19,10 +19,10 @@ export default function HowItWorks() {
         {steps.map((s, i) => (
           <FadeUp key={i} delay={i * 120}>
             <div className="relative glass p-8 h-full text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber to-orange flex items-center justify-center font-display font-bold text-black text-2xl shadow-glow mb-6">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber to-orange flex items-center justify-center font-display font-bold text-2xl shadow-glow mb-6" style={{ color: "var(--btn-text)" }}>
                 {i + 1}
               </div>
-              <h3 className="h-display text-xl mb-3">{s.t}</h3>
+              <h3 className="h-display text-xl font-bold mb-3">{s.t}</h3>
               <p className="text-muted text-sm leading-relaxed">{s.d}</p>
             </div>
           </FadeUp>

@@ -21,8 +21,8 @@ export default function Features() {
           <FadeUp key={i} delay={i * 60}>
             <div className="glass p-6 h-full hover:border-violet/40 transition-all hover:-translate-y-1">
               <div className="text-3xl mb-4">{icons[i]}</div>
-              <h3 className="h-display text-base mb-2">{it.t}</h3>
-              <p className="text-sm text-muted">{it.d}</p>
+              <h3 className="h-display text-lg font-bold mb-2">{it.t}</h3>
+              <p className="text-sm text-muted leading-relaxed">{it.d}</p>
             </div>
           </FadeUp>
         ))}

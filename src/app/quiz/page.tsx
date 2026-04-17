@@ -44,7 +44,7 @@ export default function QuizPage() {
             <span>{pick(t.quiz.step, lang)} {step + 1} {pick(t.quiz.of, lang)} {quizSteps.length}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-12">
+          <div className="h-1 rounded-full overflow-hidden mb-12" style={{ background: "var(--card-bg)" }}>
             <div
               className="h-full bg-gradient-to-r from-amber to-orange transition-all duration-500"
               style={{ width: `${progress}%` }}

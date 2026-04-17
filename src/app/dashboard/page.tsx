@@ -66,7 +66,7 @@ export default function DashboardPage() {
   if (loading || !plan) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 rounded-full border-4 border-white/5 border-t-amber animate-spin" />
+        <div className="w-16 h-16 rounded-full border-4 border-t-amber animate-spin" style={{ borderLeftColor: "var(--border)", borderRightColor: "var(--border)", borderBottomColor: "var(--border)" }} />
       </main>
     );
   }
@@ -96,11 +96,11 @@ export default function DashboardPage() {
 
           <FadeUp delay={200}>
             <div className="glass p-8 mb-6">
-              <h2 className="h-display text-xl mb-4 text-amber">💊 {pick(t.dashboard.sections.supplements, lang)}</h2>
+              <h2 className="h-display text-xl font-bold mb-4 text-amber">💊 {pick(t.dashboard.sections.supplements, lang)}</h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 {plan.supplements.map((s, i) => (
-                  <div key={i} className="border border-white/10 rounded-xl p-4">
-                    <div className="font-display font-semibold">{s.name}</div>
+                  <div key={i} className="rounded-xl p-4" style={{ border: "1px solid var(--border)" }}>
+                    <div className="font-display font-bold text-base">{s.name}</div>
                     <div className="text-amber text-sm mt-1">{s.dose}</div>
                     <div className="text-muted text-xs mt-2">{s.note}</div>
                   </div>
@@ -116,11 +116,11 @@ export default function DashboardPage() {
 
           <FadeUp delay={300}>
             <div className="glass p-8 mb-6">
-              <h2 className="h-display text-xl mb-6 text-amber">📅 {pick(t.dashboard.sections.plan, lang)}</h2>
+              <h2 className="h-display text-xl font-bold mb-6 text-amber">📅 {pick(t.dashboard.sections.plan, lang)}</h2>
               <div className="space-y-4">
                 {plan.thirtyDayPlan.map((week) => (
                   <div key={week.week} className="border-l-2 border-amber/40 pl-4">
-                    <div className="font-display font-semibold text-sm text-amber mb-1">
+                    <div className="font-display font-bold text-sm text-amber mb-1">
                       {pick(t.dashboard.week, lang)} {week.week}: {week.focus}
                     </div>
                     <ul className="text-sm text-muted space-y-1">
@@ -154,7 +154,7 @@ function ListCard({ title, items, accent }: { title: string; items: string[]; ac
   return (
     <FadeUp>
       <div className="glass p-6 h-full">
-        <h2 className={`h-display text-lg mb-4 ${color}`}>{title}</h2>
+        <h2 className={`h-display text-lg font-bold mb-4 ${color}`}>{title}</h2>
         <ul className="space-y-2">
           {items.map((it, i) => (
             <li key={i} className="flex gap-2 text-sm">

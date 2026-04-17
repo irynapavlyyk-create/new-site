@@ -23,7 +23,7 @@ export default function PlanPreview() {
               <div className="glass p-6 h-full">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-2 h-2 rounded-full bg-amber animate-pulse" />
-                  <h3 className="h-display text-base">{it.t}</h3>
+                  <h3 className="h-display text-lg font-bold">{it.t}</h3>
                 </div>
                 <p className="text-sm text-muted leading-relaxed">{it.d}</p>
               </div>

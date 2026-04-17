@@ -4,29 +4,42 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Counter({ to, suffix = "", duration = 1500 }: { to: number; suffix?: string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [val, setVal] = useState(0);
+  const [val, setVal] = useState(to);
   const started = useRef(false);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || started.current) return;
+
+    const run = () => {
+      if (started.current) return;
+      started.current = true;
+      setVal(0);
+      const begin = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - begin) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        setVal(Math.round(eased * to));
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const start = performance.now();
-          const step = (now: number) => {
-            const p = Math.min(1, (now - start) / duration);
-            const eased = 1 - Math.pow(1 - p, 3);
-            setVal(Math.round(eased * to));
-            if (p < 1) requestAnimationFrame(step);
-          };
-          requestAnimationFrame(step);
+        if (entry.isIntersecting) {
+          run();
+          obs.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.1 }
     );
     obs.observe(ref.current);
-    return () => obs.disconnect();
+
+    const fallback = window.setTimeout(run, 1200);
+    return () => {
+      obs.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, [to, duration]);
 
   return (

@@ -8,17 +8,29 @@ export const t = {
     cta: { en: "Start free", ru: "Начать бесплатно" },
   },
   hero: {
-    tag: { en: "Personal AI Energy Diagnostic", ru: "Персональный ИИ-диагност энергии" },
+    tag: { en: "Personal Energy Diagnostic", ru: "Персональная диагностика энергии" },
     title: {
-      en: "Forge your energy. Reclaim your days.",
-      ru: "Кузница твоей энергии. Верни свои дни.",
+      en: "Find out why you're exhausted — and actually fix it",
+      ru: "Узнай почему ты устаёшь — и наконец это исправь",
+    },
+    titleLead: {
+      en: "Tired of being tired?",
+      ru: "Ты не ленивый.",
+    },
+    titleMid: {
+      en: "",
+      ru: "Ты просто",
+    },
+    titleAccent: {
+      en: "Stop guessing. Start fixing.",
+      ru: "на нуле.",
     },
     subtitle: {
-      en: "Answer 9 questions — AI builds a personal 30-day protocol that works while you sleep.",
-      ru: "Ответь на 9 вопросов — ИИ соберёт персональный 30-дневный протокол, который работает пока ты спишь.",
+      en: "Answer 9 questions — your answers build a personal 30-day protocol shaped around your sleep, stress, and energy patterns.",
+      ru: "Ответь на 9 вопросов — твои ответы соберут персональный 30-дневный протокол под твой сон, стресс и ритм жизни.",
     },
-    cta: { en: "Start diagnostic — free", ru: "Начать диагностику — бесплатно" },
-    sub: { en: "No credit card. Takes 2 minutes.", ru: "Без карты. Занимает 2 минуты." },
+    cta: { en: "Start FREE diagnostic", ru: "Начать БЕСПЛАТНУЮ диагностику" },
+    sub: { en: "Takes 2 minutes.", ru: "Занимает 2 минуты." },
     stats: {
       users: { en: "people diagnosed", ru: "человек прошли диагностику" },
       plans: { en: "plans generated", ru: "планов создано" },
@@ -69,7 +81,7 @@ export const t = {
       ru: [
         "Открываешь глаза — и уже устал",
         "Кофе больше не работает",
-        "К 3 дня мозг выключается",
+        "К 3 часам дня мозг уже выключается",
         "Листаешь телефон вместо сна — каждый вечер",
         "Знаешь что делать, но не можешь начать",
         "Стресс протекает и в выходные",
@@ -81,12 +93,12 @@ export const t = {
     steps: {
       en: [
         { t: "Answer 9 questions", d: "Sleep, stress, nutrition, energy — the whole picture." },
-        { t: "AI analyzes", d: "Claude finds your top energy leaks and root causes." },
+        { t: "Every answer shapes your plan", d: "Your specific patterns reveal your top energy leaks and root causes — not generic advice." },
         { t: "Get your protocol", d: "Morning, sleep, supplements, 30-day plan — on screen in 40 seconds." },
       ],
       ru: [
         { t: "Отвечаешь на 9 вопросов", d: "Сон, стресс, питание, энергия — вся картина." },
-        { t: "ИИ анализирует", d: "Claude находит главные утечки и корни проблемы." },
+        { t: "Каждый ответ формирует твой план", d: "Твои конкретные паттерны раскрывают главные утечки и корни проблемы — без шаблонных советов." },
         { t: "Получаешь протокол", d: "Утро, сон, добавки, 30-дневный план — на экране за 40 секунд." },
       ],
     },
@@ -168,11 +180,11 @@ export const t = {
           name: "Coach",
           price: "€24.99",
           period: "/month",
-          desc: "Weekly AI adjustments",
+          desc: "Weekly plan adjustments",
           features: [
             "Everything in PRO",
-            "Weekly AI reviews",
-            "Plan auto-tuning",
+            "Weekly plan reviews",
+            "Auto-tuning to your progress",
             "Priority support",
           ],
           cta: "Become Coach",
@@ -209,11 +221,11 @@ export const t = {
           name: "Coach",
           price: "€24.99",
           period: "/мес",
-          desc: "Еженедельные корректировки ИИ",
+          desc: "Еженедельные корректировки плана",
           features: [
             "Всё из PRO",
-            "Еженедельные ревью ИИ",
-            "Автоподстройка плана",
+            "Еженедельные ревью плана",
+            "Автоподстройка под твой прогресс",
             "Приоритетная поддержка",
           ],
           cta: "Стать Coach",
@@ -275,7 +287,7 @@ export const t = {
     of: { en: "of", ru: "из" },
   },
   loading: {
-    title: { en: "AI is forging your plan…", ru: "ИИ кузнечит твой план…" },
+    title: { en: "Forging your personal plan…", ru: "Куётся твой персональный план…" },
     steps: {
       en: ["Analyzing your energy profile", "Finding root causes", "Matching protocols", "Personalizing the 30-day plan"],
       ru: ["Анализирую твой энергетический профиль", "Нахожу корневые причины", "Подбираю протоколы", "Персонализирую 30-дневный план"],
@@ -290,9 +302,93 @@ export const t = {
       en: "Unlock PRO and get the 30-day protocol — one-time €9.99.",
       ru: "Открой PRO и получи 30-дневный протокол — разово €9.99.",
     },
+    teaser: {
+      heading: { en: "⚡ Your cortisol map", ru: "⚡ Твоя карта кортизола" },
+      line1: {
+        en: "Your cortisol pattern shows a late-evening spike — this is why you can't fall asleep before 1am and feel groggy until noon.",
+        ru: "Твой кортизол пикует поздно вечером — именно поэтому ты не можешь заснуть до часу ночи и тупишь до полудня.",
+      },
+      line2: {
+        en: "The fix isn't melatonin. It's a 3-step pre-sleep reset built around your specific stress triggers.",
+        ru: "Мелатонин тут не поможет. Нужен 3-шаговый ритуал сна, собранный под твои конкретные триггеры стресса.",
+      },
+      line3: {
+        en: "Step 1 — between 18:30 and 19:15, before cortisol starts climbing, you need to shift...",
+        ru: "Шаг 1 — между 18:30 и 19:15, до того как кортизол начнёт расти, нужно перевести...",
+      },
+      line4: {
+        en: "...this moves the nervous system into parasympathetic dominance and blocks the...",
+        ru: "...это переводит нервную систему в парасимпатический режим и блокирует...",
+      },
+      line5: {
+        en: "...combined with a specific supplement stack (magnesium glycinate + L-theanine + ...), dosed at...",
+        ru: "...в сочетании со стеком добавок (магний глицинат + L-теанин + ...), дозировка...",
+      },
+      line6: {
+        en: "...result: you fall asleep within 18 minutes, and morning cortisol lands in the ideal window...",
+        ru: "...результат: засыпаешь за 18 минут, а утренний кортизол попадает в идеальное окно...",
+      },
+    },
     unlock: { en: "Unlock PRO — €9.99", ru: "Открыть PRO — €9.99" },
     tryAgain: { en: "Retake quiz", ru: "Пройти анкету заново" },
     error: { en: "Something went wrong. Please try again.", ru: "Что-то пошло не так. Попробуй ещё раз." },
+    choose: {
+      title: { en: "Choose your path", ru: "Выбери свой путь" },
+      subtitle: {
+        en: "Two ways to unlock your full personalized protocol.",
+        ru: "Два способа открыть твой персональный протокол.",
+      },
+      upgradeNote: {
+        en: "Upgrade from PRO to Coach anytime.",
+        ru: "Можно перейти с PRO на Coach в любой момент.",
+      },
+      pro: {
+        badge: { en: "One-time payment", ru: "Одноразовая оплата" },
+        name: { en: "PRO", ru: "PRO" },
+        price: { en: "€9.99", ru: "€9.99" },
+        period: { en: "one-time", ru: "разовый платёж" },
+        features: {
+          en: [
+            "Full 30-day plan",
+            "Personal supplement stack",
+            "Morning, sleep & stress protocols",
+            "PDF export",
+            "Lifetime access",
+          ],
+          ru: [
+            "Полный 30-дневный план",
+            "Персональный стек добавок",
+            "Протоколы утра, сна и стресса",
+            "PDF-экспорт",
+            "Пожизненный доступ",
+          ],
+        },
+        cta: { en: "Unlock PRO", ru: "Открыть PRO" },
+      },
+      coach: {
+        badge: { en: "★ Best value", ru: "★ Лучший выбор" },
+        name: { en: "COACH", ru: "COACH" },
+        price: { en: "€24.99", ru: "€24.99" },
+        period: { en: "per month", ru: "в месяц" },
+        features: {
+          en: [
+            "Everything in PRO",
+            "Weekly plan adjustments",
+            "New protocols as you progress",
+            "Energy tracking dashboard",
+            "Priority support",
+          ],
+          ru: [
+            "Всё из PRO",
+            "Еженедельные корректировки плана",
+            "Новые протоколы по мере прогресса",
+            "Дашборд отслеживания энергии",
+            "Приоритетная поддержка",
+          ],
+        },
+        cta: { en: "Start with Coach", ru: "Начать с Coach" },
+      },
+    },
   },
   dashboard: {
     welcome: { en: "Welcome to your plan", ru: "Добро пожаловать в твой план" },

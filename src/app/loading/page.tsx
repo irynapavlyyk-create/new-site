@@ -49,7 +49,7 @@ export default function LoadingPage() {
     <main className="min-h-screen flex flex-col items-center justify-center px-6">
       <div className="text-center max-w-lg">
         <div className="relative w-32 h-32 mx-auto mb-10">
-          <div className="absolute inset-0 rounded-full border-4 border-white/5" />
+          <div className="absolute inset-0 rounded-full border-4" style={{ borderColor: "var(--border)" }} />
           <div className="absolute inset-0 rounded-full border-4 border-t-amber border-r-orange border-b-transparent border-l-transparent animate-spin" />
           <div className="absolute inset-4 rounded-full bg-gradient-to-br from-amber/30 to-violet/30 blur-2xl" />
           <div className="absolute inset-0 flex items-center justify-center text-4xl animate-spin-slow">⚡</div>
@@ -69,8 +69,15 @@ export default function LoadingPage() {
             >
               <span
                 className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                  i < currentStep ? "bg-amber/20 text-amber" : i === currentStep ? "bg-amber text-black" : "bg-white/5 text-muted"
+                  i < currentStep ? "bg-amber/20 text-amber" : i === currentStep ? "bg-amber" : "text-muted"
                 }`}
+                style={
+                  i === currentStep
+                    ? { color: "var(--btn-text)" }
+                    : i < currentStep
+                      ? undefined
+                      : { background: "var(--card-bg)" }
+                }
               >
                 {i < currentStep ? "✓" : i + 1}
               </span>

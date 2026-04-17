@@ -30,11 +30,11 @@ export default function Pricing() {
                 }`}
               >
                 {p.tag && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber to-orange text-black text-xs font-bold px-3 py-1 rounded-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber to-orange text-xs font-bold px-3 py-1 rounded-full" style={{ color: "var(--btn-text)" }}>
                     {p.tag}
                   </div>
                 )}
-                <h3 className="h-display text-lg text-muted">{p.name}</h3>
+                <h3 className="h-display text-lg font-bold text-muted">{p.name}</h3>
                 <div className="mt-3 mb-2">
                   <span className="h-display text-4xl sm:text-5xl">{p.price}</span>
                   {p.period && <span className="text-muted ml-1 text-sm">{p.period}</span>}

@@ -26,7 +26,7 @@ export default function FAQ() {
                   className="w-full text-left px-6 py-5 flex items-center justify-between gap-4"
                   onClick={() => setOpen(isOpen ? null : i)}
                 >
-                  <span className="h-display text-base">{it.q}</span>
+                  <span className="h-display text-lg font-bold">{it.q}</span>
                   <span className={`text-amber text-xl transition-transform ${isOpen ? "rotate-45" : ""}`}>+</span>
                 </button>
                 <div className={`grid transition-all ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>

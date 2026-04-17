@@ -17,27 +17,42 @@ export default function Hero() {
           <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
           {pick(t.hero.tag, lang)}
         </div>
-        <h1 className="h-display text-5xl sm:text-6xl md:text-7xl leading-[1.05] mb-6 animate-fade-up">
-          <span className="gradient-text">{pick(t.hero.title, lang)}</span>
+        <h1
+          className="font-display text-[36px] sm:text-[52px] leading-[1.1] mb-6 animate-fade-up"
+          style={{ letterSpacing: "-0.02em" }}
+        >
+          <span className="text-ink block" style={{ fontWeight: 700 }}>
+            {pick(t.hero.titleLead, lang)}
+          </span>
+          <span className="block" style={{ fontWeight: 900 }}>
+            {pick(t.hero.titleMid, lang) && (
+              <>
+                <span className="text-ink">{pick(t.hero.titleMid, lang)}</span>{" "}
+              </>
+            )}
+            <span className="gradient-text-2">
+              {pick(t.hero.titleAccent, lang)}
+            </span>
+          </span>
         </h1>
         <p className="text-lg sm:text-xl text-muted max-w-2xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: "120ms" }}>
           {pick(t.hero.subtitle, lang)}
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "240ms" }}>
-          <Link href="/quiz" className="btn-primary text-base px-8 py-4 animate-pulse-glow">
+          <Link href="/quiz" className="btn-primary cta-nudge text-base px-8 py-4">
             {pick(t.hero.cta, lang)} →
           </Link>
           <span className="text-sm text-muted">{pick(t.hero.sub, lang)}</span>
         </div>
         <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto mt-20 animate-fade-up" style={{ animationDelay: "360ms" }}>
           {[
-            { n: 12843, suf: "", label: pick(t.hero.stats.users, lang) },
-            { n: 12184, suf: "", label: pick(t.hero.stats.plans, lang) },
-            { n: 49, suf: "/5", label: pick(t.hero.stats.rating, lang) },
+            { n: 4821, suf: "", label: pick(t.hero.stats.users, lang) },
+            { n: 4396, suf: "", label: pick(t.hero.stats.plans, lang) },
+            { n: 0, suf: "/5", label: pick(t.hero.stats.rating, lang) },
           ].map((s, i) => (
             <div key={i} className="glass p-5 sm:p-6">
               <div className="h-display text-3xl sm:text-4xl gradient-text">
-                {i === 2 ? <><Counter to={4} />{"."}<Counter to={9} />/5</> : <Counter to={s.n} />}
+                {i === 2 ? <><Counter to={4} />{"."}<Counter to={87} />/5</> : <Counter to={s.n} />}
                 {i !== 2 && s.suf}
               </div>
               <div className="text-xs sm:text-sm text-muted mt-1">{s.label}</div>
