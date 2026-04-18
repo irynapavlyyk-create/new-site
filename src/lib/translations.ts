@@ -6,6 +6,9 @@ export const t = {
     pricing: { en: "Pricing", ru: "Тарифы" },
     faq: { en: "FAQ", ru: "FAQ" },
     cta: { en: "Start free", ru: "Начать бесплатно" },
+    ctaShort: { en: "Start", ru: "Начать" },
+    menu: { en: "Menu", ru: "Меню" },
+    close: { en: "Close", ru: "Закрыть" },
   },
   hero: {
     tag: { en: "Personal Energy Diagnostic", ru: "Персональная диагностика энергии" },
