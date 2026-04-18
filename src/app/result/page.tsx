@@ -241,25 +241,27 @@ function PricingCard({
 
   return (
     <div
-      className="relative glass p-6 sm:p-7 h-full flex flex-col"
+      className="relative glass p-5 sm:p-6 md:p-7 h-full flex flex-col overflow-hidden min-w-0"
       style={cardStyle}
     >
       <div
-        className={`absolute -top-3 left-1/2 -translate-x-1/2 ${badgeBg} text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap`}
+        className={`absolute -top-3 left-1/2 -translate-x-1/2 ${badgeBg} text-[10px] sm:text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)]`}
         style={{ color: "var(--btn-text)" }}
       >
         {badge}
       </div>
-      <h4 className="h-display text-xl font-bold text-muted mt-2">{name}</h4>
-      <div className="mt-2 mb-1 flex items-baseline gap-2">
-        <span className="h-display text-4xl sm:text-5xl font-bold text-ink">{price}</span>
+      <h4 className="h-display text-xl font-bold text-muted mt-2 break-words">{name}</h4>
+      <div className="mt-2 mb-1 flex items-baseline flex-wrap gap-x-2 gap-y-1 min-w-0">
+        <span className="h-display text-3xl sm:text-4xl md:text-5xl font-bold text-ink break-words max-w-full">
+          {price}
+        </span>
       </div>
-      <p className="text-xs text-muted mb-5">{period}</p>
+      <p className="text-xs text-muted mb-5 break-words">{period}</p>
       <ul className="space-y-2.5 mb-6 flex-1">
         {features.map((f, i) => (
-          <li key={i} className="flex gap-2 text-sm">
+          <li key={i} className="flex gap-2 text-sm min-w-0">
             <span className={`${checkColor} flex-shrink-0 font-bold`}>✓</span>
-            <span className="text-ink leading-snug">{f}</span>
+            <span className="text-ink leading-snug break-words min-w-0">{f}</span>
           </li>
         ))}
       </ul>
