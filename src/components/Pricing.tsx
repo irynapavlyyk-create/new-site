@@ -19,41 +19,63 @@ export default function Pricing() {
         </h2>
         <p className="text-center text-muted mb-14">{pick(t.pricing.subtitle, lang)}</p>
       </FadeUp>
-      <div className="grid grid-cols-1 min-[900px]:grid-cols-2 min-[1200px]:grid-cols-3 gap-5 sm:gap-6">
+      <div className="pricing-grid-3">
         {plans.map((p, i) => {
           const isPro = p.name === "PRO";
           return (
             <FadeUp key={p.name} delay={i * 120}>
               <div
-                className={`relative glass p-5 sm:p-6 md:p-8 h-full flex flex-col overflow-hidden min-w-0 ${
-                  isPro
-                    ? "!border-amber/50 shadow-glow min-[1200px]:scale-105"
-                    : ""
+                className={`relative glass h-full flex flex-col overflow-hidden min-w-0 ${
+                  isPro ? "!border-amber/50 shadow-glow" : ""
                 }`}
+                style={{ padding: "clamp(12px, 2vw, 28px)" }}
               >
                 {p.tag && (
                   <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber to-orange text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)]"
-                    style={{ color: "var(--btn-text)" }}
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber to-orange font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)]"
+                    style={{
+                      color: "var(--btn-text)",
+                      fontSize: "clamp(10px, 1vw, 12px)",
+                    }}
                   >
                     {p.tag}
                   </div>
                 )}
-                <h3 className="h-display text-lg font-bold text-muted break-words">
+                <h3
+                  className="h-display font-bold text-muted break-words"
+                  style={{ fontSize: "clamp(14px, 1.8vw, 20px)" }}
+                >
                   {p.name}
                 </h3>
                 <div className="mt-3 mb-2 flex items-baseline flex-wrap gap-x-2 gap-y-1 min-w-0">
-                  <span className="h-display text-3xl sm:text-4xl md:text-5xl font-bold break-words max-w-full">
+                  <span
+                    className="h-display font-bold break-words max-w-full"
+                    style={{ fontSize: "clamp(20px, 3.5vw, 48px)", lineHeight: 1.1 }}
+                  >
                     {p.price}
                   </span>
                   {p.period && (
-                    <span className="text-muted text-sm break-words">{p.period}</span>
+                    <span
+                      className="text-muted break-words"
+                      style={{ fontSize: "clamp(11px, 1.2vw, 14px)" }}
+                    >
+                      {p.period}
+                    </span>
                   )}
                 </div>
-                <p className="text-sm text-muted mb-6 break-words">{p.desc}</p>
-                <ul className="space-y-3 mb-8 flex-1">
+                <p
+                  className="text-muted mb-6 break-words"
+                  style={{ fontSize: "clamp(12px, 1.4vw, 15px)" }}
+                >
+                  {p.desc}
+                </p>
+                <ul className="mb-6 flex-1" style={{ display: "flex", flexDirection: "column", gap: "clamp(6px, 1vw, 12px)" }}>
                   {p.features.map((f, j) => (
-                    <li key={j} className="flex gap-2 text-sm min-w-0">
+                    <li
+                      key={j}
+                      className="flex gap-2 min-w-0"
+                      style={{ fontSize: "clamp(12px, 1.4vw, 15px)" }}
+                    >
                       <span className="text-amber flex-shrink-0">✓</span>
                       <span className="text-ink break-words min-w-0">{f}</span>
                     </li>
@@ -62,8 +84,11 @@ export default function Pricing() {
                 <Link
                   href={ctaHref(p.name)}
                   className={
-                    isPro ? "btn-primary w-full justify-center" : "btn-ghost w-full justify-center"
+                    isPro
+                      ? "btn-primary w-full justify-center !px-3 !py-2.5"
+                      : "btn-ghost w-full justify-center !px-3 !py-2.5"
                   }
+                  style={{ fontSize: "clamp(13px, 1.5vw, 16px)" }}
                 >
                   {p.cta}
                 </Link>

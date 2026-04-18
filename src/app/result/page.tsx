@@ -156,7 +156,7 @@ export default function ResultPage() {
                   <p className="text-muted text-sm">{pick(t.result.choose.subtitle, lang)}</p>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 items-stretch">
+                <div className="pricing-grid-2 items-stretch">
                   <PricingCard
                     accent="amber"
                     badge={pick(t.result.choose.pro.badge, lang)}
@@ -241,25 +241,48 @@ function PricingCard({
 
   return (
     <div
-      className="relative glass p-5 sm:p-6 md:p-7 h-full flex flex-col overflow-hidden min-w-0"
-      style={cardStyle}
+      className="relative glass h-full flex flex-col overflow-hidden min-w-0"
+      style={{ ...cardStyle, padding: "clamp(12px, 2vw, 28px)" }}
     >
       <div
-        className={`absolute -top-3 left-1/2 -translate-x-1/2 ${badgeBg} text-[10px] sm:text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)]`}
-        style={{ color: "var(--btn-text)" }}
+        className={`absolute -top-3 left-1/2 -translate-x-1/2 ${badgeBg} font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)]`}
+        style={{
+          color: "var(--btn-text)",
+          fontSize: "clamp(10px, 1vw, 12px)",
+        }}
       >
         {badge}
       </div>
-      <h4 className="h-display text-xl font-bold text-muted mt-2 break-words">{name}</h4>
+      <h4
+        className="h-display font-bold text-muted mt-2 break-words"
+        style={{ fontSize: "clamp(14px, 1.8vw, 20px)" }}
+      >
+        {name}
+      </h4>
       <div className="mt-2 mb-1 flex items-baseline flex-wrap gap-x-2 gap-y-1 min-w-0">
-        <span className="h-display text-3xl sm:text-4xl md:text-5xl font-bold text-ink break-words max-w-full">
+        <span
+          className="h-display font-bold text-ink break-words max-w-full"
+          style={{ fontSize: "clamp(20px, 3.5vw, 48px)", lineHeight: 1.1 }}
+        >
           {price}
         </span>
       </div>
-      <p className="text-xs text-muted mb-5 break-words">{period}</p>
-      <ul className="space-y-2.5 mb-6 flex-1">
+      <p
+        className="text-muted mb-5 break-words"
+        style={{ fontSize: "clamp(11px, 1.2vw, 14px)" }}
+      >
+        {period}
+      </p>
+      <ul
+        className="mb-6 flex-1"
+        style={{ display: "flex", flexDirection: "column", gap: "clamp(6px, 1vw, 12px)" }}
+      >
         {features.map((f, i) => (
-          <li key={i} className="flex gap-2 text-sm min-w-0">
+          <li
+            key={i}
+            className="flex gap-2 min-w-0"
+            style={{ fontSize: "clamp(12px, 1.4vw, 15px)" }}
+          >
             <span className={`${checkColor} flex-shrink-0 font-bold`}>✓</span>
             <span className="text-ink leading-snug break-words min-w-0">{f}</span>
           </li>
@@ -270,7 +293,7 @@ function PricingCard({
         onClick={onClick}
         disabled={disabled}
         className={btnClass}
-        style={btnStyle}
+        style={{ ...btnStyle, fontSize: "clamp(13px, 1.5vw, 16px)" }}
       >
         {loading ? "…" : <>{cta} →</>}
       </button>
