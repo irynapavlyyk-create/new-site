@@ -91,8 +91,8 @@ export default function ResultPage() {
           </FadeUp>
 
           <FadeUp delay={300}>
-            <div className="relative glass-strong p-8 sm:p-10 overflow-hidden">
-              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-amber/10 via-orange/10 to-violet/10" />
+            <div className="relative glass-strong p-8 sm:p-10">
+              <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-amber/10 via-orange/10 to-violet/10" />
               <div className="relative">
                 <h2 className="h-display text-2xl sm:text-3xl mb-3 text-center">
                   <span className="gradient-text">🔒 {pick(t.result.lockedTitle, lang)}</span>
@@ -241,12 +241,19 @@ function PricingCard({
 
   return (
     <div
-      className="relative glass h-full flex flex-col overflow-hidden min-w-0"
-      style={{ ...cardStyle, padding: "clamp(12px, 2vw, 28px)" }}
+      className="relative glass h-full flex flex-col min-w-0"
+      style={{
+        ...cardStyle,
+        paddingTop: "clamp(32px, 3vw, 40px)",
+        paddingLeft: "clamp(12px, 2vw, 28px)",
+        paddingRight: "clamp(12px, 2vw, 28px)",
+        paddingBottom: "clamp(12px, 2vw, 28px)",
+      }}
     >
       <div
-        className={`absolute -top-3 left-1/2 -translate-x-1/2 ${badgeBg} font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)]`}
+        className={`absolute left-1/2 -translate-x-1/2 ${badgeBg} font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)] z-10`}
         style={{
+          top: "-14px",
           color: "var(--btn-text)",
           fontSize: "clamp(10px, 1vw, 12px)",
         }}
@@ -254,7 +261,7 @@ function PricingCard({
         {badge}
       </div>
       <h4
-        className="h-display font-bold text-muted mt-2 break-words"
+        className="h-display font-bold text-muted break-words"
         style={{ fontSize: "clamp(14px, 1.8vw, 20px)" }}
       >
         {name}

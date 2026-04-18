@@ -25,15 +25,21 @@ export default function Pricing() {
           return (
             <FadeUp key={p.name} delay={i * 120}>
               <div
-                className={`relative glass h-full flex flex-col overflow-hidden min-w-0 ${
+                className={`relative glass h-full flex flex-col min-w-0 ${
                   isPro ? "!border-amber/50 shadow-glow" : ""
                 }`}
-                style={{ padding: "clamp(12px, 2vw, 28px)" }}
+                style={{
+                  paddingTop: "clamp(32px, 3vw, 40px)",
+                  paddingLeft: "clamp(12px, 2vw, 28px)",
+                  paddingRight: "clamp(12px, 2vw, 28px)",
+                  paddingBottom: "clamp(12px, 2vw, 28px)",
+                }}
               >
                 {p.tag && (
                   <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber to-orange font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)]"
+                    className="absolute left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber to-orange font-bold px-3 py-1 rounded-full whitespace-nowrap max-w-[calc(100%-1rem)] z-10"
                     style={{
+                      top: "-14px",
                       color: "var(--btn-text)",
                       fontSize: "clamp(10px, 1vw, 12px)",
                     }}
