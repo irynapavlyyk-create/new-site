@@ -278,9 +278,20 @@ export const t = {
   },
   footer: {
     rights: { en: "All rights reserved.", ru: "Все права защищены." },
-    privacy: { en: "Privacy", ru: "Конфиденциальность" },
-    terms: { en: "Terms", ru: "Условия" },
+    privacy: { en: "Privacy Policy", ru: "Политика конфиденциальности" },
+    terms: { en: "Terms of Service", ru: "Условия использования" },
     contact: { en: "Contact", ru: "Контакты" },
+  },
+  legal: {
+    back: { en: "← Back to home", ru: "← Вернуться на главную" },
+    comingSoon: { en: "Coming soon", ru: "Скоро появится" },
+    placeholderBody: {
+      en: "We're finalising the text. The full policy will appear here shortly.",
+      ru: "Мы дорабатываем текст. Полная версия документа появится здесь в ближайшее время.",
+    },
+    privacyTitle: { en: "Privacy Policy", ru: "Политика конфиденциальности" },
+    termsTitle: { en: "Terms of Service", ru: "Условия использования" },
+    lastUpdated: { en: "Last updated", ru: "Последнее обновление" },
   },
   quiz: {
     next: { en: "Next", ru: "Дальше" },
