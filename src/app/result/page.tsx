@@ -31,6 +31,18 @@ export default function ResultPage() {
   const unlock = async (tier: "pro" | "coach") => {
     setLoadingTier(tier);
     try {
+      if (typeof window !== "undefined") {
+        const answers = localStorage.getItem("ef_answers");
+        if (!answers) {
+          setLoadingTier(null);
+          router.replace("/quiz");
+          return;
+        }
+        localStorage.setItem("ef_paid_tier", tier);
+        localStorage.setItem("ef_lang", lang);
+        localStorage.removeItem("ef_pro_plan");
+      }
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

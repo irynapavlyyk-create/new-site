@@ -411,6 +411,23 @@ export const t = {
     startQuiz: { en: "Start quiz", ru: "Пройти анкету" },
     downloadPdf: { en: "Download PDF", ru: "Скачать PDF" },
     week: { en: "Week", ru: "Неделя" },
+    generating: {
+      en: "Generating your full plan…",
+      ru: "Генерируем твой полный план…",
+    },
+    generatingSub: {
+      en: "This takes about 30 seconds. Don't close this page.",
+      ru: "Это займёт около 30 секунд. Не закрывай страницу.",
+    },
+    answersLost: {
+      en: "Your quiz answers are missing. Please retake the quiz to get your plan.",
+      ru: "Ответы анкеты не найдены. Пройди анкету снова, чтобы получить план.",
+    },
+    genError: {
+      en: "Couldn't generate your plan. Please try again.",
+      ru: "Не удалось собрать план. Попробуй ещё раз.",
+    },
+    retryGen: { en: "Try again", ru: "Попробовать снова" },
   },
 };
 

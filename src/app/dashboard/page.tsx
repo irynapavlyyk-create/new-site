@@ -33,48 +33,124 @@ function DashboardFallback() {
   );
 }
 
+type DashState =
+  | { kind: "loading-cache" }
+  | { kind: "generating" }
+  | { kind: "ready"; plan: ProPlan }
+  | { kind: "no-plan" }
+  | { kind: "answers-lost" }
+  | { kind: "error" };
+
 function DashboardContent() {
   const { lang } = useI18n();
   const params = useSearchParams();
   const sessionId = params.get("session_id");
-  const [plan, setPlan] = useState<ProPlan | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState<DashState>({ kind: "loading-cache" });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    const cached = typeof window !== "undefined" ? localStorage.getItem("ef_pro_plan") : null;
+    if (typeof window === "undefined") return;
+
+    const cached = localStorage.getItem("ef_pro_plan");
     if (cached) {
       try {
-        setPlan(JSON.parse(cached));
+        setState({ kind: "ready", plan: JSON.parse(cached) });
         return;
-      } catch {}
+      } catch {
+        localStorage.removeItem("ef_pro_plan");
+      }
     }
 
-    const answersRaw = typeof window !== "undefined" ? localStorage.getItem("ef_answers") : null;
-    if (!answersRaw || !sessionId) return;
+    const paidTier = localStorage.getItem("ef_paid_tier") as
+      | "pro"
+      | "coach"
+      | null;
+    const answersRaw = localStorage.getItem("ef_answers");
 
-    setLoading(true);
+    if (!sessionId && !paidTier) {
+      setState({ kind: "no-plan" });
+      return;
+    }
+
+    if (!answersRaw) {
+      setState({ kind: "answers-lost" });
+      return;
+    }
+
+    setState({ kind: "generating" });
+    let cancelled = false;
     (async () => {
       try {
         const res = await fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: JSON.parse(answersRaw), lang, tier: "pro", sessionId }),
+          body: JSON.stringify({
+            answers: JSON.parse(answersRaw),
+            lang,
+            tier: paidTier || "pro",
+            sessionId,
+          }),
         });
+        if (!res.ok) throw new Error(String(res.status));
         const data = await res.json();
-        localStorage.setItem("ef_pro_plan", JSON.stringify(data));
-        setPlan(data);
-      } finally {
-        setLoading(false);
+        if (cancelled) return;
+        if (data && !data.error && data.summary) {
+          localStorage.setItem("ef_pro_plan", JSON.stringify(data));
+          setState({ kind: "ready", plan: data });
+        } else {
+          setState({ kind: "error" });
+        }
+      } catch {
+        if (!cancelled) setState({ kind: "error" });
       }
     })();
-  }, [sessionId, lang]);
 
-  if (!plan && !loading) {
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, lang, attempt]);
+
+  if (state.kind === "loading-cache" || state.kind === "generating") {
     return (
       <>
         <Navbar />
-        <main className="min-h-screen flex items-center justify-center pt-28">
-          <div className="text-center max-w-md px-6">
+        <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
+          <div className="text-center max-w-md">
+            <div className="relative w-24 h-24 mx-auto mb-8">
+              <div
+                className="absolute inset-0 rounded-full border-4"
+                style={{ borderColor: "var(--border)" }}
+              />
+              <div className="absolute inset-0 rounded-full border-4 border-t-amber border-r-orange border-b-transparent border-l-transparent animate-spin" />
+              <div className="absolute inset-3 rounded-full bg-gradient-to-br from-amber/30 to-violet/30 blur-2xl" />
+              <div className="absolute inset-0 flex items-center justify-center text-3xl animate-spin-slow">
+                ⚡
+              </div>
+            </div>
+            {state.kind === "generating" && (
+              <>
+                <h2 className="h-display text-2xl sm:text-3xl font-bold mb-3">
+                  <span className="gradient-text">
+                    {pick(t.dashboard.generating, lang)}
+                  </span>
+                </h2>
+                <p className="text-muted text-sm">
+                  {pick(t.dashboard.generatingSub, lang)}
+                </p>
+              </>
+            )}
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  if (state.kind === "no-plan") {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
+          <div className="text-center max-w-md">
             <div className="text-6xl mb-6">⚡</div>
             <p className="text-muted mb-6">{pick(t.dashboard.noPlan, lang)}</p>
             <Link href="/quiz" className="btn-primary">
@@ -86,13 +162,45 @@ function DashboardContent() {
     );
   }
 
-  if (loading || !plan) {
+  if (state.kind === "answers-lost") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 rounded-full border-4 border-t-amber animate-spin" style={{ borderLeftColor: "var(--border)", borderRightColor: "var(--border)", borderBottomColor: "var(--border)" }} />
-      </main>
+      <>
+        <Navbar />
+        <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-6">⚠️</div>
+            <p className="text-muted mb-6">{pick(t.dashboard.answersLost, lang)}</p>
+            <Link href="/quiz" className="btn-primary">
+              {pick(t.dashboard.startQuiz, lang)}
+            </Link>
+          </div>
+        </main>
+      </>
     );
   }
+
+  if (state.kind === "error") {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-6">⚠️</div>
+            <p className="text-muted mb-6">{pick(t.dashboard.genError, lang)}</p>
+            <button
+              type="button"
+              onClick={() => setAttempt((n) => n + 1)}
+              className="btn-primary"
+            >
+              {pick(t.dashboard.retryGen, lang)}
+            </button>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  const plan = state.plan;
 
   return (
     <>

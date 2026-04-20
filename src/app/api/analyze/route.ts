@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const { answers, lang, tier, sessionId } = (await req.json()) as {
       answers: QuizAnswers;
       lang: "en" | "ru";
-      tier: "free" | "pro";
+      tier: "free" | "pro" | "coach";
       sessionId?: string;
     };
 
@@ -40,13 +40,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "invalid answers" }, { status: 400 });
     }
 
-    if (tier === "pro") {
+    const isPaid = tier === "pro" || tier === "coach";
+
+    if (isPaid) {
       if (!sessionId) {
         return NextResponse.json({ error: "missing session" }, { status: 401 });
       }
       try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
-        if (session.payment_status !== "paid") {
+        const paid =
+          session.payment_status === "paid" ||
+          session.status === "complete";
+        if (!paid) {
           return NextResponse.json({ error: "unpaid" }, { status: 402 });
         }
       } catch {
@@ -55,8 +60,8 @@ export async function POST(req: NextRequest) {
     }
 
     const langName = lang === "ru" ? "Russian (русский)" : "English";
-    const system = tier === "pro" ? PRO_SYSTEM : FREE_SYSTEM;
-    const schema = tier === "pro" ? PRO_SCHEMA : FREE_SCHEMA;
+    const system = isPaid ? PRO_SYSTEM : FREE_SYSTEM;
+    const schema = isPaid ? PRO_SCHEMA : FREE_SCHEMA;
 
     const userPrompt = `Here is the quiz. Write your output in ${langName}.
 
@@ -74,7 +79,7 @@ Rules:
 
     const response = await anthropic.messages.create({
       model: MODEL,
-      max_tokens: tier === "pro" ? 4000 : 1200,
+      max_tokens: isPaid ? 4000 : 1200,
       system,
       messages: [{ role: "user", content: userPrompt }],
     });
