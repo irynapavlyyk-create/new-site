@@ -7,6 +7,7 @@ import { t, pick } from "@/lib/translations";
 import { quizSteps } from "@/lib/quiz-data";
 import type { QuizAnswers } from "@/types";
 import Navbar from "@/components/Navbar";
+import { safeSave } from "@/lib/storage";
 
 export default function QuizPage() {
   const router = useRouter();
@@ -21,9 +22,11 @@ export default function QuizPage() {
     const next = { ...answers, [current.key]: value };
     setAnswers(next);
     if (isLast) {
+      safeSave("ef_answers", next);
       if (typeof window !== "undefined") {
-        localStorage.setItem("ef_answers", JSON.stringify(next));
-        localStorage.setItem("ef_lang", lang);
+        try {
+          localStorage.setItem("ef_lang", lang);
+        } catch {}
       }
       router.push("/loading");
     } else {

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { safeLoad, safeSave } from "@/lib/storage";
+import type { QuizAnswers } from "@/types";
 
 export default function LoadingPage() {
   const router = useRouter();
@@ -13,8 +15,8 @@ export default function LoadingPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const answersRaw = typeof window !== "undefined" ? localStorage.getItem("ef_answers") : null;
-    if (!answersRaw) {
+    const answers = safeLoad<QuizAnswers>("ef_answers");
+    if (!answers) {
       router.replace("/quiz");
       return;
     }
@@ -28,11 +30,11 @@ export default function LoadingPage() {
         const res = await fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: JSON.parse(answersRaw), lang, tier: "free" }),
+          body: JSON.stringify({ answers, lang, tier: "free" }),
         });
         if (!res.ok) throw new Error("api");
         const data = await res.json();
-        localStorage.setItem("ef_free_report", JSON.stringify(data));
+        safeSave("ef_free_report", data);
         clearInterval(stepTimer);
         router.replace("/result");
       } catch (e) {

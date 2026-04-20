@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import type { ProPlan } from "@/types";
+import type { ProPlan, QuizAnswers } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
+import { safeLoad, safeSave, safeRead } from "@/lib/storage";
 
 export default function DashboardPage() {
   return (
@@ -51,28 +52,21 @@ function DashboardContent() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const cached = localStorage.getItem("ef_pro_plan");
-    if (cached) {
-      try {
-        setState({ kind: "ready", plan: JSON.parse(cached) });
-        return;
-      } catch {
-        localStorage.removeItem("ef_pro_plan");
-      }
+    const cached = safeLoad<ProPlan>("ef_pro_plan");
+    if (cached && cached.summary) {
+      setState({ kind: "ready", plan: cached });
+      return;
     }
 
-    const paidTier = localStorage.getItem("ef_paid_tier") as
-      | "pro"
-      | "coach"
-      | null;
-    const answersRaw = localStorage.getItem("ef_answers");
+    const paidTier = safeRead("ef_paid_tier") as "pro" | "coach" | null;
+    const answers = safeLoad<QuizAnswers>("ef_answers");
 
     if (!sessionId && !paidTier) {
       setState({ kind: "no-plan" });
       return;
     }
 
-    if (!answersRaw) {
+    if (!answers) {
       setState({ kind: "answers-lost" });
       return;
     }
@@ -85,7 +79,7 @@ function DashboardContent() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            answers: JSON.parse(answersRaw),
+            answers,
             lang,
             tier: paidTier || "pro",
             sessionId,
@@ -95,12 +89,13 @@ function DashboardContent() {
         const data = await res.json();
         if (cancelled) return;
         if (data && !data.error && data.summary) {
-          localStorage.setItem("ef_pro_plan", JSON.stringify(data));
+          safeSave("ef_pro_plan", data);
           setState({ kind: "ready", plan: data });
         } else {
           setState({ kind: "error" });
         }
-      } catch {
+      } catch (e) {
+        console.error("[dashboard] generation failed:", e);
         if (!cancelled) setState({ kind: "error" });
       }
     })();

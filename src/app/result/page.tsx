@@ -8,6 +8,7 @@ import type { FreeReport } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
+import { safeLoad, safeRead } from "@/lib/storage";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -16,31 +17,31 @@ export default function ResultPage() {
   const [loadingTier, setLoadingTier] = useState<"pro" | "coach" | null>(null);
 
   useEffect(() => {
-    const raw = typeof window !== "undefined" ? localStorage.getItem("ef_free_report") : null;
-    if (!raw) {
+    const r = safeLoad<FreeReport>("ef_free_report");
+    if (!r) {
       router.replace("/quiz");
       return;
     }
-    try {
-      setReport(JSON.parse(raw));
-    } catch {
-      router.replace("/quiz");
-    }
+    setReport(r);
   }, [router]);
 
   const unlock = async (tier: "pro" | "coach") => {
     setLoadingTier(tier);
     try {
       if (typeof window !== "undefined") {
-        const answers = localStorage.getItem("ef_answers");
+        const answers = safeRead("ef_answers");
         if (!answers) {
           setLoadingTier(null);
           router.replace("/quiz");
           return;
         }
-        localStorage.setItem("ef_paid_tier", tier);
-        localStorage.setItem("ef_lang", lang);
-        localStorage.removeItem("ef_pro_plan");
+        try {
+          localStorage.setItem("ef_paid_tier", tier);
+          localStorage.setItem("ef_lang", lang);
+          localStorage.removeItem("ef_pro_plan");
+        } catch (e) {
+          console.error("[result] localStorage write failed:", e);
+        }
       }
 
       const res = await fetch("/api/checkout", {
