@@ -320,6 +320,18 @@ body {
   border-top: 1px solid var(--border);
   margin: 2.5em 0;
 }
+.legal-prose .legal-warning {
+  border-left: 4px solid rgb(var(--orange));
+  background: rgba(255, 107, 53, 0.08);
+  padding: 1.1em 1.25em 1.1em 1.4em;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin-top: 1.25em;
+  color: rgb(var(--text));
+}
+.legal-prose .legal-warning > * + * { margin-top: 0.9em; }
+.legal-prose .legal-warning strong { color: rgb(var(--orange)); }
+.legal-prose .legal-warning ul { margin-top: 0.5em; }
+.legal-prose .legal-warning li::marker { color: rgb(var(--orange)); }
 
 @keyframes spin-slow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 .animate-spin-slow { animation: spin-slow 6s linear infinite; }

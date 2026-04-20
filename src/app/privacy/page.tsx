@@ -3,8 +3,7 @@
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import LegalLayout from "@/components/LegalLayout";
-
-const EMAIL = "support@energyforge.app";
+import { Mail, Ext } from "@/components/LegalHelpers";
 
 export default function PrivacyPage() {
   const { lang } = useI18n();
@@ -17,20 +16,6 @@ export default function PrivacyPage() {
     >
       {lang === "ru" ? <PrivacyRU /> : <PrivacyEN />}
     </LegalLayout>
-  );
-}
-
-function Mail() {
-  return (
-    <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-  );
-}
-
-function Ext({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer">
-      {children}
-    </a>
   );
 }
 
