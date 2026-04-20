@@ -31,33 +31,27 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #B8855A;
-  --bg2: #FFFFFF;
+  --bg: #FFFFFF;
+  --bg2: #FAFAFA;
   --amber: 201 127 6;
   --orange: 224 78 24;
   --violet: 88 69 224;
-  --text: 20 16 10;
-  --muted: 55 45 32;
-  --border: rgba(0, 0, 0, 0.18);
+  --text: 15 15 15;
+  --muted: 115 115 115;
+  --border: #E5E5E5;
   --card-bg: #FFFFFF;
   --card-hover: rgba(201, 127, 6, 0.06);
-  --nav-bg: rgba(250, 245, 238, 0.92);
-  --mobile-bg: rgba(250, 245, 238, 0.98);
-  --hero-glow: rgba(201, 127, 6, 0.09);
-  --hero-glow2: rgba(88, 69, 224, 0.06);
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --mobile-bg: rgba(255, 255, 255, 0.95);
+  --hero-glow: rgba(201, 127, 6, 0.06);
+  --hero-glow2: rgba(88, 69, 224, 0.04);
   --preview-blur-from: rgba(255, 255, 255, 0);
   --preview-blur-to: #FFFFFF;
   --btn-text: #FFFFFF;
-  --shadow: 0 4px 20px rgba(80, 50, 20, 0.12);
-  --body-bg: linear-gradient(
-    90deg,
-    #8B5E3C 0%,
-    #B8855A 20%,
-    #D4A574 40%,
-    #D4A574 60%,
-    #B8855A 80%,
-    #8B5E3C 100%
-  );
+  --shadow: 0 4px 20px rgba(15, 15, 15, 0.06);
+  --body-bg:
+    radial-gradient(ellipse 60% 40% at 50% -10%, var(--hero-glow), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 90% 20%, var(--hero-glow2), transparent 60%);
 }
 
 html, body {
