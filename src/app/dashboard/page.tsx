@@ -40,7 +40,7 @@ type DashState =
   | { kind: "ready"; plan: ProPlan }
   | { kind: "no-plan" }
   | { kind: "answers-lost" }
-  | { kind: "error" };
+  | { kind: "error"; detail?: string };
 
 function DashboardContent() {
   const { lang } = useI18n();
@@ -85,18 +85,26 @@ function DashboardContent() {
             sessionId,
           }),
         });
-        if (!res.ok) throw new Error(String(res.status));
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (cancelled) return;
-        if (data && !data.error && data.summary) {
+        if (!res.ok || data.error) {
+          const detail = data.detail || data.error || `HTTP ${res.status}`;
+          console.error("[dashboard] generation failed:", res.status, data);
+          setState({ kind: "error", detail: String(detail) });
+          return;
+        }
+        if (data && data.summary) {
           safeSave("ef_pro_plan", data);
           setState({ kind: "ready", plan: data });
         } else {
-          setState({ kind: "error" });
+          setState({ kind: "error", detail: "empty response from server" });
         }
       } catch (e) {
         console.error("[dashboard] generation failed:", e);
-        if (!cancelled) setState({ kind: "error" });
+        if (!cancelled) {
+          const msg = e instanceof Error ? e.message : String(e);
+          setState({ kind: "error", detail: msg });
+        }
       }
     })();
 
@@ -181,7 +189,19 @@ function DashboardContent() {
         <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
           <div className="text-center max-w-md">
             <div className="text-6xl mb-6">⚠️</div>
-            <p className="text-muted mb-6">{pick(t.dashboard.genError, lang)}</p>
+            <p className="text-muted mb-4">{pick(t.dashboard.genError, lang)}</p>
+            {state.detail && (
+              <p
+                className="text-xs font-mono mb-6 px-3 py-2 rounded break-words"
+                style={{
+                  background: "var(--card-bg)",
+                  border: "1px solid var(--border)",
+                  color: "rgb(var(--muted))",
+                }}
+              >
+                {state.detail}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => setAttempt((n) => n + 1)}

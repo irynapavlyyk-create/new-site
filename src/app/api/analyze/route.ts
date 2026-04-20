@@ -28,34 +28,94 @@ function extractJson(text: string): unknown {
 }
 
 export async function POST(req: NextRequest) {
+  const t0 = Date.now();
   try {
-    const { answers, lang, tier, sessionId } = (await req.json()) as {
+    const body = (await req.json()) as {
       answers: QuizAnswers;
       lang: "en" | "ru";
       tier: "free" | "pro" | "coach";
       sessionId?: string;
     };
+    const { answers, lang, tier, sessionId } = body;
+
+    console.log("[analyze] incoming", {
+      tier,
+      lang,
+      hasSessionId: Boolean(sessionId),
+      sessionIdPrefix: sessionId?.slice(0, 12),
+      answerKeys: answers ? Object.keys(answers) : null,
+      answerCount: answers ? Object.keys(answers).length : 0,
+      anthropicKeySet: Boolean(process.env.ANTHROPIC_API_KEY),
+      stripeKeySet: Boolean(process.env.STRIPE_SECRET_KEY),
+      model: MODEL,
+    });
 
     if (!answers || typeof answers !== "object") {
+      console.warn("[analyze] rejected: invalid answers");
       return NextResponse.json({ error: "invalid answers" }, { status: 400 });
     }
 
     const isPaid = tier === "pro" || tier === "coach";
+    const isDev = process.env.NODE_ENV !== "production";
+    const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY);
 
     if (isPaid) {
-      if (!sessionId) {
-        return NextResponse.json({ error: "missing session" }, { status: 401 });
-      }
-      try {
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
-        const paid =
-          session.payment_status === "paid" ||
-          session.status === "complete";
-        if (!paid) {
-          return NextResponse.json({ error: "unpaid" }, { status: 402 });
+      let bypass = false;
+
+      if (!stripeConfigured) {
+        if (!isDev) {
+          console.error("[analyze] STRIPE_SECRET_KEY is not set (production)");
+          return NextResponse.json(
+            { error: "stripe not configured", detail: "STRIPE_SECRET_KEY env var missing on server" },
+            { status: 500 }
+          );
         }
-      } catch {
-        return NextResponse.json({ error: "invalid session" }, { status: 401 });
+        console.warn(
+          "[analyze] DEV BYPASS: STRIPE_SECRET_KEY missing — skipping Stripe verification. Do NOT rely on this in production."
+        );
+        bypass = true;
+      } else if (!sessionId) {
+        console.warn("[analyze] rejected: paid tier without sessionId");
+        return NextResponse.json({ error: "missing session" }, { status: 401 });
+      } else if (sessionId.startsWith("dev_bypass_")) {
+        if (!isDev) {
+          return NextResponse.json({ error: "invalid session" }, { status: 401 });
+        }
+        console.warn("[analyze] DEV BYPASS: accepting dev_bypass_ session id without Stripe check");
+        bypass = true;
+      }
+
+      if (!bypass && sessionId) {
+        try {
+          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          console.log("[analyze] stripe session", {
+            id: session.id,
+            status: session.status,
+            payment_status: session.payment_status,
+            mode: session.mode,
+          });
+          const paid =
+            session.payment_status === "paid" ||
+            session.payment_status === "no_payment_required" ||
+            session.status === "complete";
+          if (!paid) {
+            console.warn("[analyze] rejected: session not paid", {
+              status: session.status,
+              payment_status: session.payment_status,
+            });
+            return NextResponse.json(
+              { error: "unpaid", status: session.status, payment_status: session.payment_status },
+              { status: 402 }
+            );
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error("[analyze] stripe.checkout.sessions.retrieve failed:", msg);
+          return NextResponse.json(
+            { error: "invalid session", detail: msg },
+            { status: 401 }
+          );
+        }
       }
     }
 
@@ -77,22 +137,57 @@ Rules:
 - Voice: direct, warm, never preachy.
 - Output JSON only. No commentary, no markdown fences.`;
 
-    const response = await anthropic.messages.create({
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error("[analyze] ANTHROPIC_API_KEY is not set");
+      return NextResponse.json({ error: "anthropic not configured" }, { status: 500 });
+    }
+
+    console.log("[analyze] calling anthropic", {
       model: MODEL,
-      max_tokens: isPaid ? 4000 : 1200,
-      system,
-      messages: [{ role: "user", content: userPrompt }],
+      maxTokens: isPaid ? 4000 : 1200,
+      promptLength: userPrompt.length,
+    });
+
+    let response;
+    try {
+      response = await anthropic.messages.create({
+        model: MODEL,
+        max_tokens: isPaid ? 4000 : 1200,
+        system,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[analyze] anthropic call failed:", msg, err);
+      return NextResponse.json({ error: "anthropic failed", detail: msg }, { status: 502 });
+    }
+
+    console.log("[analyze] anthropic ok", {
+      stopReason: response.stop_reason,
+      usage: response.usage,
     });
 
     const textBlock = response.content.find((c) => c.type === "text");
     if (!textBlock || textBlock.type !== "text") {
+      console.error("[analyze] empty response — no text block");
       return NextResponse.json({ error: "empty response" }, { status: 500 });
     }
 
-    const data = extractJson(textBlock.text);
+    let data;
+    try {
+      data = extractJson(textBlock.text);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[analyze] JSON parse failed:", msg, "\n--- RAW ---\n", textBlock.text);
+      return NextResponse.json({ error: "invalid model output", detail: msg }, { status: 502 });
+    }
+
+    console.log("[analyze] success", { ms: Date.now() - t0 });
     return NextResponse.json(data);
   } catch (err) {
-    console.error("[analyze] error", err);
-    return NextResponse.json({ error: "generation failed" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("[analyze] unhandled error:", msg, "\nstack:", stack);
+    return NextResponse.json({ error: "generation failed", detail: msg }, { status: 500 });
   }
 }
