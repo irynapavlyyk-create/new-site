@@ -327,6 +327,88 @@ body {
 .legal-prose .legal-warning ul { margin-top: 0.5em; }
 .legal-prose .legal-warning li::marker { color: rgb(var(--orange)); }
 
+.auth-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: rgb(var(--text));
+  font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+.auth-input::placeholder { color: rgb(var(--muted)); opacity: 0.7; }
+.auth-input:focus {
+  outline: none;
+  border-color: rgb(var(--amber));
+  box-shadow: 0 0 0 3px rgba(var(--amber), 0.18);
+}
+.auth-input:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(var(--text));
+  margin-bottom: 0.4rem;
+}
+.auth-error {
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  color: rgb(var(--orange));
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.625rem;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.auth-success {
+  background: rgba(var(--amber), 0.1);
+  border: 1px solid rgba(var(--amber), 0.3);
+  color: rgb(var(--text));
+  padding: 0.8rem 1rem;
+  border-radius: 0.625rem;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.auth-google-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.7rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: rgb(var(--text));
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+.auth-google-btn:hover {
+  background: var(--card-hover);
+  border-color: rgb(var(--amber) / 0.5);
+}
+.auth-google-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: rgb(var(--muted));
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
 @keyframes spin-slow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 .animate-spin-slow { animation: spin-slow 6s linear infinite; }
 
