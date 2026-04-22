@@ -1,31 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { anthropic, MODEL, FREE_SYSTEM, PRO_SYSTEM, FREE_SCHEMA, PRO_SCHEMA } from "@/lib/claude";
 import { stripe } from "@/lib/stripe";
-import { quizSteps } from "@/lib/quiz-data";
+import { generatePlan } from "@/lib/generatePlan";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-function buildUserSummary(answers: QuizAnswers, lang: "en" | "ru"): string {
-  const lines: string[] = [];
-  for (const step of quizSteps) {
-    const value = answers[step.key];
-    if (!value) continue;
-    const opt = step.options.find((o) => o.value === value);
-    const q = lang === "ru" ? step.qRu : step.qEn;
-    const a = opt ? (lang === "ru" ? opt.labelRu : opt.labelEn) : value;
-    lines.push(`- ${q}: ${a}`);
-  }
-  return lines.join("\n");
-}
-
-function extractJson(text: string): unknown {
-  const trimmed = text.trim();
-  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  const raw = fenced ? fenced[1] : trimmed;
-  return JSON.parse(raw);
-}
 
 export async function POST(req: NextRequest) {
   const t0 = Date.now();
@@ -35,19 +15,20 @@ export async function POST(req: NextRequest) {
       lang: "en" | "ru";
       tier: "free" | "pro" | "coach";
       sessionId?: string;
+      userId?: string | null;
     };
-    const { answers, lang, tier, sessionId } = body;
+    const { answers, lang, tier, sessionId, userId } = body;
 
     console.log("[analyze] incoming", {
       tier,
       lang,
       hasSessionId: Boolean(sessionId),
       sessionIdPrefix: sessionId?.slice(0, 12),
+      hasUserId: Boolean(userId),
       answerKeys: answers ? Object.keys(answers) : null,
       answerCount: answers ? Object.keys(answers).length : 0,
       anthropicKeySet: Boolean(process.env.ANTHROPIC_API_KEY),
       stripeKeySet: Boolean(process.env.STRIPE_SECRET_KEY),
-      model: MODEL,
     });
 
     if (!answers || typeof answers !== "object") {
@@ -119,71 +100,36 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const langName = lang === "ru" ? "Russian (русский)" : "English";
-    const system = isPaid ? PRO_SYSTEM : FREE_SYSTEM;
-    const schema = isPaid ? PRO_SCHEMA : FREE_SCHEMA;
-
-    const userPrompt = `Here is the quiz. Write your output in ${langName}.
-
-Quiz answers:
-${buildUserSummary(answers, lang)}
-
-Produce a JSON object that exactly matches this shape:
-${schema}
-
-Rules:
-- Be specific to these answers, not generic.
-- Use concrete numbers, times, and dosages where applicable.
-- Voice: direct, warm, never preachy.
-- Output JSON only. No commentary, no markdown fences.`;
-
-    if (!process.env.ANTHROPIC_API_KEY) {
-      console.error("[analyze] ANTHROPIC_API_KEY is not set");
-      return NextResponse.json({ error: "anthropic not configured" }, { status: 500 });
+    const result = await generatePlan({ answers, lang, tier });
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.error, detail: result.detail },
+        { status: result.status }
+      );
     }
 
-    console.log("[analyze] calling anthropic", {
-      model: MODEL,
-      maxTokens: isPaid ? 4000 : 1200,
-      promptLength: userPrompt.length,
-    });
-
-    let response;
-    try {
-      response = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: isPaid ? 4000 : 1200,
-        system,
-        messages: [{ role: "user", content: userPrompt }],
-      });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error("[analyze] anthropic call failed:", msg, err);
-      return NextResponse.json({ error: "anthropic failed", detail: msg }, { status: 502 });
-    }
-
-    console.log("[analyze] anthropic ok", {
-      stopReason: response.stop_reason,
-      usage: response.usage,
-    });
-
-    const textBlock = response.content.find((c) => c.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      console.error("[analyze] empty response — no text block");
-      return NextResponse.json({ error: "empty response" }, { status: 500 });
-    }
-
-    let data;
-    try {
-      data = extractJson(textBlock.text);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error("[analyze] JSON parse failed:", msg, "\n--- RAW ---\n", textBlock.text);
-      return NextResponse.json({ error: "invalid model output", detail: msg }, { status: 502 });
+    // Optionally persist to DB for logged-in paid users. Starter tier never saves.
+    if (userId && tier !== "free") {
+      try {
+        const admin = createAdminClient();
+        const { error: planErr } = await admin.from("plans").insert({
+          user_id: userId,
+          tier,
+          answers,
+          plan_data: result.data,
+          language: lang,
+          ...(sessionId ? { stripe_session_id: sessionId } : {}),
+        });
+        if (planErr) {
+          console.error("[analyze] plans insert failed:", planErr);
+        }
+      } catch (err) {
+        console.error("[analyze] plans insert threw:", err);
+      }
     }
 
     console.log("[analyze] success", { ms: Date.now() - t0 });
-    return NextResponse.json(data);
+    return NextResponse.json(result.data);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const stack = err instanceof Error ? err.stack : undefined;

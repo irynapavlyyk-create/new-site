@@ -8,7 +8,9 @@ import type { FreeReport } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
-import { safeLoad, safeRead } from "@/lib/storage";
+import { safeLoad } from "@/lib/storage";
+import { createClient } from "@/utils/supabase/client";
+import type { QuizAnswers } from "@/types";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -28,8 +30,9 @@ export default function ResultPage() {
   const unlock = async (tier: "pro" | "coach") => {
     setLoadingTier(tier);
     try {
+      let answers: QuizAnswers | null = null;
       if (typeof window !== "undefined") {
-        const answers = safeRead("ef_answers");
+        answers = safeLoad<QuizAnswers>("ef_answers");
         if (!answers) {
           setLoadingTier(null);
           router.replace("/quiz");
@@ -44,10 +47,21 @@ export default function ResultPage() {
         }
       }
 
+      let userId: string | null = null;
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        userId = user?.id ?? null;
+      } catch (e) {
+        console.warn("[result] supabase.auth.getUser failed:", e);
+      }
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier, lang }),
+        body: JSON.stringify({ tier, lang, userId, answers }),
       });
       const { url } = await res.json();
       if (url) window.location.href = url;

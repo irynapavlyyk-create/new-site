@@ -5,20 +5,29 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import type { ProPlan, QuizAnswers } from "@/types";
+import type { ProPlan } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
-import { safeLoad, safeSave, safeRead } from "@/lib/storage";
+import { safeLoad, safeSave } from "@/lib/storage";
+import { createClient } from "@/utils/supabase/client";
 
 export default function DashboardClient({
   userEmail,
+  initialPlan = null,
+  initialPlanTier = null,
 }: {
   userEmail?: string | null;
+  initialPlan?: ProPlan | null;
+  initialPlanTier?: string | null;
 }) {
   return (
     <Suspense fallback={<DashboardFallback />}>
-      <DashboardContent userEmail={userEmail} />
+      <DashboardContent
+        userEmail={userEmail}
+        initialPlan={initialPlan}
+        initialPlanTier={initialPlanTier}
+      />
     </Suspense>
   );
 }
@@ -43,80 +52,93 @@ type DashState =
   | { kind: "generating" }
   | { kind: "ready"; plan: ProPlan }
   | { kind: "no-plan" }
-  | { kind: "answers-lost" }
   | { kind: "error"; detail?: string };
 
-function DashboardContent({ userEmail }: { userEmail?: string | null }) {
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 30000;
+
+function DashboardContent({
+  userEmail,
+  initialPlan,
+  initialPlanTier,
+}: {
+  userEmail?: string | null;
+  initialPlan: ProPlan | null;
+  initialPlanTier: string | null;
+}) {
   const { lang } = useI18n();
   void userEmail;
+  void initialPlanTier;
   const params = useSearchParams();
   const sessionId = params.get("session_id");
-  const [state, setState] = useState<DashState>({ kind: "loading-cache" });
-  const [attempt, setAttempt] = useState(0);
+
+  const [state, setState] = useState<DashState>(() => {
+    if (initialPlan && initialPlan.summary) {
+      return { kind: "ready", plan: initialPlan };
+    }
+    return { kind: "loading-cache" };
+  });
+
+  // Persist server-delivered plan to localStorage for offline fallback.
+  useEffect(() => {
+    if (initialPlan && initialPlan.summary) {
+      safeSave("ef_pro_plan", initialPlan);
+    }
+  }, [initialPlan]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (initialPlan && initialPlan.summary) return; // already ready from server
 
+    // Priority 2: poll DB for plan that matches the checkout session (webhook may still be processing).
+    if (sessionId) {
+      setState({ kind: "generating" });
+      const supabase = createClient();
+      const started = Date.now();
+      let cancelled = false;
+
+      const poll = async () => {
+        const { data, error } = await supabase
+          .from("plans")
+          .select("plan_data, tier")
+          .eq("stripe_session_id", sessionId)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) {
+          console.error("[dashboard] plan poll error:", error);
+        }
+        const plan = (data?.plan_data as ProPlan | null) ?? null;
+        if (plan && plan.summary) {
+          safeSave("ef_pro_plan", plan);
+          setState({ kind: "ready", plan });
+          return;
+        }
+        if (Date.now() - started > POLL_TIMEOUT_MS) {
+          setState({
+            kind: "error",
+            detail: "Plan generation is taking longer than expected. Please contact support.",
+          });
+          return;
+        }
+        timer = window.setTimeout(poll, POLL_INTERVAL_MS);
+      };
+
+      let timer: number | undefined = window.setTimeout(poll, 0);
+      return () => {
+        cancelled = true;
+        if (timer !== undefined) window.clearTimeout(timer);
+      };
+    }
+
+    // Priority 3: localStorage fallback.
     const cached = safeLoad<ProPlan>("ef_pro_plan");
     if (cached && cached.summary) {
       setState({ kind: "ready", plan: cached });
       return;
     }
 
-    const paidTier = safeRead("ef_paid_tier") as "pro" | "coach" | null;
-    const answers = safeLoad<QuizAnswers>("ef_answers");
-
-    if (!sessionId && !paidTier) {
-      setState({ kind: "no-plan" });
-      return;
-    }
-
-    if (!answers) {
-      setState({ kind: "answers-lost" });
-      return;
-    }
-
-    setState({ kind: "generating" });
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            answers,
-            lang,
-            tier: paidTier || "pro",
-            sessionId,
-          }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (cancelled) return;
-        if (!res.ok || data.error) {
-          const detail = data.detail || data.error || `HTTP ${res.status}`;
-          console.error("[dashboard] generation failed:", res.status, data);
-          setState({ kind: "error", detail: String(detail) });
-          return;
-        }
-        if (data && data.summary) {
-          safeSave("ef_pro_plan", data);
-          setState({ kind: "ready", plan: data });
-        } else {
-          setState({ kind: "error", detail: "empty response from server" });
-        }
-      } catch (e) {
-        console.error("[dashboard] generation failed:", e);
-        if (!cancelled) {
-          const msg = e instanceof Error ? e.message : String(e);
-          setState({ kind: "error", detail: msg });
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [sessionId, lang, attempt]);
+    setState({ kind: "no-plan" });
+  }, [sessionId, initialPlan]);
 
   if (state.kind === "loading-cache" || state.kind === "generating") {
     return (
@@ -170,23 +192,6 @@ function DashboardContent({ userEmail }: { userEmail?: string | null }) {
     );
   }
 
-  if (state.kind === "answers-lost") {
-    return (
-      <>
-        <Navbar />
-        <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
-          <div className="text-center max-w-md">
-            <div className="text-6xl mb-6">⚠️</div>
-            <p className="text-muted mb-6">{pick(t.dashboard.answersLost, lang)}</p>
-            <Link href="/quiz" className="btn-primary">
-              {pick(t.dashboard.startQuiz, lang)}
-            </Link>
-          </div>
-        </main>
-      </>
-    );
-  }
-
   if (state.kind === "error") {
     return (
       <>
@@ -209,7 +214,7 @@ function DashboardContent({ userEmail }: { userEmail?: string | null }) {
             )}
             <button
               type="button"
-              onClick={() => setAttempt((n) => n + 1)}
+              onClick={() => window.location.reload()}
               className="btn-primary"
             >
               {pick(t.dashboard.retryGen, lang)}
