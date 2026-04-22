@@ -9,6 +9,11 @@ export const t = {
     ctaShort: { en: "Start", ru: "Начать" },
     menu: { en: "Menu", ru: "Меню" },
     close: { en: "Close", ru: "Закрыть" },
+    signIn: { en: "Sign in", ru: "Войти" },
+    dashboard: { en: "Dashboard", ru: "Личный кабинет" },
+    settings: { en: "Settings", ru: "Настройки" },
+    signOut: { en: "Sign out", ru: "Выйти" },
+    profile: { en: "Profile", ru: "Профиль" },
   },
   hero: {
     tag: { en: "Personal Energy Diagnostic", ru: "Персональная диагностика энергии" },

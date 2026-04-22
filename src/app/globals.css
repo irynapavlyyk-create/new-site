@@ -436,3 +436,12 @@ body {
   100% { transform: rotate(360deg) scale(1); }
 }
 .animate-theme-toggle { animation: theme-toggle-spin 0.4s ease-out; }
+
+@keyframes profile-dropdown-in {
+  0% { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.profile-dropdown {
+  animation: profile-dropdown-in 0.15s ease-out;
+  z-index: 50;
+}
