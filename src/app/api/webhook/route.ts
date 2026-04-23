@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
+import { waitUntil } from "@vercel/functions";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { generatePlan } from "@/lib/generatePlan";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
+// Vercel: plan generation (Anthropic API) can take 20–30s; Stripe handler
+// returns 200 immediately but waitUntil keeps the function alive for background work.
+export const maxDuration = 60;
 
 type Tier = "pro" | "coach";
 
@@ -13,7 +17,6 @@ function tierFromAmount(amount: number | null | undefined): Tier | null {
   if (amount == null) return null;
   if (amount === 999) return "pro";
   if (amount === 2499) return "coach";
-  // Fallback bands: <$15 ≈ pro, ≥$15 ≈ coach
   if (amount <= 1500) return "pro";
   return "coach";
 }
@@ -84,14 +87,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   const admin = createAdminClient();
 
-  // 1. Resolve user: existing (metadata.user_id !== anonymous) or lookup/create by email
+  // Idempotency: Stripe retries on timeout — skip if we've already processed this session.
+  const { data: existingPlan } = await admin
+    .from("plans")
+    .select("id")
+    .eq("stripe_session_id", sessionId)
+    .maybeSingle();
+  if (existingPlan) {
+    console.log("[webhook] plan already exists for session — skipping", sessionId);
+    return;
+  }
+
   let userId: string | null = null;
   let isNewUser = false;
 
   if (metadataUserId && metadataUserId !== "anonymous") {
     userId = metadataUserId;
   } else {
-    // Try profiles table first (fastest)
     const { data: profileRow } = await admin
       .from("profiles")
       .select("id")
@@ -100,7 +112,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     if (profileRow?.id) {
       userId = profileRow.id as string;
     } else {
-      // Fallback: search auth.users via listUsers
       try {
         const { data: listed } = await admin.auth.admin.listUsers();
         const found = listed?.users?.find(
@@ -134,7 +145,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // 2. Update profile: stripe_customer_id + preferred_language
   try {
     const profileUpdate: Record<string, unknown> = {
       id: userId,
@@ -152,7 +162,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.error("[webhook] profile upsert threw:", err);
   }
 
-  // 3. Generate plan from answers (if we have them)
   const answers = parseAnswersFromMetadata(metadata);
   let planData: unknown = null;
   if (answers) {
@@ -169,7 +178,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     );
   }
 
-  // 4. Insert plan row (even if generation failed, we record the purchase)
   try {
     const { error: planErr } = await admin.from("plans").insert({
       user_id: userId,
@@ -186,7 +194,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.error("[webhook] plans insert threw:", err);
   }
 
-  // 5. Magic link for newly created (anonymous) users
   if (isNewUser) {
     try {
       const siteUrl =
@@ -214,7 +221,6 @@ async function handleSubscriptionEvent(sub: Stripe.Subscription) {
     typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const admin = createAdminClient();
 
-  // Resolve user via profiles.stripe_customer_id
   const { data: profile } = await admin
     .from("profiles")
     .select("id")
@@ -247,6 +253,28 @@ async function handleSubscriptionEvent(sub: Stripe.Subscription) {
   }
 }
 
+async function processEventAsync(event: Stripe.Event) {
+  console.log("[webhook] processing event:", event.type, event.id);
+  try {
+    switch (event.type) {
+      case "checkout.session.completed":
+        await handleCheckoutCompleted(
+          event.data.object as Stripe.Checkout.Session
+        );
+        break;
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted":
+        await handleSubscriptionEvent(event.data.object as Stripe.Subscription);
+        break;
+      default:
+        break;
+    }
+  } catch (err) {
+    console.error("[webhook] handler threw for", event.type, event.id, err);
+  }
+}
+
 export async function POST(req: NextRequest) {
   const sig = req.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -264,27 +292,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid signature" }, { status: 400 });
   }
 
-  try {
-    switch (event.type) {
-      case "checkout.session.completed": {
-        await handleCheckoutCompleted(
-          event.data.object as Stripe.Checkout.Session
-        );
-        break;
-      }
-      case "customer.subscription.created":
-      case "customer.subscription.updated":
-      case "customer.subscription.deleted": {
-        await handleSubscriptionEvent(event.data.object as Stripe.Subscription);
-        break;
-      }
-      default:
-        break;
-    }
-  } catch (err) {
-    // Never let an error bubble out: that triggers Stripe retries forever.
-    console.error("[webhook] handler threw for", event.type, err);
-  }
+  // Respond to Stripe immediately (10s timeout) — heavy work continues via waitUntil.
+  waitUntil(processEventAsync(event));
 
   return NextResponse.json({ received: true });
 }
