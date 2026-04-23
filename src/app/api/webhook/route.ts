@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { waitUntil } from "@vercel/functions";
+import { createClient } from "@supabase/supabase-js";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { generatePlan } from "@/lib/generatePlan";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
-// Vercel: plan generation (Anthropic API) can take 20–30s; Stripe handler
-// returns 200 immediately but waitUntil keeps the function alive for background work.
 export const maxDuration = 60;
 
 type Tier = "pro" | "coach";
@@ -53,6 +52,39 @@ function parseAnswersFromMetadata(
   return null;
 }
 
+// Real email delivery: signInWithOtp uses the configured SMTP (Resend).
+// admin.auth.admin.generateLink only produces a link — it does NOT send mail.
+async function sendMagicLinkEmail(email: string) {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.energyforge.app";
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!url || !anonKey) {
+    console.error("[webhook] magic link: missing Supabase env vars");
+    return;
+  }
+
+  const supabase = createClient(url, anonKey);
+  console.log("[webhook] sending magic link via signInWithOtp to", email);
+  try {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=/dashboard`,
+      },
+    });
+    if (error) {
+      console.error("[webhook] signInWithOtp failed:", error);
+    } else {
+      console.log("[webhook] signInWithOtp ok — email queued to", email);
+    }
+  } catch (err) {
+    console.error("[webhook] signInWithOtp threw:", err);
+  }
+}
+
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const email = session.customer_details?.email || session.customer_email || null;
   const metadata = session.metadata || {};
@@ -67,153 +99,150 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const tier =
     (metadata.tier as Tier | undefined) || tierFromAmount(session.amount_total);
 
-  console.log("[webhook] checkout.session.completed", {
+  console.log("[webhook] checkout session started", {
     sessionId,
-    tier,
     email,
+    tier,
     metadataUserId,
     amount: session.amount_total,
     mode: session.mode,
   });
 
   if (!tier) {
-    console.error("[webhook] could not determine tier for session", sessionId);
+    console.error("[webhook] could not determine tier", sessionId);
     return;
   }
   if (!email) {
-    console.error("[webhook] checkout session has no email", sessionId);
+    console.error("[webhook] no email in session", sessionId);
     return;
   }
 
   const admin = createAdminClient();
 
-  // Idempotency: Stripe retries on timeout — skip if we've already processed this session.
+  // Idempotency: reuse user_id from prior insert if we already processed this session.
   const { data: existingPlan } = await admin
     .from("plans")
-    .select("id")
+    .select("id, user_id")
     .eq("stripe_session_id", sessionId)
     .maybeSingle();
-  if (existingPlan) {
-    console.log("[webhook] plan already exists for session — skipping", sessionId);
-    return;
-  }
+  console.log("[webhook] plan exists for session?", !!existingPlan);
 
-  let userId: string | null = null;
+  // Always resolve user — needed both for plan work and for magic link on retry.
+  let userId: string | null = (existingPlan?.user_id as string | null) ?? null;
   let isNewUser = false;
 
-  if (metadataUserId && metadataUserId !== "anonymous") {
-    userId = metadataUserId;
-  } else {
-    const { data: profileRow } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
-    if (profileRow?.id) {
-      userId = profileRow.id as string;
+  if (!userId) {
+    if (metadataUserId && metadataUserId !== "anonymous") {
+      userId = metadataUserId;
     } else {
-      try {
-        const { data: listed } = await admin.auth.admin.listUsers();
-        const found = listed?.users?.find(
-          (u) => (u.email || "").toLowerCase() === email.toLowerCase()
-        );
-        if (found) {
-          userId = found.id;
+      const { data: profileRow } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+      if (profileRow?.id) {
+        userId = profileRow.id as string;
+      } else {
+        try {
+          const { data: listed } = await admin.auth.admin.listUsers();
+          const found = listed?.users?.find(
+            (u) => (u.email || "").toLowerCase() === email.toLowerCase()
+          );
+          if (found) userId = found.id;
+        } catch (err) {
+          console.warn("[webhook] listUsers failed, will attempt create:", err);
         }
-      } catch (err) {
-        console.warn("[webhook] listUsers failed, will attempt create:", err);
       }
-    }
 
-    if (!userId) {
-      const { data: created, error: createErr } =
-        await admin.auth.admin.createUser({
-          email,
-          email_confirm: true,
-        });
-      if (createErr || !created?.user) {
-        console.error("[webhook] createUser failed:", createErr);
-        return;
+      if (!userId) {
+        const { data: created, error: createErr } =
+          await admin.auth.admin.createUser({
+            email,
+            email_confirm: true,
+          });
+        if (createErr || !created?.user) {
+          console.error("[webhook] createUser failed:", createErr);
+          return;
+        }
+        userId = created.user.id;
+        isNewUser = true;
       }
-      userId = created.user.id;
-      isNewUser = true;
     }
   }
 
   if (!userId) {
-    console.error("[webhook] could not resolve or create userId for", email);
+    console.error("[webhook] could not resolve userId for", email);
     return;
   }
 
-  try {
-    const profileUpdate: Record<string, unknown> = {
-      id: userId,
-      email,
-      ...(stripeCustomerId ? { stripe_customer_id: stripeCustomerId } : {}),
-      ...(language ? { preferred_language: language } : {}),
-    };
-    const { error: upsertErr } = await admin
-      .from("profiles")
-      .upsert(profileUpdate, { onConflict: "id" });
-    if (upsertErr) {
-      console.error("[webhook] profile upsert failed:", upsertErr);
-    }
-  } catch (err) {
-    console.error("[webhook] profile upsert threw:", err);
-  }
+  console.log("[webhook] user resolved", { userId, isNewUser });
 
-  const answers = parseAnswersFromMetadata(metadata);
-  let planData: unknown = null;
-  if (answers) {
-    const result = await generatePlan({ answers, lang: language, tier });
-    if (result.ok) {
-      planData = result.data;
+  // Only do plan work if not already done — this guards the expensive generatePlan call.
+  if (!existingPlan) {
+    try {
+      const profileUpdate: Record<string, unknown> = {
+        id: userId,
+        email,
+        ...(stripeCustomerId ? { stripe_customer_id: stripeCustomerId } : {}),
+        ...(language ? { preferred_language: language } : {}),
+      };
+      const { error: upsertErr } = await admin
+        .from("profiles")
+        .upsert(profileUpdate, { onConflict: "id" });
+      if (upsertErr) {
+        console.error("[webhook] profile upsert failed:", upsertErr);
+      }
+    } catch (err) {
+      console.error("[webhook] profile upsert threw:", err);
+    }
+
+    const answers = parseAnswersFromMetadata(metadata);
+    let planData: unknown = null;
+    if (answers) {
+      const result = await generatePlan({ answers, lang: language, tier });
+      if (result.ok) {
+        planData = result.data;
+      } else {
+        console.error("[webhook] plan generation failed:", result);
+      }
     } else {
-      console.error("[webhook] plan generation failed:", result);
+      console.warn(
+        "[webhook] no answers in metadata — skipping plan generation",
+        sessionId
+      );
+    }
+
+    try {
+      const { error: planErr } = await admin.from("plans").insert({
+        user_id: userId,
+        tier,
+        answers: answers ?? {},
+        plan_data: planData ?? {},
+        language,
+        stripe_session_id: sessionId,
+      });
+      if (planErr) {
+        console.error("[webhook] plans insert failed:", planErr);
+      }
+    } catch (err) {
+      console.error("[webhook] plans insert threw:", err);
     }
   } else {
-    console.warn(
-      "[webhook] no answers in metadata — skipping plan generation",
-      sessionId
+    console.log(
+      "[webhook] plan already exists — skipping plan/profile/generation"
     );
   }
 
-  try {
-    const { error: planErr } = await admin.from("plans").insert({
-      user_id: userId,
-      tier,
-      answers: answers ?? {},
-      plan_data: planData ?? {},
-      language,
-      stripe_session_id: sessionId,
-    });
-    if (planErr) {
-      console.error("[webhook] plans insert failed:", planErr);
-    }
-  } catch (err) {
-    console.error("[webhook] plans insert threw:", err);
+  // Magic link sits OUTSIDE the existingPlan gate so a retry (e.g. after a prior
+  // silent failure) still triggers a send. Supabase rate-limits duplicates per
+  // email, so a healthy retry is a no-op rather than a duplicate send.
+  const shouldSendMagicLink = isNewUser || metadataUserId === "anonymous";
+  console.log("[webhook] should send magic link?", shouldSendMagicLink);
+  if (shouldSendMagicLink) {
+    await sendMagicLinkEmail(email);
   }
 
-  if (isNewUser) {
-    try {
-      const siteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL || "https://energyforge.app";
-      const { error: linkErr } = await admin.auth.admin.generateLink({
-        type: "magiclink",
-        email,
-        options: {
-          redirectTo: `${siteUrl}/auth/callback?next=/dashboard`,
-        },
-      });
-      if (linkErr) {
-        console.error("[webhook] generateLink failed:", linkErr);
-      } else {
-        console.log("[webhook] magic link sent to", email);
-      }
-    } catch (err) {
-      console.error("[webhook] generateLink threw:", err);
-    }
-  }
+  console.log("[webhook] done processing session", sessionId);
 }
 
 async function handleSubscriptionEvent(sub: Stripe.Subscription) {
@@ -292,7 +321,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid signature" }, { status: 400 });
   }
 
-  // Respond to Stripe immediately (10s timeout) — heavy work continues via waitUntil.
   waitUntil(processEventAsync(event));
 
   return NextResponse.json({ received: true });
