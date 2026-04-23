@@ -4,6 +4,12 @@ import { NextResponse, type NextRequest } from "next/server";
 const PROTECTED_PREFIXES = ["/dashboard", "/settings"];
 
 export async function updateSession(request: NextRequest) {
+  // Safeguard: never touch API routes — they manage their own auth.
+  // Critical for /api/webhook (Stripe) which must not be redirected.
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
