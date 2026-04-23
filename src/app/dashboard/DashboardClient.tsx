@@ -72,6 +72,20 @@ function DashboardContent({
   const params = useSearchParams();
   const sessionId = params.get("session_id");
 
+  // Supabase returns auth errors (e.g. expired magic link) via URL hash
+  // because it uses the implicit flow. Server code can't see the hash,
+  // so we detect it here and bounce to /login with a readable error code.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash;
+    if (!hash || !hash.includes("error=")) return;
+    const hashParams = new URLSearchParams(hash.slice(1));
+    const raw =
+      hashParams.get("error_code") || hashParams.get("error") || "access_denied";
+    const normalized = raw === "otp_expired" ? "link_expired" : raw;
+    window.location.replace(`/login?error=${encodeURIComponent(normalized)}`);
+  }, []);
+
   const [state, setState] = useState<DashState>(() => {
     if (initialPlan && initialPlan.summary) {
       return { kind: "ready", plan: initialPlan };

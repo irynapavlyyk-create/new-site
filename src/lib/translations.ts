@@ -346,6 +346,18 @@ export const t = {
       ru: "Проверьте почту — мы прислали ссылку для сброса.",
     },
     working: { en: "…", ru: "…" },
+    linkExpired: {
+      en: "Your login link has expired. Please request a new one below.",
+      ru: "Срок действия ссылки истёк. Войдите ниже, чтобы получить новую.",
+    },
+    accessDenied: {
+      en: "Access denied. Please sign in again.",
+      ru: "Доступ закрыт. Войдите снова.",
+    },
+    authErrorGeneric: {
+      en: "Something went wrong. Please try signing in again.",
+      ru: "Что-то пошло не так. Попробуйте войти снова.",
+    },
   },
   legal: {
     back: { en: "← Back to home", ru: "← Вернуться на главную" },
