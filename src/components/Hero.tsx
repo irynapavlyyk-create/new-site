@@ -14,7 +14,7 @@ export default function Hero() {
       </div>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="inline-flex items-center gap-2 glass px-4 py-1.5 text-xs text-muted mb-6 animate-fade-up">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
+          <span className="badge-dot w-1.5 h-1.5 rounded-full bg-amber" />
           {pick(t.hero.tag, lang)}
         </div>
         <h1

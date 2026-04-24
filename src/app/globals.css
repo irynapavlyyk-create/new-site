@@ -416,10 +416,25 @@ body {
   0%, 100% { transform: translateX(0) scale(var(--cta-scale, 1)); }
   50% { transform: translateX(6px) scale(var(--cta-scale, 1)); }
 }
+@keyframes cta-heartbeat {
+  0%, 50%, 100% {
+    box-shadow:
+      0 6px 24px rgba(245, 166, 35, 0.45),
+      0 0 50px rgba(255, 107, 53, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  25% {
+    box-shadow:
+      0 9px 34px rgba(245, 166, 35, 0.63),
+      0 0 70px rgba(255, 107, 53, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
 .cta-nudge {
   --cta-scale: 1;
-  animation: gentle-push 1.8s ease-in-out infinite;
-  transition: box-shadow 0.3s ease;
+  animation:
+    gentle-push 1.8s ease-in-out infinite,
+    cta-heartbeat 3s ease-in-out infinite;
 }
 .cta-nudge:hover {
   --cta-scale: 1.03;
@@ -428,6 +443,88 @@ body {
     0 12px 40px rgba(245, 166, 35, 0.7),
     0 0 100px rgba(255, 107, 53, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Badge dot — breathing scale + amber glow. */
+@keyframes badge-breathe {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 166, 35, 0);
+  }
+  50% {
+    transform: scale(1.3);
+    box-shadow: 0 0 10px 2px rgba(245, 166, 35, 0.55);
+  }
+}
+.badge-dot {
+  animation: badge-breathe 2s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Aurora ambient backdrop — three drifting blobs behind all content. */
+.aurora-root {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  overflow: hidden;
+}
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(120px);
+  will-change: transform;
+}
+.aurora-blob-1 {
+  width: 780px;
+  height: 780px;
+  top: -180px;
+  left: -200px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+  animation: aurora-drift-1 38s ease-in-out infinite;
+}
+.aurora-blob-2 {
+  width: 820px;
+  height: 820px;
+  top: 28%;
+  right: -260px;
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.2) 0%, transparent 70%);
+  animation: aurora-drift-2 44s ease-in-out infinite;
+  animation-delay: -12s;
+}
+.aurora-blob-3 {
+  width: 900px;
+  height: 900px;
+  bottom: -260px;
+  left: 22%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  animation: aurora-drift-3 32s ease-in-out infinite;
+  animation-delay: -6s;
+}
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(60px, -40px, 0) scale(1.08); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(-55px, 50px, 0) scale(1.1); }
+}
+@keyframes aurora-drift-3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(45px, -55px, 0) scale(1.05); }
+}
+
+/* Respect users who ask for less motion: disable stage-1 ambient animations.
+   Existing animations (counters, marquee, fade-up) are intentionally not
+   neutralised here — scope is limited to the visuals added in this stage. */
+@media (prefers-reduced-motion: reduce) {
+  .cta-nudge,
+  .badge-dot,
+  .aurora-blob-1,
+  .aurora-blob-2,
+  .aurora-blob-3 {
+    animation: none !important;
+  }
 }
 
 @keyframes theme-toggle-spin {
