@@ -518,6 +518,16 @@ body {
   50%      { transform: translate3d(45px, -55px, 0) scale(1.05); }
 }
 
+/* Icon cards: scale + amber drop-shadow on card hover. */
+.icon-hover {
+  transition: transform 250ms ease-out, filter 250ms ease-out;
+  will-change: transform, filter;
+}
+.icon-card:hover .icon-hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 10px rgba(245, 166, 35, 0.5));
+}
+
 /* Respect users who ask for less motion: disable stage-1 ambient animations.
    Existing animations (counters, marquee, fade-up) are intentionally not
    neutralised here — scope is limited to the visuals added in this stage. */
@@ -528,6 +538,12 @@ body {
   .aurora-blob-2,
   .aurora-blob-3 {
     animation: none !important;
+  }
+  .icon-hover,
+  .icon-card:hover .icon-hover {
+    transition: none;
+    transform: none;
+    filter: none;
   }
 }
 
