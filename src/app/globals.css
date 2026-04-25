@@ -853,24 +853,24 @@ body {
   font-size: 1.1em;
   line-height: 1;
 }
-/* Chips at the four corners. Inner content is now constrained to a 580px
-   center column inside the ~820px frame, so a chip slightly hugging the
-   corner can never touch headings, columns, or supplement pills. */
-.chip-tl { top: -20px; left: 0; }
-.chip-tr { top: -20px; right: 0; }
-.chip-bl { bottom: -20px; left: 0; }
-.chip-br { bottom: -20px; right: 0; }
+/* Chips drift around the mockup at staggered, asymmetric heights — each
+   roughly aligned with a different content row inside the frame so they
+   feel organic rather than mirrored. */
+.chip-tl { top: -25px; left: 0; }
+.chip-tr { top: 90px; right: 0; }
+.chip-bl { bottom: 80px; left: 0; }
+.chip-br { bottom: -30px; right: 0; }
 @media (min-width: 1024px) {
-  .chip-tl { top: -20px; left: -50px; }
-  .chip-tr { top: -20px; right: -50px; }
-  .chip-bl { bottom: -20px; left: -50px; }
-  .chip-br { bottom: -20px; right: -50px; }
+  .chip-tl { top: -25px; left: -50px; }
+  .chip-tr { top: 90px; right: -50px; }
+  .chip-bl { bottom: 80px; left: -50px; }
+  .chip-br { bottom: -30px; right: -50px; }
 }
 @media (min-width: 1280px) {
-  .chip-tl { top: -20px; left: -80px; }
-  .chip-tr { top: -20px; right: -80px; }
-  .chip-bl { bottom: -20px; left: -80px; }
-  .chip-br { bottom: -20px; right: -80px; }
+  .chip-tl { top: -25px; left: -90px; }
+  .chip-tr { top: 90px; right: -90px; }
+  .chip-bl { bottom: 80px; left: -90px; }
+  .chip-br { bottom: -30px; right: -90px; }
 }
 /* Below 1024 the frame can shrink under 820px, leaving less than the
    needed 120px breathing margin inside; hide chips to avoid content
