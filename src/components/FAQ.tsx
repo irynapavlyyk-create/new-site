@@ -20,7 +20,7 @@ export default function FAQ() {
         {items.map((it, i) => {
           const isOpen = open === i;
           return (
-            <FadeUp key={i} delay={i * 60}>
+            <FadeUp key={i} delay={i * 50}>
               <div className={`glass overflow-hidden transition-all ${isOpen ? "border-amber/40" : ""}`}>
                 <button
                   className="w-full text-left px-6 py-5 flex items-center justify-between gap-4"

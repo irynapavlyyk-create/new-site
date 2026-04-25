@@ -16,6 +16,13 @@ export default function FadeUp({
 
   useEffect(() => {
     if (!ref.current) return;
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      setShown(true);
+      return;
+    }
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -23,7 +30,7 @@ export default function FadeUp({
           obs.disconnect();
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.15 }
     );
     obs.observe(ref.current);
     return () => obs.disconnect();

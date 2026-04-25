@@ -23,7 +23,7 @@ export default function Pricing() {
         {plans.map((p, i) => {
           const isPro = p.name === "PRO";
           return (
-            <FadeUp key={p.name} delay={i * 120}>
+            <FadeUp key={p.name} delay={i * 100}>
               <div
                 className={`relative glass h-full flex flex-col min-w-0 ${
                   isPro ? "!border-amber/50 shadow-glow" : ""
