@@ -1,5 +1,6 @@
 type Props = { className?: string; stroke?: string };
 
+// Apple silhouette with stem and angled leaf. Lucide-style.
 export default function NutritionIcon({ className, stroke = "url(#ef-grad-nutrition)" }: Props) {
   return (
     <svg
@@ -18,10 +19,9 @@ export default function NutritionIcon({ className, stroke = "url(#ef-grad-nutrit
           <stop offset="100%" stopColor="#FF6B35" />
         </linearGradient>
       </defs>
-      <path d="M3 13h18" />
-      <path d="M4 13c0 4 3 7 8 7s8 -3 8 -7" />
-      <path d="M11 13c0 -3 1 -6 4 -7c1 3 0 7 -4 7z" />
-      <path d="M14 7l-2 5" />
+      <path d="M12 7c-1.5 -1.5 -4.5 -2.5 -6.5 -1c-1.5 1 -2.5 3.5 -2.5 5.5c0 4 3 8.5 6.5 8.5c1 0 1.5 -.5 2.5 -.5s1.5 .5 2.5 .5c3.5 0 6.5 -4.5 6.5 -8.5c0 -2 -1 -4.5 -2.5 -5.5c-2 -1.5 -5 -.5 -6.5 1z" />
+      <path d="M12 4v3" />
+      <path d="M12 5c1.5 -2 4 -2 5 0c-1 1 -3 2 -5 0z" />
     </svg>
   );
 }

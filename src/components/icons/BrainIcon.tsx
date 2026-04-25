@@ -1,6 +1,7 @@
 type Props = { className?: string; stroke?: string };
 
-// "3pm brain-off": brain silhouette with a Z above-right for sleep/shutdown.
+// Two mirrored C-shaped hemispheres meeting top and bottom, with internal
+// fold lines suggesting cortex wrinkles. Lucide-style.
 export default function BrainIcon({ className, stroke = "url(#ef-grad-brain)" }: Props) {
   return (
     <svg
@@ -19,9 +20,12 @@ export default function BrainIcon({ className, stroke = "url(#ef-grad-brain)" }:
           <stop offset="100%" stopColor="#FF6B35" />
         </linearGradient>
       </defs>
-      <path d="M5 13c0 -2 2 -4 4 -4c0 -2 2 -3 4 -3c2 0 4 1 4 3c2 0 4 2 4 4c0 2 -1 4 -3 4c0 2 -2 4 -4 4h-2c-2 0 -4 -2 -4 -4c-2 0 -3 -2 -3 -4z" />
-      <path d="M13 6v15" />
-      <path d="M16 3h3.5l-3.5 3h3.5" />
+      <path d="M12 5C7 4 3 8 3 12S7 20 12 19" />
+      <path d="M12 5C17 4 21 8 21 12S17 20 12 19" />
+      <path d="M7 9c.5 1 1.5 1.5 2.5 1.5" />
+      <path d="M17 9c-.5 1 -1.5 1.5 -2.5 1.5" />
+      <path d="M5 14c1 1 2 1.5 3.5 1.5" />
+      <path d="M19 14c-1 1 -2 1.5 -3.5 1.5" />
     </svg>
   );
 }

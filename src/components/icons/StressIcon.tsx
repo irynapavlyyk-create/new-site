@@ -1,6 +1,7 @@
 type Props = { className?: string; stroke?: string };
 
-// Calm breath waves expanding upward from a center source.
+// Heart outline with a horizontal EKG pulse line passing through —
+// universal "heart-rate / stress regulation" mark.
 export default function StressIcon({ className, stroke = "url(#ef-grad-stress)" }: Props) {
   return (
     <svg
@@ -19,10 +20,8 @@ export default function StressIcon({ className, stroke = "url(#ef-grad-stress)" 
           <stop offset="100%" stopColor="#FF6B35" />
         </linearGradient>
       </defs>
-      <path d="M12 17v.01" />
-      <path d="M8 17a4 4 0 0 1 8 0" />
-      <path d="M5 17a7 7 0 0 1 14 0" />
-      <path d="M2 17a10 10 0 0 1 20 0" />
+      <path d="M12 16c-1.5 -1 -6 -3 -6 -8c0 -2.5 2 -4 3.5 -4c1.5 0 2 .5 2.5 1.5c.5 -1 1 -1.5 2.5 -1.5c1.5 0 3.5 1.5 3.5 4c0 5 -4.5 7 -6 8z" />
+      <path d="M2 10H8L9.5 7L11 13L12.5 10H20" />
     </svg>
   );
 }
