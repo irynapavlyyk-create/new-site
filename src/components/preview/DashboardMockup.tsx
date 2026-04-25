@@ -136,7 +136,7 @@ export default function DashboardMockup() {
         </div>
 
         <div className="mockup-content">
-          <h2 className="h-display text-2xl font-bold mb-3">
+          <h2 className="h-display text-2xl font-bold mb-3 text-center">
             <span className="gradient-text">Welcome to your plan</span>
           </h2>
 

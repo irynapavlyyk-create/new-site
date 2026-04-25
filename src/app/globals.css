@@ -655,7 +655,7 @@ body {
   position: relative;
   max-width: 820px;
   margin: 0 auto;
-  padding: 100px 0;
+  padding: 0;
   z-index: 0;
 }
 .mockup-stage::before {
@@ -752,13 +752,18 @@ body {
   50%      { transform: scale(1.2); box-shadow: 0 0 12px 2px rgba(40, 200, 64, 0.6); }
 }
 .mockup-content {
-  padding: 1.5rem 1.5rem 1.75rem;
+  /* Inner centered column — leaves ~110px breathing on each side of an
+     820px-wide frame so corner chips never touch the real content. */
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem;
 }
 .mockup-summary {
   font-size: 13px;
   line-height: 1.7;
   color: rgb(var(--muted));
   min-height: 84px;
+  text-align: center;
 }
 .mockup-cursor {
   display: inline-block;
@@ -789,7 +794,8 @@ body {
 .mockup-pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 0.6rem;
   margin-top: 1.4rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border);
@@ -847,27 +853,29 @@ body {
   font-size: 1.1em;
   line-height: 1;
 }
-/* Default (768-1023px): chips above and below the frame, never beside it. */
-.chip-tl { top: 15px; left: 5%; }
-.chip-tr { top: 15px; right: 5%; }
-.chip-bl { bottom: 25px; left: 5%; }
-.chip-br { bottom: 25px; right: 5%; }
+/* Chips at the four corners. Inner content is now constrained to a 580px
+   center column inside the ~820px frame, so a chip slightly hugging the
+   corner can never touch headings, columns, or supplement pills. */
+.chip-tl { top: -20px; left: 0; }
+.chip-tr { top: -20px; right: 0; }
+.chip-bl { bottom: -20px; left: 0; }
+.chip-br { bottom: -20px; right: 0; }
 @media (min-width: 1024px) {
-  /* still above-and-below — viewport too narrow for full side breathing */
-  .chip-tl { top: 15px; left: 8%; }
-  .chip-tr { top: 15px; right: 8%; }
-  .chip-bl { bottom: 25px; left: 10%; }
-  .chip-br { bottom: 25px; right: 10%; }
+  .chip-tl { top: -20px; left: -50px; }
+  .chip-tr { top: -20px; right: -50px; }
+  .chip-bl { bottom: -20px; left: -50px; }
+  .chip-br { bottom: -20px; right: -50px; }
 }
 @media (min-width: 1280px) {
-  /* full desktop: top chips orbit on the sides with 50+px breathing,
-     bottom chips remain below the frame so supplement pills stay clear. */
-  .chip-tl { top: 100px; left: -210px; }
-  .chip-tr { top: 120px; right: -160px; }
-  .chip-bl { bottom: 25px; left: 10%; }
-  .chip-br { bottom: 25px; right: 10%; }
+  .chip-tl { top: -20px; left: -80px; }
+  .chip-tr { top: -20px; right: -80px; }
+  .chip-bl { bottom: -20px; left: -80px; }
+  .chip-br { bottom: -20px; right: -80px; }
 }
-@media (max-width: 767px) {
+/* Below 1024 the frame can shrink under 820px, leaving less than the
+   needed 120px breathing margin inside; hide chips to avoid content
+   overlap at narrow desktops/tablets. */
+@media (max-width: 1023.98px) {
   .floating-chip { display: none; }
 }
 @keyframes chip-float {
