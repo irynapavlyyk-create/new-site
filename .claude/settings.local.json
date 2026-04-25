@@ -20,7 +20,9 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(taskkill //F //IM node.exe)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Skill(claude-api)",
+      "Bash(npm view *)"
     ]
   }
 }
