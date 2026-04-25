@@ -18,7 +18,7 @@ export default function LifetimeIcon({ className, stroke = "url(#ef-grad-lifetim
           <stop offset="100%" stopColor="#FF6B35" />
         </linearGradient>
       </defs>
-      <path d="M18.178 8a5 5 0 1 0 0 8l-6.357 -8a5 5 0 1 1 0 8z" />
+      <path d="M12 12c2.5 -4 7 -4 9 0s-2.5 4 -9 0c-2.5 -4 -7 -4 -9 0s2.5 4 9 0z" />
     </svg>
   );
 }

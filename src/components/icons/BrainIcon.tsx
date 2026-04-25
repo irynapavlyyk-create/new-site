@@ -1,6 +1,6 @@
 type Props = { className?: string; stroke?: string };
 
-// "3pm brain-off" — clock face with hands showing 3:00.
+// "3pm brain-off": brain silhouette with a Z above-right for sleep/shutdown.
 export default function BrainIcon({ className, stroke = "url(#ef-grad-brain)" }: Props) {
   return (
     <svg
@@ -19,8 +19,9 @@ export default function BrainIcon({ className, stroke = "url(#ef-grad-brain)" }:
           <stop offset="100%" stopColor="#FF6B35" />
         </linearGradient>
       </defs>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5h5" />
+      <path d="M5 13c0 -2 2 -4 4 -4c0 -2 2 -3 4 -3c2 0 4 1 4 3c2 0 4 2 4 4c0 2 -1 4 -3 4c0 2 -2 4 -4 4h-2c-2 0 -4 -2 -4 -4c-2 0 -3 -2 -3 -4z" />
+      <path d="M13 6v15" />
+      <path d="M16 3h3.5l-3.5 3h3.5" />
     </svg>
   );
 }

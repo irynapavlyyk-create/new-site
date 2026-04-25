@@ -1,5 +1,6 @@
 type Props = { className?: string; stroke?: string };
 
+// Calm breath waves expanding upward from a center source.
 export default function StressIcon({ className, stroke = "url(#ef-grad-stress)" }: Props) {
   return (
     <svg
@@ -18,9 +19,10 @@ export default function StressIcon({ className, stroke = "url(#ef-grad-stress)" 
           <stop offset="100%" stopColor="#FF6B35" />
         </linearGradient>
       </defs>
-      <circle cx="12" cy="12" r="2" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="10" />
+      <path d="M12 17v.01" />
+      <path d="M8 17a4 4 0 0 1 8 0" />
+      <path d="M5 17a7 7 0 0 1 14 0" />
+      <path d="M2 17a10 10 0 0 1 20 0" />
     </svg>
   );
 }

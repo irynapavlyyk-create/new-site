@@ -18,10 +18,10 @@ export default function NutritionIcon({ className, stroke = "url(#ef-grad-nutrit
           <stop offset="100%" stopColor="#FF6B35" />
         </linearGradient>
       </defs>
-      <path d="M4 13h16" />
-      <path d="M5 13a7 5 0 0 0 14 0" />
-      <path d="M11 10c-1 -3 1 -5 3 -5c1 2 -1 5 -3 5z" />
-      <path d="M12.5 9l-1 1" />
+      <path d="M3 13h18" />
+      <path d="M4 13c0 4 3 7 8 7s8 -3 8 -7" />
+      <path d="M11 13c0 -3 1 -6 4 -7c1 3 0 7 -4 7z" />
+      <path d="M14 7l-2 5" />
     </svg>
   );
 }
