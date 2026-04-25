@@ -23,10 +23,18 @@ type Phase = "idle" | "typing" | "bullets" | "done";
 
 export default function DashboardMockup() {
   const ref = useRef<HTMLDivElement>(null);
+  const resumeTimer = useRef<number | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [typed, setTyped] = useState("");
   const [reduced, setReduced] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [interacting, setInteracting] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     const m = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -77,20 +85,39 @@ export default function DashboardMockup() {
 
   const showBullets = phase === "bullets" || phase === "done";
 
+  const isHoverDevice = () =>
+    typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
+
+  const onMouseEnter = () => {
+    if (reduced || !isHoverDevice()) return;
+    if (resumeTimer.current) {
+      window.clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+    setInteracting(true);
+  };
   const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (reduced) return;
-    if (typeof window !== "undefined" && !window.matchMedia("(hover: hover)").matches) return;
+    if (reduced || !isHoverDevice()) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
     const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
     setTilt({ x: -dy * 6, y: dx * 6 });
   };
-  const onMouseLeave = () => setTilt({ x: 0, y: 0 });
+  const onMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+    if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    resumeTimer.current = window.setTimeout(() => {
+      setInteracting(false);
+      resumeTimer.current = null;
+    }, 500);
+  };
 
   return (
     <div className="mockup-perspective" ref={ref}>
+      <div className={`mockup-idle-float ${interacting ? "is-interacting" : ""}`}>
       <div
         className="mockup-frame glass-strong"
+        onMouseEnter={onMouseEnter}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
         style={{
@@ -149,6 +176,7 @@ export default function DashboardMockup() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

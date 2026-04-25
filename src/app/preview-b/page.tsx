@@ -26,9 +26,9 @@ export default function PreviewBPage() {
           </FadeUp>
           <div className="mockup-stage">
             <FloatingChip emoji="✨" text="AI-personalized" className="chip-tl" delay={0} />
-            <FloatingChip emoji="⏱" text="30 days" className="chip-tr" delay={2} />
-            <FloatingChip emoji="🧬" text="Science-backed" className="chip-bl" delay={4} />
-            <FloatingChip emoji="🎯" text="Just for you" className="chip-br" delay={6} />
+            <FloatingChip emoji="⏱" text="30 days" className="chip-tr" delay={1} />
+            <FloatingChip emoji="🧬" text="Science-backed" className="chip-bl" delay={2} />
+            <FloatingChip emoji="🎯" text="Just for you" className="chip-br" delay={3} />
             <DashboardMockup />
           </div>
         </div>
