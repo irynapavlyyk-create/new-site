@@ -547,6 +547,300 @@ body {
   }
 }
 
+/* ============================================================
+   Stage 3 — preview-a (Constellation) and preview-b (Living Dashboard)
+   ============================================================ */
+
+/* --- Constellation --- */
+.constellation-canvas {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.constellation-card {
+  --rot: 0deg;
+  --accent-bg: rgb(var(--amber));
+  --accent-glow: rgba(245, 166, 35, 0.4);
+  position: relative;
+  padding: 1.25rem 1.25rem 1.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  animation: constellation-float 6.5s ease-in-out infinite;
+  transition: transform 250ms ease-out, box-shadow 250ms ease-out;
+  will-change: transform;
+}
+.constellation-accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-bg);
+}
+.constellation-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+.constellation-card-bullets {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 13px;
+  color: rgb(var(--muted));
+}
+.constellation-lines {
+  display: none;
+}
+.constellation-star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgb(var(--amber));
+  pointer-events: none;
+  display: none;
+  animation: constellation-twinkle 3.2s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+.constellation-line {
+  animation: constellation-flow 6s linear infinite;
+  transition: stroke-opacity 250ms ease-out, stroke-width 250ms ease-out;
+}
+@keyframes constellation-float {
+  0%, 100% { transform: translateY(0) rotate(var(--rot)); }
+  50%      { transform: translateY(-6px) rotate(var(--rot)); }
+}
+@keyframes constellation-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 0.85; transform: scale(1.4); }
+}
+@keyframes constellation-flow {
+  to { stroke-dashoffset: -32; }
+}
+@media (min-width: 768px) {
+  .constellation-canvas {
+    display: block;
+    height: 700px;
+  }
+  .constellation-lines {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .constellation-card {
+    position: absolute;
+  }
+  .constellation-star { display: block; }
+  .constellation-canvas:has(.constellation-card:hover) .constellation-line {
+    stroke-opacity: 0.85;
+  }
+  .constellation-card:hover {
+    animation-play-state: paused;
+    transform: translateY(-12px) rotate(var(--rot)) scale(1.02);
+    box-shadow: 0 18px 50px var(--accent-glow);
+  }
+}
+
+/* --- Living Dashboard mockup --- */
+.mockup-stage {
+  position: relative;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 30px 0;
+}
+.mockup-perspective {
+  perspective: 1200px;
+}
+.mockup-frame {
+  position: relative;
+  width: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.mockup-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border);
+}
+.mockup-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.mockup-url {
+  flex: 1;
+  text-align: center;
+  font-size: 11.5px;
+  color: rgb(var(--muted));
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+  margin: 0 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mockup-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 11px;
+  font-weight: 600;
+  color: #28C840;
+  flex-shrink: 0;
+}
+.mockup-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #28C840;
+  animation: mockup-live-pulse 2s ease-in-out infinite;
+}
+@keyframes mockup-live-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 200, 64, 0); }
+  50%      { transform: scale(1.2);  box-shadow: 0 0 8px 2px rgba(40, 200, 64, 0.45); }
+}
+.mockup-content {
+  padding: 1.5rem 1.5rem 1.75rem;
+}
+.mockup-summary {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgb(var(--muted));
+  min-height: 84px;
+}
+.mockup-cursor {
+  display: inline-block;
+  margin-left: 1px;
+  font-weight: 300;
+  color: rgb(var(--amber));
+  animation: mockup-cursor-blink 1s steps(2) infinite;
+}
+@keyframes mockup-cursor-blink {
+  to { opacity: 0; }
+}
+.mockup-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 12.5px;
+  color: rgb(var(--muted));
+}
+.mockup-bullets li {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+.mockup-bullets.active li {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mockup-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.4rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.mockup-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(245, 166, 35, 0.1);
+  border: 1px solid rgba(245, 166, 35, 0.28);
+  color: rgb(var(--text));
+  font-size: 12px;
+  font-weight: 600;
+  animation: mockup-pill-rock 4s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+.mockup-pill:nth-child(2n) {
+  animation-name: mockup-pill-rock-rev;
+}
+@keyframes mockup-pill-rock {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(2deg); }
+}
+@keyframes mockup-pill-rock-rev {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-2deg); }
+}
+
+/* --- Floating chips around the mockup --- */
+.floating-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgb(var(--text));
+  z-index: 5;
+  animation: chip-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+.chip-tl { top: 0;  left: -10px; }
+.chip-tr { top: 30px; right: 0; }
+.chip-bl { bottom: 60px; left: 0; }
+.chip-br { bottom: 30px; right: -10px; }
+@media (min-width: 1024px) {
+  .chip-tl { top: -10px;  left: -50px; }
+  .chip-tr { top: 30px;   right: -60px; }
+  .chip-bl { bottom: 80px; left: -40px; }
+  .chip-br { bottom: 30px; right: -50px; }
+}
+@media (max-width: 767px) {
+  .floating-chip { display: none; }
+}
+@keyframes chip-float {
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(8px, -10px); }
+  50%      { transform: translate(-4px, -6px); }
+  75%      { transform: translate(-8px, 4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-card,
+  .constellation-line,
+  .constellation-star,
+  .floating-chip,
+  .mockup-pill,
+  .mockup-cursor,
+  .mockup-live-dot {
+    animation: none !important;
+  }
+  .mockup-bullets li {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .constellation-card:hover {
+    transform: rotate(var(--rot)) scale(1.02);
+  }
+}
+
 @keyframes theme-toggle-spin {
   0% { transform: rotate(0deg) scale(1); }
   50% { transform: rotate(180deg) scale(1.12); }
