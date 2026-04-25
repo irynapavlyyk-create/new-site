@@ -3,33 +3,27 @@
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import FadeUp from "./FadeUp";
+import DashboardMockup from "./preview/DashboardMockup";
+import FloatingChip from "./preview/FloatingChip";
 
 export default function PlanPreview() {
   const { lang } = useI18n();
-  const items = pick(t.preview.items, lang);
   return (
     <section className="section">
       <FadeUp>
-        <h2 className="h-display text-4xl sm:text-5xl text-center mb-4">
+        <h2 className="h-display text-4xl sm:text-5xl text-center mb-3">
           <span className="gradient-text">{pick(t.preview.title, lang)}</span>
         </h2>
-        <p className="text-center text-muted mb-14">{pick(t.preview.subtitle, lang)}</p>
+        <p className="text-muted text-center mb-12 max-w-xl mx-auto">
+          {pick(t.preview.subtitle, lang)}
+        </p>
       </FadeUp>
-      <div className="relative glass-strong p-2 sm:p-4">
-        <div className="absolute -top-4 left-4 right-4 h-12 bg-gradient-to-b from-bg to-transparent rounded-t-xl -z-10" />
-        <div className="grid sm:grid-cols-2 gap-3">
-          {items.map((it, i) => (
-            <FadeUp key={i} delay={i * 100}>
-              <div className="glass p-6 h-full">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-2 h-2 rounded-full bg-amber animate-pulse" />
-                  <h3 className="h-display text-lg font-bold">{it.t}</h3>
-                </div>
-                <p className="text-sm text-muted leading-relaxed">{it.d}</p>
-              </div>
-            </FadeUp>
-          ))}
-        </div>
+      <div className="mockup-stage">
+        <FloatingChip emoji="✨" text="AI-personalized" className="chip-tl" delay={0} />
+        <FloatingChip emoji="⏱" text="30 days" className="chip-tr" delay={1} />
+        <FloatingChip emoji="🧬" text="Science-backed" className="chip-bl" delay={2} />
+        <FloatingChip emoji="🎯" text="Just for you" className="chip-br" delay={3} />
+        <DashboardMockup />
       </div>
     </section>
   );

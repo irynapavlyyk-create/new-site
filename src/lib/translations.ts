@@ -112,21 +112,10 @@ export const t = {
     },
   },
   preview: {
-    title: { en: "A glimpse of your plan", ru: "Превью твоего плана" },
-    subtitle: { en: "Here's what PRO looks like.", ru: "Так выглядит PRO-план." },
-    items: {
-      en: [
-        { t: "Morning Protocol", d: "Cold water → light → protein → no phone 30 min." },
-        { t: "Sleep Protocol", d: "Last caffeine 2pm. Magnesium glycinate 400mg at 21:00." },
-        { t: "Supplements", d: "Vit D3 4000 IU, Omega-3 2g, B-complex with breakfast." },
-        { t: "Nutrition", d: "Carbs in the evening. Protein 1.6g/kg. Water 2.5L." },
-      ],
-      ru: [
-        { t: "Утренний протокол", d: "Холодная вода → свет → белок → без телефона 30 мин." },
-        { t: "Протокол сна", d: "Последний кофеин до 14:00. Магний глицинат 400мг в 21:00." },
-        { t: "Добавки", d: "Vit D3 4000 МЕ, Омега-3 2г, B-комплекс с завтраком." },
-        { t: "Питание", d: "Углеводы вечером. Белок 1.6г/кг. Вода 2.5 л." },
-      ],
+    title: { en: "This is what you get", ru: "Вот что ты получаешь" },
+    subtitle: {
+      en: "A real plan, generated for you in 40 seconds.",
+      ru: "Настоящий план, сгенерированный под тебя за 40 секунд.",
     },
   },
   features: {
