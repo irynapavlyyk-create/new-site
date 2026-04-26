@@ -493,8 +493,8 @@ export const t = {
       ru: "Генерируем твой полный план…",
     },
     generatingSub: {
-      en: "This takes about 30 seconds. Don't close this page.",
-      ru: "Это займёт около 30 секунд. Не закрывай страницу.",
+      en: "Your AI is analyzing 9 dimensions of your energy profile. This usually takes 60-90 seconds — please don't close this tab.",
+      ru: "ИИ анализирует 9 измерений твоего энергетического профиля. Обычно занимает 60-90 секунд — не закрывай вкладку.",
     },
     answersLost: {
       en: "Your quiz answers are missing. Please retake the quiz to get your plan.",

@@ -4,11 +4,14 @@ import { waitUntil } from "@vercel/functions";
 import { createClient } from "@supabase/supabase-js";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { generatePlan } from "@/lib/generatePlan";
+import { generateAndSavePlan } from "@/lib/generatePlan";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// Webhook itself returns 200 in <5s. The remainder runs under waitUntil()
+// for up to 5 minutes, which covers the slow generatePlan path (50-80s)
+// plus margin. The 60s default was killing background work mid-generation.
+export const maxDuration = 300;
 
 type Tier = "pro" | "coach";
 
@@ -177,7 +180,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   console.log("[webhook] user resolved", { userId, isNewUser });
 
-  // Only do plan work if not already done — this guards the expensive generatePlan call.
+  // Profile upsert is fast (<200ms) and idempotent — run it before the magic
+  // link so the user has a profile row by the time they click through.
   if (!existingPlan) {
     try {
       const profileUpdate: Record<string, unknown> = {
@@ -195,51 +199,52 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     } catch (err) {
       console.error("[webhook] profile upsert threw:", err);
     }
-
-    const answers = parseAnswersFromMetadata(metadata);
-    let planData: unknown = null;
-    if (answers) {
-      const result = await generatePlan({ answers, lang: language, tier });
-      if (result.ok) {
-        planData = result.data;
-      } else {
-        console.error("[webhook] plan generation failed:", result);
-      }
-    } else {
-      console.warn(
-        "[webhook] no answers in metadata — skipping plan generation",
-        sessionId
-      );
-    }
-
-    try {
-      const { error: planErr } = await admin.from("plans").insert({
-        user_id: userId,
-        tier,
-        answers: answers ?? {},
-        plan_data: planData ?? {},
-        language,
-        stripe_session_id: sessionId,
-      });
-      if (planErr) {
-        console.error("[webhook] plans insert failed:", planErr);
-      }
-    } catch (err) {
-      console.error("[webhook] plans insert threw:", err);
-    }
-  } else {
-    console.log(
-      "[webhook] plan already exists — skipping plan/profile/generation"
-    );
   }
 
-  // Magic link sits OUTSIDE the existingPlan gate so a retry (e.g. after a prior
-  // silent failure) still triggers a send. Supabase rate-limits duplicates per
-  // email, so a healthy retry is a no-op rather than a duplicate send.
+  // Magic link goes out BEFORE the slow plan generation path. Sits outside the
+  // existingPlan gate so a retry still triggers a send. Supabase rate-limits
+  // duplicates per email, so a healthy retry is a no-op rather than a dupe.
   const shouldSendMagicLink = isNewUser || metadataUserId === "anonymous";
   console.log("[webhook] should send magic link?", shouldSendMagicLink);
   if (shouldSendMagicLink) {
     await sendMagicLinkEmail(email);
+  }
+
+  // Plan generation: 50-80s. Runs after the magic link is queued so the user
+  // already has the email by the time their plan finishes generating.
+  if (!existingPlan) {
+    const answers = parseAnswersFromMetadata(metadata);
+    if (answers) {
+      await generateAndSavePlan({
+        userId,
+        sessionId,
+        answers,
+        lang: language,
+        tier,
+      });
+    } else {
+      console.warn(
+        "[webhook] no answers in metadata — inserting empty plan row for idempotency",
+        sessionId
+      );
+      try {
+        const { error: planErr } = await admin.from("plans").insert({
+          user_id: userId,
+          tier,
+          answers: {},
+          plan_data: {},
+          language,
+          stripe_session_id: sessionId,
+        });
+        if (planErr) {
+          console.error("[webhook] plans insert failed:", planErr);
+        }
+      } catch (err) {
+        console.error("[webhook] plans insert threw:", err);
+      }
+    }
+  } else {
+    console.log("[webhook] plan already exists — skipping generation");
   }
 
   console.log("[webhook] done processing session", sessionId);

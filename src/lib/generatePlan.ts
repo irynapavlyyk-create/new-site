@@ -8,6 +8,7 @@ import {
   FREE_SCHEMA,
   PRO_SCHEMA,
 } from "@/lib/claude";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { QuizAnswers } from "@/types";
 
 export type GenerateTier = "free" | "pro" | "coach";
@@ -439,4 +440,58 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
   }
 
   return { ok: true, data: validation.data };
+}
+
+// Background-job entry point. Wrapped by waitUntil() in the webhook so plan
+// generation runs after the webhook has already returned 200 to Stripe.
+// Always writes a row to plans — on success with plan_data, on failure with
+// { error, detail } so the dashboard polling can surface a clear error state
+// instead of polling forever.
+export async function generateAndSavePlan(params: {
+  userId: string;
+  sessionId: string;
+  answers: QuizAnswers;
+  lang: GenerateLang;
+  tier: GenerateTier;
+}): Promise<void> {
+  const { userId, sessionId, answers, lang, tier } = params;
+  console.log("[generateAndSavePlan] background plan generation started", {
+    sessionId,
+    userId,
+    tier,
+  });
+
+  const admin = createAdminClient();
+  const result = await generatePlan({ answers, lang, tier });
+
+  const planRow: Record<string, unknown> = {
+    user_id: userId,
+    tier,
+    answers,
+    language: lang,
+    stripe_session_id: sessionId,
+  };
+
+  if (result.ok) {
+    planRow.plan_data = result.data;
+  } else {
+    console.error("[generateAndSavePlan] generation failed — saving error marker", {
+      sessionId,
+      error: result.error,
+      detail: result.detail,
+    });
+    planRow.plan_data = { error: result.error, detail: result.detail ?? null };
+  }
+
+  const { error: insertErr } = await admin.from("plans").insert(planRow);
+  if (insertErr) {
+    console.error("[generateAndSavePlan] plans insert failed:", insertErr);
+    return;
+  }
+
+  if (result.ok) {
+    console.log("[generateAndSavePlan] saved plan for session", sessionId);
+  } else {
+    console.log("[generateAndSavePlan] saved error marker for session", sessionId);
+  }
 }

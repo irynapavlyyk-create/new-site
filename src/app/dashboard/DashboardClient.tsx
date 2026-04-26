@@ -55,7 +55,14 @@ type DashState =
   | { kind: "error"; detail?: string };
 
 const POLL_INTERVAL_MS = 2000;
-const POLL_TIMEOUT_MS = 30000;
+// Webhook-triggered plan generation runs in the background and takes 50-80s.
+// Polling for ~2 minutes covers the common case plus margin before surfacing
+// an error.
+const POLL_TIMEOUT_MS = 120000;
+
+// Elapsed-time thresholds (ms) for the 4-stage progress UI. Each stage stays
+// active until the next threshold is reached; stage 4 holds until plan arrives.
+const STAGE_THRESHOLDS_MS = [0, 15000, 35000, 55000];
 
 function DashboardContent({
   userEmail,
@@ -92,6 +99,7 @@ function DashboardContent({
     }
     return { kind: "loading-cache" };
   });
+  const [elapsedMs, setElapsedMs] = useState(0);
 
   // Persist server-delivered plan to localStorage for offline fallback.
   useEffect(() => {
@@ -111,6 +119,10 @@ function DashboardContent({
       const started = Date.now();
       let cancelled = false;
 
+      const tick = window.setInterval(() => {
+        if (!cancelled) setElapsedMs(Date.now() - started);
+      }, 500);
+
       const poll = async () => {
         const { data, error } = await supabase
           .from("plans")
@@ -121,10 +133,24 @@ function DashboardContent({
         if (error) {
           console.error("[dashboard] plan poll error:", error);
         }
-        const plan = (data?.plan_data as ProPlan | null) ?? null;
-        if (plan && plan.summary) {
+        const planData = data?.plan_data as
+          | (ProPlan & { error?: never })
+          | { error: string; detail?: string | null }
+          | null
+          | undefined;
+        // Background job wrote a successful plan.
+        if (planData && "summary" in planData && planData.summary) {
+          const plan = planData as ProPlan;
           safeSave("ef_pro_plan", plan);
           setState({ kind: "ready", plan });
+          return;
+        }
+        // Background job wrote an error marker — surface immediately.
+        if (planData && "error" in planData && planData.error) {
+          setState({
+            kind: "error",
+            detail: planData.detail ?? planData.error,
+          });
           return;
         }
         if (Date.now() - started > POLL_TIMEOUT_MS) {
@@ -140,6 +166,7 @@ function DashboardContent({
       let timer: number | undefined = window.setTimeout(poll, 0);
       return () => {
         cancelled = true;
+        window.clearInterval(tick);
         if (timer !== undefined) window.clearTimeout(timer);
       };
     }
@@ -155,11 +182,19 @@ function DashboardContent({
   }, [sessionId, initialPlan]);
 
   if (state.kind === "loading-cache" || state.kind === "generating") {
+    const stageLabels = pick(t.loading.steps, lang);
+    let activeStage = 0;
+    for (let i = STAGE_THRESHOLDS_MS.length - 1; i >= 0; i--) {
+      if (elapsedMs >= STAGE_THRESHOLDS_MS[i]) {
+        activeStage = i;
+        break;
+      }
+    }
     return (
       <>
         <Navbar />
         <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
-          <div className="text-center max-w-md">
+          <div className="text-center max-w-md w-full">
             <div className="relative w-24 h-24 mx-auto mb-8">
               <div
                 className="absolute inset-0 rounded-full border-4"
@@ -178,9 +213,43 @@ function DashboardContent({
                     {pick(t.dashboard.generating, lang)}
                   </span>
                 </h2>
-                <p className="text-muted text-sm">
+                <p className="text-muted text-sm mb-8">
                   {pick(t.dashboard.generatingSub, lang)}
                 </p>
+                <ul className="space-y-3 text-left">
+                  {stageLabels.map((label, i) => (
+                    <li
+                      key={i}
+                      className={`flex items-center gap-3 transition-all ${
+                        i < activeStage
+                          ? "opacity-40"
+                          : i === activeStage
+                            ? "opacity-100"
+                            : "opacity-30"
+                      }`}
+                    >
+                      <span
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                          i < activeStage
+                            ? "bg-amber/20 text-amber"
+                            : i === activeStage
+                              ? "bg-amber"
+                              : "text-muted"
+                        }`}
+                        style={
+                          i === activeStage
+                            ? { color: "var(--btn-text)" }
+                            : i < activeStage
+                              ? undefined
+                              : { background: "var(--card-bg)" }
+                        }
+                      >
+                        {i < activeStage ? "✓" : i + 1}
+                      </span>
+                      <span className="text-sm">{label}</span>
+                    </li>
+                  ))}
+                </ul>
               </>
             )}
           </div>
