@@ -282,6 +282,10 @@ function stripThinking(text: string): string {
   return text.replace(/<thinking>[\s\S]*?<\/thinking>/g, "").trim();
 }
 
+function hadThinkingBlock(text: string): boolean {
+  return /<thinking>[\s\S]*?<\/thinking>/.test(text);
+}
+
 function extractJson(text: string): unknown {
   const stripped = stripThinking(text);
   const fenced = stripped.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -322,13 +326,14 @@ Rules for the JSON output:
 - Be specific to this profile, not generic. Reference the user's actual answers and pattern signals.
 - Use concrete numbers, times, and dosages (e.g., "magnesium glycinate 300mg, 1 hour before bed").
 - Voice: direct, warm, never preachy. No empty wellness platitudes.
-- Output JSON only after the </thinking> tag. No commentary, no markdown fences.`;
+
+CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no markdown fences, no preamble. The JSON must be complete and valid — every string must be closed, every array must end with ], every object must end with }.`;
 
   let response;
   try {
     response = await anthropic.messages.create({
       model: MODEL,
-      max_tokens: isPaid ? 4500 : 1500,
+      max_tokens: isPaid ? 8000 : 3000,
       temperature: 1.0,
       // cache_control on system text blocks is supported at runtime (prompt caching
       // is GA) but the SDK types in ^0.32.1 omit it on TextBlockParam — cast to
@@ -362,7 +367,22 @@ Rules for the JSON output:
     output_tokens: usage?.output_tokens,
     cache_creation_input_tokens: usage?.cache_creation_input_tokens,
     cache_read_input_tokens: usage?.cache_read_input_tokens,
+    stop_reason: response.stop_reason,
   });
+
+  if (response.stop_reason === "max_tokens") {
+    console.warn("[generatePlan] response truncated by max_tokens cap", {
+      tier,
+      max_tokens: isPaid ? 8000 : 3000,
+      output_tokens: usage?.output_tokens,
+    });
+    return {
+      ok: false,
+      status: 500,
+      error: "generation_truncated",
+      detail: "Plan generation exceeded token budget",
+    };
+  }
 
   const textBlock = response.content.find((c) => c.type === "text");
   if (!textBlock || textBlock.type !== "text") {
@@ -370,17 +390,37 @@ Rules for the JSON output:
     return { ok: false, status: 500, error: "empty response" };
   }
 
+  const rawText = textBlock.text;
+  const stripped = stripThinking(rawText);
+  if (stripped.length === 0 || !stripped.includes("{")) {
+    console.error("[generatePlan] No JSON after thinking block — likely truncated mid-thinking", {
+      tier,
+      totalLength: rawText.length,
+      strippedLength: stripped.length,
+      hadThinking: hadThinkingBlock(rawText),
+      stopReason: response.stop_reason,
+      lastChars: rawText.slice(-200),
+    });
+    return {
+      ok: false,
+      status: 502,
+      error: "no_json_after_thinking",
+      detail: "Model emitted thinking but no JSON — likely truncated",
+    };
+  }
+
   let parsed: unknown;
   try {
-    parsed = extractJson(textBlock.text);
+    parsed = extractJson(rawText);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(
-      "[generatePlan] JSON parse failed:",
-      msg,
-      "\n--- RAW ---\n",
-      textBlock.text
-    );
+    console.error("[generatePlan] parse failed", {
+      error: msg,
+      lastChars: rawText.slice(-200),
+      totalLength: rawText.length,
+      stopReason: response.stop_reason,
+      hadThinking: hadThinkingBlock(rawText),
+    });
     return { ok: false, status: 502, error: "invalid model output", detail: msg };
   }
 
