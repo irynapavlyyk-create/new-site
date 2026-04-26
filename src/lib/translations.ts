@@ -347,6 +347,27 @@ export const t = {
       en: "Something went wrong. Please try signing in again.",
       ru: "Что-то пошло не так. Попробуйте войти снова.",
     },
+    magicLinkTitle: {
+      en: "Sign in with magic link",
+      ru: "Войти через магическую ссылку",
+    },
+    magicLinkSubtitle: {
+      en: "We'll email you a one-time login link",
+      ru: "Отправим одноразовую ссылку на email",
+    },
+    magicLinkButton: { en: "Send magic link", ru: "Отправить ссылку" },
+    magicLinkSent: {
+      en: "Check your email — link sent to",
+      ru: "Проверьте почту — ссылка отправлена на",
+    },
+    orPassword: {
+      en: "OR sign in with password",
+      ru: "ИЛИ войти с паролем",
+    },
+    magicLinkError: {
+      en: "Couldn't send the magic link. Please try again.",
+      ru: "Не удалось отправить ссылку. Попробуйте ещё раз.",
+    },
   },
   legal: {
     back: { en: "← Back to home", ru: "← Вернуться на главную" },

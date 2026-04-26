@@ -40,8 +40,11 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [magicEmail, setMagicEmail] = useState("");
+  const [magicSentTo, setMagicSentTo] = useState<string | null>(null);
+  const [magicError, setMagicError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<"email" | "google" | null>(null);
+  const [loading, setLoading] = useState<"email" | "google" | "magic" | null>(null);
 
   // If a server-side redirect preserved Supabase's hash error (e.g.
   // #error=access_denied&error_code=otp_expired), lift it into the query
@@ -88,6 +91,32 @@ function LoginForm() {
     router.refresh();
   };
 
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMagicError(null);
+    setMagicSentTo(null);
+    setLoading("magic");
+    const supabase = createClient();
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "";
+    // Supabase returns success even when the email is not in the DB (security
+    // best practice — does not leak which emails exist). Showing the success
+    // state in both cases is intentional and correct.
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: magicEmail,
+      options: {
+        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+      },
+    });
+    if (otpError) {
+      setMagicError(otpError.message || pick(t.auth.magicLinkError, lang));
+      setLoading(null);
+      return;
+    }
+    setMagicSentTo(magicEmail);
+    setLoading(null);
+  };
+
   const handleGoogle = async () => {
     setError(null);
     setLoading("google");
@@ -112,9 +141,66 @@ function LoginForm() {
       subtitle={pick(t.auth.loginSubtitle, lang)}
     >
       {linkError && <div className="auth-error mb-4">{linkError}</div>}
+
+      <section aria-labelledby="magic-link-heading" className="mb-6">
+        <h2
+          id="magic-link-heading"
+          className="h-display text-lg font-bold mb-1"
+        >
+          {pick(t.auth.magicLinkTitle, lang)}
+        </h2>
+        <p className="text-xs text-muted mb-4">
+          {pick(t.auth.magicLinkSubtitle, lang)}
+        </p>
+        {magicError && <div className="auth-error mb-3">{magicError}</div>}
+        {magicSentTo ? (
+          <div
+            className="text-sm rounded-lg px-4 py-3"
+            style={{
+              background: "var(--card-bg)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            ✨ {pick(t.auth.magicLinkSent, lang)}{" "}
+            <span className="text-amber font-semibold break-all">
+              {magicSentTo}
+            </span>
+          </div>
+        ) : (
+          <form onSubmit={handleMagicLink} className="space-y-3" noValidate>
+            <div>
+              <label htmlFor="magic-email" className="auth-label">
+                {pick(t.auth.email, lang)}
+              </label>
+              <input
+                id="magic-email"
+                type="email"
+                autoComplete="email"
+                required
+                className="auth-input"
+                value={magicEmail}
+                onChange={(e) => setMagicEmail(e.target.value)}
+                disabled={loading !== null}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading !== null || !magicEmail}
+              className="btn-primary w-full justify-center disabled:opacity-60"
+            >
+              {loading === "magic"
+                ? pick(t.auth.working, lang)
+                : pick(t.auth.magicLinkButton, lang)}
+            </button>
+          </form>
+        )}
+      </section>
+
+      <div className="auth-divider">{pick(t.auth.orPassword, lang)}</div>
+
       {error && <div className="auth-error mb-4">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-3" noValidate>
         <div>
           <label htmlFor="email" className="auth-label">
             {pick(t.auth.email, lang)}
@@ -158,7 +244,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading !== null}
-          className="btn-primary w-full justify-center disabled:opacity-60"
+          className="btn-ghost w-full justify-center disabled:opacity-60"
         >
           {loading === "email" ? pick(t.auth.working, lang) : pick(t.auth.signIn, lang)}
         </button>
