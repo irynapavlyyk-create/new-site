@@ -87,6 +87,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    console.log("[checkout] creating Stripe session", {
+      tier,
+      lang,
+      metadataLanguage: metadata.language,
+      metadataLang: metadata.lang,
+      hasAnswers: Boolean(answers),
+      userId: userId || null,
+    });
+
     const session = await stripe.checkout.sessions.create({
       mode: tier === "coach" ? "subscription" : "payment",
       line_items: [{ price: priceId, quantity: 1 }],

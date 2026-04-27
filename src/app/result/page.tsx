@@ -58,6 +58,7 @@ export default function ResultPage() {
         console.warn("[result] supabase.auth.getUser failed:", e);
       }
 
+      console.log("[result] starting checkout", { tier, lang, hasAnswers: Boolean(answers) });
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

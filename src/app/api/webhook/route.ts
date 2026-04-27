@@ -92,8 +92,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const email = session.customer_details?.email || session.customer_email || null;
   const metadata = session.metadata || {};
   const metadataUserId = metadata.user_id || "anonymous";
-  const language =
-    metadata.language === "ru" || metadata.lang === "ru" ? "ru" : "en";
+  // Normalize whitespace/case before comparing — defensive against any
+  // upstream serialization that might mangle "ru" into " ru\n" or "RU".
+  // Prefer canonical `language` key; `lang` is a legacy fallback from older
+  // checkout sessions that only set the short key.
+  const langRaw = (metadata.language ?? metadata.lang ?? "")
+    .toString()
+    .trim()
+    .toLowerCase();
+  const language: "en" | "ru" = langRaw === "ru" ? "ru" : "en";
   const stripeCustomerId =
     typeof session.customer === "string"
       ? session.customer
@@ -109,6 +116,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     metadataUserId,
     amount: session.amount_total,
     mode: session.mode,
+    metadataLanguage: metadata.language ?? null,
+    metadataLang: metadata.lang ?? null,
+    resolvedLanguage: language,
   });
 
   if (!tier) {
