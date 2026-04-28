@@ -368,6 +368,22 @@ export const t = {
       en: "Couldn't send the magic link. Please try again.",
       ru: "Не удалось отправить ссылку. Попробуйте ещё раз.",
     },
+    clickToLoginTitle: {
+      en: "One more click to sign you in",
+      ru: "Один клик до входа",
+    },
+    clickToLoginSubtitle: {
+      en: "We're confirming this is really you. Click below to access your plan.",
+      ru: "Мы подтверждаем что это вы. Нажмите чтобы открыть план.",
+    },
+    clickToLoginButton: {
+      en: "Sign me in →",
+      ru: "Войти →",
+    },
+    clickToLoginInvalid: {
+      en: "This link is invalid. Please request a new login link from the sign-in page.",
+      ru: "Эта ссылка недействительна. Запросите новую ссылку на странице входа.",
+    },
   },
   legal: {
     back: { en: "← Back to home", ru: "← Вернуться на главную" },
