@@ -3,6 +3,7 @@ import { Inter, Manrope } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n-context";
 import { ThemeProvider } from "@/lib/theme-provider";
 import AuroraBackground from "@/components/AuroraBackground";
+import AuthHashHandler from "@/components/AuthHashHandler";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body suppressHydrationWarning>
+        <AuthHashHandler />
         <AuroraBackground />
         <ThemeProvider>
           <I18nProvider>{children}</I18nProvider>
