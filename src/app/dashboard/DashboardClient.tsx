@@ -1,16 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import type { ProPlan } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
-import { safeLoad, safeSave } from "@/lib/storage";
-import { createClient } from "@/utils/supabase/client";
 
 export default function DashboardClient({
   userEmail,
@@ -21,63 +18,9 @@ export default function DashboardClient({
   initialPlan?: ProPlan | null;
   initialPlanTier?: string | null;
 }) {
-  return (
-    <Suspense fallback={<DashboardFallback />}>
-      <DashboardContent
-        userEmail={userEmail}
-        initialPlan={initialPlan}
-        initialPlanTier={initialPlanTier}
-      />
-    </Suspense>
-  );
-}
-
-function DashboardFallback() {
-  return (
-    <main className="min-h-screen flex items-center justify-center">
-      <div
-        className="w-16 h-16 rounded-full border-4 border-t-amber animate-spin"
-        style={{
-          borderLeftColor: "var(--border)",
-          borderRightColor: "var(--border)",
-          borderBottomColor: "var(--border)",
-        }}
-      />
-    </main>
-  );
-}
-
-type DashState =
-  | { kind: "loading-cache" }
-  | { kind: "generating" }
-  | { kind: "ready"; plan: ProPlan }
-  | { kind: "no-plan" }
-  | { kind: "error"; detail?: string };
-
-const POLL_INTERVAL_MS = 2000;
-// Webhook-triggered plan generation runs in the background and takes 50-80s.
-// Polling for ~2 minutes covers the common case plus margin before surfacing
-// an error.
-const POLL_TIMEOUT_MS = 120000;
-
-// Elapsed-time thresholds (ms) for the 4-stage progress UI. Each stage stays
-// active until the next threshold is reached; stage 4 holds until plan arrives.
-const STAGE_THRESHOLDS_MS = [0, 15000, 35000, 55000];
-
-function DashboardContent({
-  userEmail,
-  initialPlan,
-  initialPlanTier,
-}: {
-  userEmail?: string | null;
-  initialPlan: ProPlan | null;
-  initialPlanTier: string | null;
-}) {
   const { lang } = useI18n();
   void userEmail;
   void initialPlanTier;
-  const params = useSearchParams();
-  const sessionId = params.get("session_id");
 
   // Supabase returns auth errors (e.g. expired magic link) via URL hash
   // because it uses the implicit flow. Server code can't see the hash,
@@ -93,172 +36,7 @@ function DashboardContent({
     window.location.replace(`/login?error=${encodeURIComponent(normalized)}`);
   }, []);
 
-  const [state, setState] = useState<DashState>(() => {
-    if (initialPlan && initialPlan.summary) {
-      return { kind: "ready", plan: initialPlan };
-    }
-    return { kind: "loading-cache" };
-  });
-  const [elapsedMs, setElapsedMs] = useState(0);
-
-  // Persist server-delivered plan to localStorage for offline fallback.
-  useEffect(() => {
-    if (initialPlan && initialPlan.summary) {
-      safeSave("ef_pro_plan", initialPlan);
-    }
-  }, [initialPlan]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (initialPlan && initialPlan.summary) return; // already ready from server
-
-    // Priority 2: poll DB for plan that matches the checkout session (webhook may still be processing).
-    if (sessionId) {
-      setState({ kind: "generating" });
-      const supabase = createClient();
-      const started = Date.now();
-      let cancelled = false;
-
-      const tick = window.setInterval(() => {
-        if (!cancelled) setElapsedMs(Date.now() - started);
-      }, 500);
-
-      const poll = async () => {
-        const { data, error } = await supabase
-          .from("plans")
-          .select("plan_data, tier")
-          .eq("stripe_session_id", sessionId)
-          .maybeSingle();
-        if (cancelled) return;
-        if (error) {
-          console.error("[dashboard] plan poll error:", error);
-        }
-        const planData = data?.plan_data as
-          | (ProPlan & { error?: never })
-          | { error: string; detail?: string | null }
-          | null
-          | undefined;
-        // Background job wrote a successful plan.
-        if (planData && "summary" in planData && planData.summary) {
-          const plan = planData as ProPlan;
-          safeSave("ef_pro_plan", plan);
-          setState({ kind: "ready", plan });
-          return;
-        }
-        // Background job wrote an error marker — surface immediately.
-        if (planData && "error" in planData && planData.error) {
-          setState({
-            kind: "error",
-            detail: planData.detail ?? planData.error,
-          });
-          return;
-        }
-        if (Date.now() - started > POLL_TIMEOUT_MS) {
-          setState({
-            kind: "error",
-            detail: "Plan generation is taking longer than expected. Please contact support.",
-          });
-          return;
-        }
-        timer = window.setTimeout(poll, POLL_INTERVAL_MS);
-      };
-
-      let timer: number | undefined = window.setTimeout(poll, 0);
-      return () => {
-        cancelled = true;
-        window.clearInterval(tick);
-        if (timer !== undefined) window.clearTimeout(timer);
-      };
-    }
-
-    // Priority 3: localStorage fallback.
-    const cached = safeLoad<ProPlan>("ef_pro_plan");
-    if (cached && cached.summary) {
-      setState({ kind: "ready", plan: cached });
-      return;
-    }
-
-    setState({ kind: "no-plan" });
-  }, [sessionId, initialPlan]);
-
-  if (state.kind === "loading-cache" || state.kind === "generating") {
-    const stageLabels = pick(t.loading.steps, lang);
-    let activeStage = 0;
-    for (let i = STAGE_THRESHOLDS_MS.length - 1; i >= 0; i--) {
-      if (elapsedMs >= STAGE_THRESHOLDS_MS[i]) {
-        activeStage = i;
-        break;
-      }
-    }
-    return (
-      <>
-        <Navbar />
-        <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
-          <div className="text-center max-w-md w-full">
-            <div className="relative w-24 h-24 mx-auto mb-8">
-              <div
-                className="absolute inset-0 rounded-full border-4"
-                style={{ borderColor: "var(--border)" }}
-              />
-              <div className="absolute inset-0 rounded-full border-4 border-t-amber border-r-orange border-b-transparent border-l-transparent animate-spin" />
-              <div className="absolute inset-3 rounded-full bg-gradient-to-br from-amber/30 to-violet/30 blur-2xl" />
-              <div className="absolute inset-0 flex items-center justify-center text-3xl animate-spin-slow">
-                ⚡
-              </div>
-            </div>
-            {state.kind === "generating" && (
-              <>
-                <h2 className="h-display text-2xl sm:text-3xl font-bold mb-3">
-                  <span className="gradient-text">
-                    {pick(t.dashboard.generating, lang)}
-                  </span>
-                </h2>
-                <p className="text-muted text-sm mb-8">
-                  {pick(t.dashboard.generatingSub, lang)}
-                </p>
-                <ul className="space-y-3 text-left">
-                  {stageLabels.map((label, i) => (
-                    <li
-                      key={i}
-                      className={`flex items-center gap-3 transition-all ${
-                        i < activeStage
-                          ? "opacity-40"
-                          : i === activeStage
-                            ? "opacity-100"
-                            : "opacity-30"
-                      }`}
-                    >
-                      <span
-                        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                          i < activeStage
-                            ? "bg-amber/20 text-amber"
-                            : i === activeStage
-                              ? "bg-amber"
-                              : "text-muted"
-                        }`}
-                        style={
-                          i === activeStage
-                            ? { color: "var(--btn-text)" }
-                            : i < activeStage
-                              ? undefined
-                              : { background: "var(--card-bg)" }
-                        }
-                      >
-                        {i < activeStage ? "✓" : i + 1}
-                      </span>
-                      <span className="text-sm">{label}</span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
-        </main>
-      </>
-    );
-  }
-
-  if (state.kind === "no-plan") {
+  if (!initialPlan || !initialPlan.summary) {
     return (
       <>
         <Navbar />
@@ -275,40 +53,7 @@ function DashboardContent({
     );
   }
 
-  if (state.kind === "error") {
-    return (
-      <>
-        <Navbar />
-        <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
-          <div className="text-center max-w-md">
-            <div className="text-6xl mb-6">⚠️</div>
-            <p className="text-muted mb-4">{pick(t.dashboard.genError, lang)}</p>
-            {state.detail && (
-              <p
-                className="text-xs font-mono mb-6 px-3 py-2 rounded break-words"
-                style={{
-                  background: "var(--card-bg)",
-                  border: "1px solid var(--border)",
-                  color: "rgb(var(--muted))",
-                }}
-              >
-                {state.detail}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="btn-primary"
-            >
-              {pick(t.dashboard.retryGen, lang)}
-            </button>
-          </div>
-        </main>
-      </>
-    );
-  }
-
-  const plan = state.plan;
+  const plan = initialPlan;
 
   return (
     <>

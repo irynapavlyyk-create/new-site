@@ -15,20 +15,20 @@ export default async function DashboardPage() {
     redirect("/login?redirect=/dashboard");
   }
 
-  const { data: plans, error } = await supabase
+  const { data: plan, error } = await supabase
     .from("plans")
-    .select("tier, plan_data, language, created_at")
+    .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(1);
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
     console.error("[dashboard/page] plans fetch failed:", error);
   }
 
-  const latest = plans?.[0] ?? null;
-  const initialPlan = (latest?.plan_data as ProPlan | null) ?? null;
-  const initialPlanTier = (latest?.tier as string | null) ?? null;
+  const initialPlan = (plan?.plan_data as ProPlan | null) ?? null;
+  const initialPlanTier = (plan?.tier as string | null) ?? null;
 
   return (
     <DashboardClient
