@@ -543,6 +543,52 @@ export const t = {
     },
     retryGen: { en: "Try again", ru: "Попробовать снова" },
   },
+  welcome: {
+    invalidTitle: { en: "Invalid link", ru: "Неверная ссылка" },
+    invalidSub: {
+      en: "We can't find your checkout session. Please return home and try again.",
+      ru: "Не удалось найти вашу сессию оплаты. Вернитесь на главную и попробуйте снова.",
+    },
+    goHome: { en: "Go home", ru: "На главную" },
+    stage1Title: {
+      en: "✨ Processing your payment…",
+      ru: "✨ Обрабатываем платёж…",
+    },
+    stage1Sub: {
+      en: "This usually takes 30 seconds",
+      ru: "Обычно это занимает 30 секунд",
+    },
+    stage2Title: {
+      en: "🪄 Generating your personalized plan…",
+      ru: "🪄 Создаём твой персональный план…",
+    },
+    stage2Sub: {
+      en: "Crafting your 30-day energy protocol",
+      ru: "Готовим твой 30-дневный протокол энергии",
+    },
+    stage3Title: { en: "✅ Your plan is ready!", ru: "✅ Твой план готов!" },
+    stage3Sub: {
+      en: "📧 Check your email — your login link is on the way ✨",
+      ru: "📧 Проверь почту — ссылка для входа уже в пути ✨",
+    },
+    openGmail: { en: "Open Gmail", ru: "Открыть Gmail" },
+    errorTitle: {
+      en: "We hit a snag generating your plan",
+      ru: "Возникла ошибка при создании плана",
+    },
+    errorSub: {
+      en: "Don't worry — your payment is safe. Please contact support@energyforge.app",
+      ru: "Не волнуйся — платёж в порядке. Напиши на support@energyforge.app",
+    },
+    timeoutTitle: {
+      en: "Taking longer than expected",
+      ru: "Это занимает дольше обычного",
+    },
+    timeoutSub: {
+      en: "Check your email — we'll send your login link there. Or contact support@energyforge.app",
+      ru: "Проверь почту — мы отправим ссылку для входа туда. Или напиши на support@energyforge.app",
+    },
+  },
 };
 
 type Mutable<T> = T extends readonly (infer U)[]

@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: tier === "coach" ? "subscription" : "payment",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${siteUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${siteUrl}/welcome?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/quiz`,
       locale: lang === "ru" ? "ru" : "en",
       allow_promotion_codes: true,
