@@ -22,7 +22,9 @@
       "Bash(taskkill //F //IM node.exe)",
       "Bash(git *)",
       "Skill(claude-api)",
-      "Bash(npm view *)"
+      "Bash(npm view *)",
+      "Bash(taskkill //F //PID 113976)",
+      "Bash(taskkill //F //PID 114972)"
     ]
   }
 }

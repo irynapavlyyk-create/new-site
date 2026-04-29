@@ -543,6 +543,22 @@ export const t = {
     },
     retryGen: { en: "Try again", ru: "Попробовать снова" },
   },
+  paymentSuccess: {
+    title: { en: "Payment Successful!", ru: "Платёж прошёл!" },
+    subtitle: {
+      en: "We've sent a login link to your email.",
+      ru: "Мы отправили ссылку для входа на твою почту.",
+    },
+    body: {
+      en: "Click it to access your personalized 30-day plan.",
+      ru: "Открой её, чтобы получить доступ к своему 30-дневному плану.",
+    },
+    button: { en: "Open Gmail", ru: "Открыть Gmail" },
+    hint: {
+      en: "Didn't get the email? Check your spam folder.",
+      ru: "Не пришло письмо? Проверь папку Спам.",
+    },
+  },
   welcome: {
     invalidTitle: { en: "Invalid link", ru: "Неверная ссылка" },
     invalidSub: {
