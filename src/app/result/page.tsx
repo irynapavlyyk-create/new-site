@@ -58,7 +58,23 @@ export default function ResultPage() {
         console.warn("[result] supabase.auth.getUser failed:", e);
       }
 
-      console.log("[result] starting checkout", { tier, lang, hasAnswers: Boolean(answers) });
+      // New flow: logged-out users go through /signup first (account + Stripe
+      // in one step). Logged-in users skip signup and hit checkout directly.
+      if (!userId) {
+        if (typeof window !== "undefined" && answers) {
+          try {
+            sessionStorage.setItem("quiz_answers", JSON.stringify(answers));
+            sessionStorage.setItem("quiz_lang", lang);
+            sessionStorage.setItem("quiz_tier", tier);
+          } catch (e) {
+            console.error("[result] sessionStorage write failed:", e);
+          }
+        }
+        router.push("/signup?from=quiz");
+        return;
+      }
+
+      console.log("[result] starting checkout (returning user)", { tier, lang, hasAnswers: Boolean(answers) });
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

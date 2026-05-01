@@ -605,6 +605,48 @@ export const t = {
       ru: "Проверь почту — мы отправим ссылку для входа туда. Или напиши на support@energyforge.app",
     },
   },
+  signup: {
+    title: { en: "Create your account", ru: "Создай аккаунт" },
+    subtitle: {
+      en: "One last step before your personalized plan",
+      ru: "Последний шаг перед твоим персональным планом",
+    },
+    emailLabel: { en: "Email", ru: "Email" },
+    passwordLabel: {
+      en: "Password (min 8 characters)",
+      ru: "Пароль (минимум 8 символов)",
+    },
+    confirmPasswordLabel: {
+      en: "Confirm password",
+      ru: "Повторите пароль",
+    },
+    submitButton: {
+      en: "Create account & continue to payment",
+      ru: "Создать аккаунт и продолжить к оплате",
+    },
+    submitting: { en: "Creating account…", ru: "Создаём аккаунт…" },
+    alreadyHaveAccount: {
+      en: "Already have an account?",
+      ru: "Уже есть аккаунт?",
+    },
+    signInLink: { en: "Sign in", ru: "Войти" },
+    passwordTooShort: {
+      en: "Password must be at least 8 characters.",
+      ru: "Пароль должен быть не менее 8 символов.",
+    },
+    passwordMismatch: {
+      en: "Passwords don't match.",
+      ru: "Пароли не совпадают.",
+    },
+    emailInUse: {
+      en: "This email is already registered. Please sign in instead.",
+      ru: "Этот email уже зарегистрирован. Пожалуйста, войдите.",
+    },
+    genericError: {
+      en: "Something went wrong. Please try again.",
+      ru: "Что-то пошло не так. Попробуй ещё раз.",
+    },
+  },
 };
 
 type Mutable<T> = T extends readonly (infer U)[]
