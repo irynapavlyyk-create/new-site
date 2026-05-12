@@ -547,8 +547,8 @@ export const t = {
       ru: "Куётся твой персональный план...",
     },
     forgingSub: {
-      en: "This usually takes 30-60 seconds",
-      ru: "Это занимает обычно 30-60 секунд",
+      en: "This usually takes 1-2 minutes. Don't close this page.",
+      ru: "Это занимает обычно 1-2 минуты. Не закрывай страницу.",
     },
     forgingTimeout: {
       en: "Generation is taking longer than usual. Please refresh or contact support@energyforge.app",
