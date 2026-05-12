@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
@@ -9,14 +9,19 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
 
+const POLL_INTERVAL_MS = 3000;
+const MAX_POLL_ATTEMPTS = 30;
+
 export default function DashboardClient({
   userEmail,
   initialPlan = null,
   initialPlanTier = null,
+  fromStripe = false,
 }: {
   userEmail?: string | null;
   initialPlan?: ProPlan | null;
   initialPlanTier?: string | null;
+  fromStripe?: boolean;
 }) {
   const { lang } = useI18n();
   void userEmail;
@@ -36,7 +41,13 @@ export default function DashboardClient({
     window.location.replace(`/login?error=${encodeURIComponent(normalized)}`);
   }, []);
 
-  if (!initialPlan || !initialPlan.summary) {
+  const planMissing = !initialPlan || !initialPlan.summary;
+
+  if (planMissing && fromStripe) {
+    return <PlanForgingScreen lang={lang} />;
+  }
+
+  if (planMissing) {
     return (
       <>
         <Navbar />
@@ -129,6 +140,54 @@ export default function DashboardClient({
         </div>
       </main>
       <Footer />
+    </>
+  );
+}
+
+function PlanForgingScreen({ lang }: { lang: "en" | "ru" }) {
+  const [attempts, setAttempts] = useState(0);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (attempts >= MAX_POLL_ATTEMPTS) return;
+    timeoutRef.current = setTimeout(() => {
+      setAttempts((n) => n + 1);
+      window.location.reload();
+    }, POLL_INTERVAL_MS);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [attempts]);
+
+  const timedOut = attempts >= MAX_POLL_ATTEMPTS;
+
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen flex flex-col items-center justify-center pt-28 pb-20 px-6">
+        <div className="text-center max-w-lg">
+          <div className="relative w-32 h-32 mx-auto mb-10">
+            <div className="absolute inset-0 rounded-full border-4" style={{ borderColor: "var(--border)" }} />
+            <div className="absolute inset-0 rounded-full border-4 border-t-amber border-r-orange border-b-transparent border-l-transparent animate-spin" />
+            <div className="absolute inset-4 rounded-full bg-gradient-to-br from-amber/30 to-violet/30 blur-2xl" />
+            <div className="absolute inset-0 flex items-center justify-center text-4xl animate-spin-slow">⚡</div>
+          </div>
+
+          {timedOut ? (
+            <p className="text-muted text-base">{pick(t.dashboard.forgingTimeout, lang)}</p>
+          ) : (
+            <>
+              <h1 className="h-display text-3xl sm:text-4xl mb-4">
+                <span className="gradient-text">{pick(t.dashboard.forging, lang)}</span>
+              </h1>
+              <p className="text-muted">{pick(t.dashboard.forgingSub, lang)}</p>
+            </>
+          )}
+        </div>
+      </main>
     </>
   );
 }

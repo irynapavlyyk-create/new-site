@@ -542,6 +542,18 @@ export const t = {
       ru: "Не удалось собрать план. Попробуй ещё раз.",
     },
     retryGen: { en: "Try again", ru: "Попробовать снова" },
+    forging: {
+      en: "Forging your personal plan...",
+      ru: "Куётся твой персональный план...",
+    },
+    forgingSub: {
+      en: "This usually takes 30-60 seconds",
+      ru: "Это занимает обычно 30-60 секунд",
+    },
+    forgingTimeout: {
+      en: "Generation is taking longer than usual. Please refresh or contact support@energyforge.app",
+      ru: "Генерация занимает дольше обычного. Обнови страницу или напиши на support@energyforge.app",
+    },
   },
   paymentSuccess: {
     title: { en: "Payment Successful!", ru: "Платёж прошёл!" },

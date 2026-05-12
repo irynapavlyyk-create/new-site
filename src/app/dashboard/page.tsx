@@ -5,7 +5,14 @@ import type { ProPlan } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  const params = await searchParams;
+  const fromStripe = Boolean(params.session_id);
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -35,6 +42,7 @@ export default async function DashboardPage() {
       userEmail={user.email ?? null}
       initialPlan={initialPlan}
       initialPlanTier={initialPlanTier}
+      fromStripe={fromStripe}
     />
   );
 }
