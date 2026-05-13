@@ -624,6 +624,19 @@ export const t = {
       ru: "Проверь почту — мы отправим ссылку для входа туда. Или напиши на support@energyforge.app",
     },
   },
+  cookieBanner: {
+    title: { en: "Cookies", ru: "Cookies" },
+    messageBeforeLink: {
+      en: "We only use essential cookies for site functionality and payment processing. Learn more in our ",
+      ru: "Мы используем только необходимые cookies для работы сайта и обработки платежей. Подробнее — в ",
+    },
+    privacyLinkText: {
+      en: "Privacy Policy",
+      ru: "Политике конфиденциальности",
+    },
+    messageAfterLink: { en: ".", ru: "." },
+    dismiss: { en: "Got it", ru: "Понятно" },
+  },
   errors: {
     notFound: {
       title: { en: "Page not found", ru: "Страница не найдена" },

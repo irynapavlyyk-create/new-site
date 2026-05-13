@@ -4,6 +4,7 @@ import { I18nProvider } from "@/lib/i18n-context";
 import { ThemeProvider } from "@/lib/theme-provider";
 import AuroraBackground from "@/components/AuroraBackground";
 import AuthHashHandler from "@/components/AuthHashHandler";
+import CookieBanner from "@/components/CookieBanner";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
@@ -39,7 +40,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthHashHandler />
         <AuroraBackground />
         <ThemeProvider>
-          <I18nProvider>{children}</I18nProvider>
+          <I18nProvider>
+            {children}
+            <CookieBanner />
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>
