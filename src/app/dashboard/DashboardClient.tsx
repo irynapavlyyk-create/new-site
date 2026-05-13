@@ -11,6 +11,37 @@ import FadeUp from "@/components/FadeUp";
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 30;
+const STORAGE_KEY = "energyforge_plan_forging_attempts";
+
+function readStoredAttempts(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    if (raw === null) return 0;
+    const parsed = parseInt(raw, 10);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeStoredAttempts(n: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(STORAGE_KEY, String(n));
+  } catch {
+    // sessionStorage may be unavailable (private mode); fall through silently
+  }
+}
+
+function clearStoredAttempts(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // sessionStorage may be unavailable; ignore
+  }
+}
 
 export default function DashboardClient({
   userEmail,
@@ -40,6 +71,13 @@ export default function DashboardClient({
     const normalized = raw === "otp_expired" ? "link_expired" : raw;
     window.location.replace(`/login?error=${encodeURIComponent(normalized)}`);
   }, []);
+
+  // Once the plan has loaded, the forging screen is unmounted, so the
+  // attempts counter is no longer needed. Clear it so a fresh checkout
+  // starts counting from zero.
+  useEffect(() => {
+    if (initialPlan) clearStoredAttempts();
+  }, [initialPlan]);
 
   const planMissing = !initialPlan || !initialPlan.summary;
 
@@ -148,10 +186,20 @@ function PlanForgingScreen({ lang }: { lang: "en" | "ru" }) {
   const [attempts, setAttempts] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Seed from sessionStorage on mount so the counter survives reloads.
+  // Stays at 0 during SSR / hydration to avoid mismatch; the real value
+  // is applied right after.
   useEffect(() => {
-    if (attempts >= MAX_POLL_ATTEMPTS) return;
+    setAttempts(readStoredAttempts());
+  }, []);
+
+  useEffect(() => {
+    if (attempts >= MAX_POLL_ATTEMPTS) {
+      clearStoredAttempts();
+      return;
+    }
     timeoutRef.current = setTimeout(() => {
-      setAttempts((n) => n + 1);
+      writeStoredAttempts(attempts + 1);
       window.location.reload();
     }, POLL_INTERVAL_MS);
     return () => {
