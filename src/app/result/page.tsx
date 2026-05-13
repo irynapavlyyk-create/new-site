@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import type { FreeReport } from "@/types";
@@ -13,10 +13,22 @@ import { createClient } from "@/utils/supabase/client";
 import type { QuizAnswers } from "@/types";
 
 export default function ResultPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResultPageInner />
+    </Suspense>
+  );
+}
+
+function ResultPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { lang } = useI18n();
   const [report, setReport] = useState<FreeReport | null>(null);
   const [loadingTier, setLoadingTier] = useState<"pro" | "coach" | null>(null);
+  const [showCanceled, setShowCanceled] = useState(
+    searchParams.get("canceled") === "true",
+  );
 
   useEffect(() => {
     const r = safeLoad<FreeReport>("ef_free_report");
@@ -95,6 +107,29 @@ export default function ResultPage() {
       <Navbar />
       <main className="pt-28 pb-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          {showCanceled && (
+            <FadeUp>
+              <div
+                className="glass relative mb-8 px-5 py-4 sm:px-6 sm:py-5"
+                style={{ borderColor: "rgba(245, 158, 11, 0.35)" }}
+              >
+                <div className="flex items-start gap-3 pr-8">
+                  <span className="text-2xl flex-shrink-0 leading-none">💭</span>
+                  <p className="text-sm sm:text-base text-ink leading-relaxed">
+                    {pick(t.pricing.canceledBanner.message, lang)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCanceled(false)}
+                  aria-label={pick(t.pricing.canceledBanner.dismiss, lang)}
+                  className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-white/5 transition"
+                >
+                  <span className="text-lg leading-none">×</span>
+                </button>
+              </div>
+            </FadeUp>
+          )}
           <FadeUp>
             <h1 className="h-display text-4xl sm:text-5xl mb-8 text-center">
               <span className="gradient-text">{pick(t.result.freeTitle, lang)}</span>

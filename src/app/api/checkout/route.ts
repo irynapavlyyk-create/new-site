@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
       mode: tier === "coach" ? "subscription" : "payment",
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${siteUrl}/check-email`,
-      cancel_url: `${siteUrl}/quiz`,
+      cancel_url: `${siteUrl}/result?canceled=true`,
       locale: lang === "ru" ? "ru" : "en",
       allow_promotion_codes: true,
       metadata,

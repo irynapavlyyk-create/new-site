@@ -146,6 +146,13 @@ export const t = {
   pricing: {
     title: { en: "Pick your path", ru: "Выбери свой путь" },
     subtitle: { en: "Start free. Upgrade only if it's worth it.", ru: "Начни бесплатно. Апгрейдь если стоит." },
+    canceledBanner: {
+      message: {
+        en: "Payment canceled. If you had questions, email support@energyforge.app — we're happy to help.",
+        ru: "Платёж отменён. Если у тебя были вопросы — напиши на support@energyforge.app, мы поможем.",
+      },
+      dismiss: { en: "Dismiss", ru: "Закрыть" },
+    },
     plans: {
       en: [
         {
@@ -615,6 +622,27 @@ export const t = {
     timeoutSub: {
       en: "Check your email — we'll send your login link there. Or contact support@energyforge.app",
       ru: "Проверь почту — мы отправим ссылку для входа туда. Или напиши на support@energyforge.app",
+    },
+  },
+  errors: {
+    notFound: {
+      title: { en: "Page not found", ru: "Страница не найдена" },
+      heading: { en: "Page not found", ru: "Страница не найдена" },
+      message: {
+        en: "Looks like this page wandered off. Head back home and try again.",
+        ru: "Похоже, эта страница куда-то делась. Вернись на главную и попробуй снова.",
+      },
+      backHome: { en: "Back home", ru: "На главную" },
+      takeQuiz: { en: "Take the quiz", ru: "Пройти анкету" },
+    },
+    serverError: {
+      heading: { en: "Something went wrong", ru: "Что-то пошло не так" },
+      message: {
+        en: "We've been notified and are working on it. Try refreshing, or contact us if it keeps happening.",
+        ru: "Мы уже знаем о проблеме и работаем над ней. Попробуй обновить страницу или напиши нам, если ошибка повторится.",
+      },
+      tryAgain: { en: "Try again", ru: "Попробовать снова" },
+      contactSupport: { en: "Contact support", ru: "Написать в поддержку" },
     },
   },
   signup: {
