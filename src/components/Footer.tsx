@@ -27,6 +27,9 @@ export default function Footer() {
           <Link href="/terms" className="hover:text-ink transition-colors">
             {pick(t.footer.terms, lang)}
           </Link>
+          <Link href="/refund-policy" className="hover:text-ink transition-colors">
+            {pick(t.footer.refund, lang)}
+          </Link>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
             className="hover:text-ink transition-colors"

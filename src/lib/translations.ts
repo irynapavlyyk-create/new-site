@@ -281,6 +281,7 @@ export const t = {
     rights: { en: "All rights reserved.", ru: "Все права защищены." },
     privacy: { en: "Privacy Policy", ru: "Политика конфиденциальности" },
     terms: { en: "Terms of Service", ru: "Условия использования" },
+    refund: { en: "Refund Policy", ru: "Политика возврата" },
     contact: { en: "Contact", ru: "Контакты" },
   },
   auth: {
@@ -401,6 +402,7 @@ export const t = {
     },
     privacyTitle: { en: "Privacy Policy", ru: "Политика конфиденциальности" },
     termsTitle: { en: "Terms of Service", ru: "Условия использования" },
+    refundTitle: { en: "Refund Policy", ru: "Политика возврата средств" },
     lastUpdated: { en: "Last updated", ru: "Последнее обновление" },
   },
   quiz: {
@@ -560,6 +562,13 @@ export const t = {
     forgingTimeout: {
       en: "Generation is taking longer than usual. Please refresh or contact support@energyforge.app",
       ru: "Генерация занимает дольше обычного. Обнови страницу или напиши на support@energyforge.app",
+    },
+    medicalDisclaimer: {
+      text: {
+        en: "This is not medical advice. Always consult a healthcare professional before starting new supplements, especially if you have medical conditions, take medications, are pregnant, or are under 18.",
+        ru: "Это не медицинский совет. Всегда консультируйтесь с врачом перед началом приёма новых добавок, особенно если у вас есть заболевания, вы принимаете лекарства, беременны или вам меньше 18 лет.",
+      },
+      learnMore: { en: "Full disclaimer", ru: "Полный текст" },
     },
   },
   paymentSuccess: {

@@ -8,6 +8,7 @@ import type { ProPlan } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
+import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 30;
@@ -139,6 +140,7 @@ export default function DashboardClient({
                   </div>
                 ))}
               </div>
+              <MedicalDisclaimer />
             </div>
           </FadeUp>
 
