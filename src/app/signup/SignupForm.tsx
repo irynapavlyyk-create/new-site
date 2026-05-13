@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import { createClient } from "@/utils/supabase/client";
 import AuthLayout from "@/components/AuthLayout";
 import type { QuizAnswers } from "@/types";
 
@@ -21,9 +20,10 @@ export default function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Quiz context guard: anyone hitting /signup without `from=quiz` AND
-  // sessionStorage answers must take the quiz first. Runs synchronously,
-  // beats the async auth-check below.
+  // Quiz context guard: logged-out users hitting /signup without `from=quiz`
+  // AND sessionStorage answers must take the quiz first. The logged-in case
+  // is handled server-side in page.tsx (redirects to /dashboard before this
+  // component renders), so no client-side auth check is needed here.
   useEffect(() => {
     if (typeof window !== "undefined") {
       const hasAnswers = sessionStorage.getItem("quiz_answers");
@@ -32,15 +32,6 @@ export default function SignupForm() {
       }
     }
   }, [fromQuiz, router]);
-
-  // Already-authenticated users skip signup entirely. If they came via quiz,
-  // bounce back to /result so the existing logged-in fast path runs.
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) router.replace(fromQuiz ? "/result" : "/dashboard");
-    });
-  }, [router, fromQuiz]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
