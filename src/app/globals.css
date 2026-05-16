@@ -837,7 +837,7 @@ body {
   white-space: nowrap;
   font-size: 13.5px;
   font-weight: 600;
-  color: rgb(var(--text));
+  color: #fff;
   background:
     linear-gradient(rgba(20, 20, 30, 0.92), rgba(20, 20, 30, 0.92)) padding-box,
     linear-gradient(135deg, #F5A623, #FF6B35) border-box;
