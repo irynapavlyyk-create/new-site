@@ -72,16 +72,16 @@ export const t = {
     },
   },
   problems: {
-    title: { en: "This is you?", ru: "Это про тебя?" },
+    title: { en: "Is this you?", ru: "Это про тебя?" },
     subtitle: {
       en: "If at least 3 feel familiar — you're leaking energy every day.",
       ru: "Если узнаёшь хотя бы 3 — ты теряешь энергию каждый день.",
     },
     items: {
       en: [
-        "You open your eyes and already feel tired",
+        "You never feel rested",
         "Coffee stopped working",
-        "By 3pm your brain turns off",
+        "By 3 PM your brain turns off",
         "You scroll instead of sleeping — every night",
         "You know what to do but can't start",
         "Stress leaks into weekends",
@@ -273,7 +273,7 @@ export const t = {
     },
   },
   finalCta: {
-    title: { en: "Your next 30 days can look different.", ru: "Твои следующие 30 дней могут быть другими." },
+    title: { en: "Your next 30 days can feel different.", ru: "Твои следующие 30 дней могут быть другими." },
     sub: { en: "Start with the free diagnostic.", ru: "Начни с бесплатной диагностики." },
     btn: { en: "Start diagnostic", ru: "Начать диагностику" },
   },
