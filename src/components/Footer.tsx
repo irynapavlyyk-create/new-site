@@ -13,7 +13,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="flex items-center gap-2 flex-wrap">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber to-orange flex items-center justify-center flex-shrink-0">
-            <span className="font-bold text-xs" style={{ color: "var(--btn-text)" }}>⚡</span>
+            <span className="font-bold text-xs" style={{ color: "#0A0A0F" }}>{"⚡︎"}</span>
           </div>
           <span className="font-display font-bold">EnergyForge</span>
           <span className="text-muted text-xs ml-2">

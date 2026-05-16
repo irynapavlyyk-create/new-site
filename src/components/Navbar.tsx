@@ -109,9 +109,9 @@ export default function Navbar() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber to-orange flex items-center justify-center shadow-glow flex-shrink-0">
                 <span
                   className="font-display font-bold text-sm"
-                  style={{ color: "var(--btn-text)" }}
+                  style={{ color: "#0A0A0F" }}
                 >
-                  ⚡
+                  {"⚡︎"}
                 </span>
               </div>
               <span className="font-display font-bold text-base sm:text-lg tracking-tight truncate">
@@ -364,9 +364,9 @@ function MobileMenu({
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber to-orange flex items-center justify-center shadow-glow">
             <span
               className="font-display font-bold text-sm"
-              style={{ color: "var(--btn-text)" }}
+              style={{ color: "#0A0A0F" }}
             >
-              ⚡
+              {"⚡︎"}
             </span>
           </div>
           <span className="font-display font-bold text-lg tracking-tight">
