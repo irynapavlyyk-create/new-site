@@ -1,10 +1,16 @@
 export const emailStrings = {
   en: {
     purchaseConfirmation: {
-      subject: "Welcome to EnergyForge PRO 🎉",
+      subject: {
+        pro: "Welcome to EnergyForge PRO 🎉",
+        coach: "Welcome to EnergyForge Coach 🎉",
+      },
       preheader: "Your purchase is confirmed — your personal energy plan is generating now.",
       greeting: "Hi there 👋",
-      heading: "Welcome to EnergyForge PRO",
+      heading: {
+        pro: "Welcome to EnergyForge PRO",
+        coach: "Welcome to EnergyForge Coach",
+      },
       intro: "Your purchase is confirmed. Your personalized energy diagnostic plan is being generated right now — it usually takes about 30 seconds.",
       whatsNext: "What happens next",
       step1: "Open your plan in the dashboard and wait ~30 seconds for it to finish generating",
@@ -40,10 +46,16 @@ export const emailStrings = {
   },
   ru: {
     purchaseConfirmation: {
-      subject: "Добро пожаловать в EnergyForge PRO 🎉",
+      subject: {
+        pro: "Добро пожаловать в EnergyForge PRO 🎉",
+        coach: "Добро пожаловать в EnergyForge Coach 🎉",
+      },
       preheader: "Покупка подтверждена — ваш персональный план генерируется прямо сейчас.",
       greeting: "Привет 👋",
-      heading: "Добро пожаловать в EnergyForge PRO",
+      heading: {
+        pro: "Добро пожаловать в EnergyForge PRO",
+        coach: "Добро пожаловать в EnergyForge Coach",
+      },
       intro: "Покупка подтверждена. Ваш персональный план энергетической диагностики генерируется прямо сейчас — это занимает около 30 секунд.",
       whatsNext: "Что дальше",
       step1: "Откройте план в дашборде и подождите ~30 секунд пока он догенерируется",

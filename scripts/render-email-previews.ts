@@ -20,16 +20,28 @@ const dashboardUrl = "https://www.energyforge.app/dashboard";
 async function main(): Promise<void> {
   await mkdir(outDir, { recursive: true });
 
-  const purchaseEn = renderPurchaseConfirmation({
+  const purchaseProEn = renderPurchaseConfirmation({
     to: "test@example.com",
     locale: "en",
     tier: "pro",
     dashboardUrl,
   });
-  const purchaseRu = renderPurchaseConfirmation({
+  const purchaseProRu = renderPurchaseConfirmation({
     to: "test@example.com",
     locale: "ru",
     tier: "pro",
+    dashboardUrl,
+  });
+  const purchaseCoachEn = renderPurchaseConfirmation({
+    to: "test@example.com",
+    locale: "en",
+    tier: "coach",
+    dashboardUrl,
+  });
+  const purchaseCoachRu = renderPurchaseConfirmation({
+    to: "test@example.com",
+    locale: "ru",
+    tier: "coach",
     dashboardUrl,
   });
   const planReadyEn = renderPlanReady({
@@ -46,8 +58,10 @@ async function main(): Promise<void> {
   });
 
   const files: Array<[string, string]> = [
-    ["purchase-en.html", purchaseEn.html],
-    ["purchase-ru.html", purchaseRu.html],
+    ["purchase-pro-en.html", purchaseProEn.html],
+    ["purchase-pro-ru.html", purchaseProRu.html],
+    ["purchase-coach-en.html", purchaseCoachEn.html],
+    ["purchase-coach-ru.html", purchaseCoachRu.html],
     ["plan-ready-en.html", planReadyEn.html],
     ["plan-ready-ru.html", planReadyRu.html],
   ];
@@ -56,7 +70,7 @@ async function main(): Promise<void> {
     files.map(([name, html]) => writeFile(join(outDir, name), html, "utf8"))
   );
 
-  console.log("Wrote 4 preview files to:", outDir);
+  console.log(`Wrote ${files.length} preview files to:`, outDir);
   for (const [name] of files) {
     console.log("  ", join(outDir, name));
   }

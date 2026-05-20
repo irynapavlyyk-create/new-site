@@ -32,7 +32,7 @@ export function renderPurchaseConfirmation(
 
   const innerHtml = `${renderHeader()}
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:16px;color:#1A1A1A;margin:0 0 8px 0;">${escapeHtml(s.greeting)}</p>
-<h1 style="font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;font-weight:700;font-size:26px;line-height:1.3;margin:0 0 16px 0;">${escapeHtml(s.heading)}</h1>
+<h1 style="font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;font-weight:700;font-size:26px;line-height:1.3;margin:0 0 16px 0;">${escapeHtml(s.heading[ctx.tier])}</h1>
 <p style="font-family:Arial,Helvetica,sans-serif;color:#555555;font-size:16px;line-height:1.6;margin:0 0 24px 0;">${escapeHtml(s.intro)}</p>
 <h2 style="font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;font-weight:700;font-size:18px;line-height:1.3;margin:24px 0 16px 0;">${escapeHtml(s.whatsNext)}</h2>
 ${renderStep(1, s.step1)}
@@ -47,7 +47,7 @@ ${renderFooter(ctx.locale)}`;
   const text = [
     s.greeting,
     "",
-    s.heading,
+    s.heading[ctx.tier],
     "",
     s.intro,
     "",
@@ -68,5 +68,5 @@ ${renderFooter(ctx.locale)}`;
     s.footerCopyright,
   ].join("\n");
 
-  return { subject: s.subject, html, text };
+  return { subject: s.subject[ctx.tier], html, text };
 }
