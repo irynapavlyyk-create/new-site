@@ -33,3 +33,6 @@ next-env.d.ts
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Email preview output (regenerate via: npm run render:emails)
+.email-previews/
