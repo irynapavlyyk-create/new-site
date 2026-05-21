@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { generateAndSavePlan } from "@/lib/generatePlan";
+import { sendPurchaseConfirmation } from "@/lib/emails/send";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
@@ -218,6 +219,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   console.log("[webhook] should send magic link?", shouldSendMagicLink);
   if (shouldSendMagicLink) {
     await sendMagicLinkEmail(email);
+  }
+
+  // Send branded purchase confirmation email (best-effort, never blocks webhook)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.energyforge.app";
+  const purchaseEmailResult = await sendPurchaseConfirmation({
+    to: email,
+    locale: language,
+    tier,
+    dashboardUrl: `${siteUrl}/dashboard`,
+  });
+  if (purchaseEmailResult.success) {
+    console.log(`[webhook] Purchase confirmation email sent: id=${purchaseEmailResult.id} to=${email}`);
+  } else {
+    console.error(`[webhook] Purchase confirmation email failed: ${purchaseEmailResult.error} to=${email}`);
   }
 
   // Plan generation: 50-80s. Runs after the magic link is queued so the user
