@@ -15,19 +15,23 @@ async function sendEmail(input: {
   subject: string;
   html: string;
   text: string;
+  idempotencyKey?: string;
 }): Promise<EmailSendResult> {
   console.log(`[email] Sending: to=${input.to} subject="${input.subject}"`);
 
   try {
     const resend = getResendClient();
-    const result = await resend.emails.send({
-      from: getEmailFrom(),
-      to: input.to,
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-      replyTo: getEmailReplyTo(),
-    });
+    const result = await resend.emails.send(
+      {
+        from: getEmailFrom(),
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+        text: input.text,
+        replyTo: getEmailReplyTo(),
+      },
+      input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined
+    );
 
     if (result.error) {
       console.error(`[email] Resend error: ${result.error.message}`);
@@ -45,7 +49,8 @@ async function sendEmail(input: {
 }
 
 export async function sendPurchaseConfirmation(
-  ctx: PurchaseConfirmationContext
+  ctx: PurchaseConfirmationContext,
+  idempotencyKey?: string
 ): Promise<EmailSendResult> {
   const rendered = renderPurchaseConfirmation(ctx);
   return sendEmail({
@@ -53,11 +58,13 @@ export async function sendPurchaseConfirmation(
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,
+    idempotencyKey,
   });
 }
 
 export async function sendPlanReady(
-  ctx: PlanReadyContext
+  ctx: PlanReadyContext,
+  idempotencyKey?: string
 ): Promise<EmailSendResult> {
   const rendered = renderPlanReady(ctx);
   return sendEmail({
@@ -65,5 +72,6 @@ export async function sendPlanReady(
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,
+    idempotencyKey,
   });
 }

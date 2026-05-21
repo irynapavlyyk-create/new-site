@@ -223,12 +223,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Send branded purchase confirmation email (best-effort, never blocks webhook)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.energyforge.app";
-  const purchaseEmailResult = await sendPurchaseConfirmation({
-    to: email,
-    locale: language,
-    tier,
-    dashboardUrl: `${siteUrl}/dashboard`,
-  });
+  const purchaseEmailResult = await sendPurchaseConfirmation(
+    {
+      to: email,
+      locale: language,
+      tier,
+      dashboardUrl: `${siteUrl}/dashboard`,
+    },
+    `purchase-confirmation:${sessionId}`
+  );
   if (purchaseEmailResult.success) {
     console.log(`[webhook] Purchase confirmation email sent: id=${purchaseEmailResult.id} to=${email}`);
   } else {

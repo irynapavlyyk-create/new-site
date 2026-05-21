@@ -9,6 +9,7 @@ import {
   PRO_SCHEMA,
 } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { sendPlanReady } from "@/lib/emails/send";
 import type { QuizAnswers } from "@/types";
 
 export type GenerateTier = "free" | "pro" | "coach";
@@ -442,6 +443,32 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
   return { ok: true, data: validation.data };
 }
 
+function extractSummary(planData: unknown, lang: GenerateLang): string {
+  const raw =
+    planData && typeof planData === "object" && "summary" in planData
+      ? String((planData as { summary: unknown }).summary ?? "")
+      : "";
+
+  const cleaned = raw
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/_(.*?)_/g, "$1")
+    .replace(/\[(.*?)\]\([^)]*\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^>\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!cleaned) {
+    return lang === "ru"
+      ? "Ваш персональный 30-дневный энергетический протокол готов."
+      : "Your personalized 30-day energy protocol is ready.";
+  }
+
+  if (cleaned.length <= 200) return cleaned;
+  return cleaned.slice(0, 200).trimEnd() + "…";
+}
+
 // Background-job entry point. Wrapped by waitUntil() in the webhook so plan
 // generation runs after the webhook has already returned 200 to Stripe.
 // Always writes a row to plans — on success with plan_data, on failure with
@@ -483,7 +510,11 @@ export async function generateAndSavePlan(params: {
     planRow.plan_data = { error: result.error, detail: result.detail ?? null };
   }
 
-  const { error: insertErr } = await admin.from("plans").insert(planRow);
+  const { data: insertedPlan, error: insertErr } = await admin
+    .from("plans")
+    .insert(planRow)
+    .select("id")
+    .single();
   if (insertErr) {
     console.error("[generateAndSavePlan] plans insert failed:", insertErr);
     return;
@@ -493,5 +524,51 @@ export async function generateAndSavePlan(params: {
     console.log("[generateAndSavePlan] saved plan for session", sessionId);
   } else {
     console.log("[generateAndSavePlan] saved error marker for session", sessionId);
+  }
+
+  // Plan-ready email — only when generation succeeded for a paid tier.
+  // Best-effort: never blocks; logs success/failure.
+  if (!result.ok || tier === "free") return;
+
+  const planId = insertedPlan?.id as string | undefined;
+  if (!planId) {
+    console.warn("[generateAndSavePlan] missing plan id after insert — skipping plan-ready email");
+    return;
+  }
+
+  let userEmail: string | null = null;
+  try {
+    const { data: userData, error: userErr } = await admin.auth.admin.getUserById(userId);
+    if (userErr) {
+      console.warn("[generateAndSavePlan] getUserById failed for plan-ready email:", userErr);
+    } else {
+      userEmail = userData?.user?.email ?? null;
+    }
+  } catch (err) {
+    console.warn("[generateAndSavePlan] getUserById threw for plan-ready email:", err);
+  }
+
+  if (!userEmail) {
+    console.warn(`[generateAndSavePlan] no email for userId=${userId} — skipping plan-ready email`);
+    return;
+  }
+
+  const summary = extractSummary(result.data, lang);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.energyforge.app";
+
+  const emailResult = await sendPlanReady(
+    {
+      to: userEmail,
+      locale: lang,
+      dashboardUrl: `${siteUrl}/dashboard`,
+      planPreview: summary,
+    },
+    `plan-ready:${planId}`
+  );
+
+  if (emailResult.success) {
+    console.log(`[generateAndSavePlan] Plan-ready email sent: id=${emailResult.id} to=${userEmail} planId=${planId}`);
+  } else {
+    console.error(`[generateAndSavePlan] Plan-ready email failed: ${emailResult.error} to=${userEmail} planId=${planId}`);
   }
 }
