@@ -11,13 +11,37 @@ const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", 
 const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-display", display: "swap", weight: ["500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "EnergyForge — Personal energy diagnostic",
-  description: "Your personal 30-day energy protocol — built from your specific sleep, stress, and lifestyle patterns. Answer 9 questions, get a plan shaped for you.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NODE_ENV === "production"
+      ? "https://www.energyforge.app"
+      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  ),
+  title: "EnergyForge — Discover your energy phenotype",
+  description:
+    "Six energy types. One is yours. AI-powered diagnostic finds why you're tired and builds your personalized 30-day protocol. Take the 9-question quiz in 3 minutes.",
   openGraph: {
-    title: "EnergyForge — Forge your energy",
-    description: "A 30-day energy protocol built around your answers — not a template.",
+    title: "Discover your energy phenotype",
+    description:
+      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol from a 3-minute quiz.",
+    url: "https://www.energyforge.app",
+    siteName: "EnergyForge",
+    locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "EnergyForge — Discover your energy phenotype",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Discover your energy phenotype",
+    description:
+      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol from a 3-minute quiz.",
+    images: ["/og-image.png"],
   },
 };
 
