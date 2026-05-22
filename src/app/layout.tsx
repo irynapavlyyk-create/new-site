@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Discover your energy phenotype",
     description:
-      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol from a 3-minute quiz.",
+      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol. Free 3-minute quiz — no signup to see your result.",
     url: "https://www.energyforge.app",
     siteName: "EnergyForge",
     locale: "en_US",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Discover your energy phenotype",
     description:
-      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol from a 3-minute quiz.",
+      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol. Free 3-minute quiz — no signup to see your result.",
     images: ["/og-image.png"],
   },
 };
