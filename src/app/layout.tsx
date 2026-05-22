@@ -27,21 +27,12 @@ export const metadata: Metadata = {
     siteName: "EnergyForge",
     locale: "en_US",
     type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "EnergyForge — Discover your energy phenotype",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Discover your energy phenotype",
     description:
       "Six energy types. One is yours. AI builds your personalized 30-day energy protocol. Free 3-minute quiz — no signup to see your result.",
-    images: ["/og-image.png"],
   },
 };
 
