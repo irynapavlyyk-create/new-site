@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import AuroraBackground from "@/components/AuroraBackground";
 import AuthHashHandler from "@/components/AuthHashHandler";
 import CookieBanner from "@/components/CookieBanner";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CookieBanner />
           </I18nProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
