@@ -11,9 +11,9 @@ export const config = {
      * Match all request paths except:
      * - api/* (API routes manage their own auth; Stripe webhook must not be redirected)
      * - _next/static, _next/image
-     * - favicon.ico, robots.txt, sitemap.xml
+     * - favicon.ico, robots.txt, sitemap.xml, monitoring (Sentry tunnel)
      * - image and font extensions
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf)$).*)",
   ],
 };

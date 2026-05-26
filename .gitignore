@@ -36,3 +36,6 @@ yarn-error.log*
 
 # Email preview output (regenerate via: npm run render:emails)
 .email-previews/
+
+# Sentry Config File
+.env.sentry-build-plugin
