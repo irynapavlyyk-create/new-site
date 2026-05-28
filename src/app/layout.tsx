@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     description:
       "Six energy types. One is yours. AI builds your personalized 30-day energy protocol. Free 3-minute quiz — no signup to see your result.",
   },
+  other: {
+    "p:domain_verify": "bcb0cfaa679c655a6b45b83e6f7c901b",
+  },
 };
 
 const themeInitScript = `
