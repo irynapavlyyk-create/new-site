@@ -6,7 +6,6 @@ import {
   FREE_SYSTEM,
   PRO_SYSTEM,
   FREE_SCHEMA,
-  PRO_SCHEMA,
 } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { sendPlanReady } from "@/lib/emails/send";
@@ -40,6 +39,91 @@ const ProPlanSchema = z.object({
     )
     .min(1),
 });
+
+// ============================================
+// V2 SCHEMAS — Dashboard redesign (Phase 1.3.b)
+// Paid path validates against these. Legacy ProPlanSchema is kept
+// intentionally above for rollback safety — it is currently unreferenced.
+// ============================================
+
+const ProtocolStepSchema = z.object({
+  time: z.string(),
+  action: z.string(),
+  note: z.string(),
+});
+
+const WeekProtocolSchema = z.object({
+  number: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+  title: z.string(),
+  focus: z.string(),
+  nutritionFocus: z.array(z.string()).min(3).max(5),
+  stressPractices: z.array(z.string()).min(3).max(5),
+  keyActions: z.array(z.string()).min(2).max(3),
+});
+
+const SupplementItemSchema = z.object({
+  name: z.string(),
+  dose: z.string(),
+  timing: z.string(),
+  note: z.string(),
+  startWeek: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+});
+
+const PhenotypeIdSchema = z.enum([
+  "wired-but-tired",
+  "crashed-circadian",
+  "depleted-engine",
+  "afternoon-crasher",
+  "brain-fog-dominant",
+  "stress-burnout-transitioning",
+]);
+
+const ProPlanV2Schema = z.object({
+  phenotypeId: PhenotypeIdSchema,
+  summary: z.string(),
+  morningProtocol: z.array(ProtocolStepSchema).min(3).max(6),
+  sleepProtocol: z.array(ProtocolStepSchema).min(3).max(6),
+  weeks: z.tuple([
+    WeekProtocolSchema,
+    WeekProtocolSchema,
+    WeekProtocolSchema,
+    WeekProtocolSchema,
+  ]),
+  supplements: z.array(SupplementItemSchema).min(3).max(6),
+});
+
+/** JSON shape description sent to the model in the paid-tier user prompt. */
+const PRO_SCHEMA_V2 = `{
+  "phenotypeId": "wired-but-tired" | "crashed-circadian" | "depleted-engine" | "afternoon-crasher" | "brain-fog-dominant" | "stress-burnout-transitioning",
+  "summary": "2-3 sentences personalized to this user's situation, in the user's language",
+  "morningProtocol": [
+    { "time": "06:30", "action": "≤60 chars action", "note": "1 short why/how line" }
+  ],
+  "sleepProtocol": [
+    { "time": "21:00", "action": "≤60 chars action", "note": "1 short why/how line" }
+  ],
+  "weeks": [
+    {
+      "number": 1,
+      "title": "Short title for the week, e.g. 'Foundation reset'",
+      "focus": "2-3 sentence description of what this week accomplishes",
+      "nutritionFocus": ["3 to 5 nutrition items specific to this week"],
+      "stressPractices": ["3 to 5 stress practices specific to this week"],
+      "keyActions": ["2 to 3 highlighted key actions for the week"]
+    }
+    // exactly 4 week objects, numbered 1, 2, 3, 4 in order
+  ],
+  "supplements": [
+    {
+      "name": "Vitamin D3 + K2",
+      "dose": "2000-4000 IU",
+      "timing": "AM with breakfast",
+      "note": "Why or how, 1-2 sentences",
+      "startWeek": 1
+    }
+    // 3 to 6 supplements total
+  ]
+}`;
 
 const FreeReportSchema = z.object({
   topIssues: z
@@ -314,8 +398,8 @@ export async function generatePlan(params: {
   const isPaid = tier === "pro" || tier === "coach";
   const langName = lang === "ru" ? "Russian (русский)" : "English";
   const system = isPaid ? PRO_SYSTEM : FREE_SYSTEM;
-  const schema = isPaid ? PRO_SCHEMA : FREE_SCHEMA;
-  const validator = isPaid ? ProPlanSchema : FreeReportSchema;
+  const schema = isPaid ? PRO_SCHEMA_V2 : FREE_SCHEMA;
+  const validator = isPaid ? ProPlanV2Schema : FreeReportSchema;
 
   const userPrompt = `${buildUserProfile(answers, lang)}
 
