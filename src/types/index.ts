@@ -1,15 +1,78 @@
 export type Lang = "en" | "ru";
 
+/**
+ * Quiz V2 answer shape. All fields optional during in-progress entry —
+ * the quiz UI uses useState<QuizAnswers>({}) and fills fields as the user
+ * advances. Multi-select fields (stressSymptoms, activity) store arrays;
+ * mutex rules ("none" / "sedentary" exclude others) are UI-enforced in
+ * Step 4, not encoded at the type level.
+ */
 export type QuizAnswers = {
-  goal?: string;
-  age?: string;
-  energy?: string;
-  sleep?: string;
-  caffeine?: string;
-  stress?: string;
-  nutrition?: string;
-  activity?: string;
-  mainIssue?: string;
+  // Q1 — Chronotype (replaces old "goal")
+  chronotype?: "early-bird" | "intermediate" | "night-owl" | "irregular";
+
+  // Q2 — Age (resplit, added 55+)
+  age?: "18-24" | "25-34" | "35-44" | "45-54" | "55+";
+
+  // Q3 — Energy pattern (refined, added flat-high)
+  energy?:
+    | "morning-peak"
+    | "afternoon-crash"
+    | "evening-peak"
+    | "flat-low"
+    | "flat-high";
+
+  // Q4a — Sleep duration (split from old single sleep field)
+  sleepDuration?: "<6h" | "6-7h" | "7-8h" | ">8h";
+
+  // Q4b — Sleep quality (NEW)
+  sleepQuality?: "refreshed" | "groggy" | "tired" | "interrupted";
+
+  // Q5 — Caffeine quantity + timing (expanded)
+  caffeine?:
+    | "none"
+    | "1-2-morning"
+    | "3+-morning"
+    | "1-2-afternoon"
+    | "3+-afternoon"
+    | "energy-drinks";
+
+  // Q6 — Stress symptoms (NEW: multi-select).
+  stressSymptoms?: Array<
+    | "racing-thoughts"
+    | "tension-headaches"
+    | "irritable"
+    | "wired-cant-relax"
+    | "dread-anxiety"
+    | "overwhelmed"
+    | "none"
+  >;
+
+  // Q7 — Eating regularity (refined, added restricted)
+  nutrition?:
+    | "skip-meals"
+    | "irregular"
+    | "regular-3"
+    | "regular-3-snacks"
+    | "restricted";
+
+  // Q8 — Activity types (NEW: multi-select).
+  activity?: Array<
+    | "walking"
+    | "cardio-moderate"
+    | "strength"
+    | "combat"
+    | "intense-cardio"
+    | "mind-body"
+    | "daily-pro"
+    | "sedentary"
+  >;
+
+  // Q9 — Priority (repurposed from old "mainIssue" — explicit pick, not symptom claim)
+  priority?: "energy" | "sleep" | "focus" | "stress" | "mood";
+
+  // Q10 — Biological sex (NEW — for hormone-related branches in the system prompt)
+  biologicalSex?: "female" | "male" | "prefer-not-say";
 };
 
 export type QuizKey = keyof QuizAnswers;
