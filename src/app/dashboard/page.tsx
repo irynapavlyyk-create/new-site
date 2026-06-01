@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import DashboardClient from "./DashboardClient";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import type { ProPlan } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +37,30 @@ export default async function DashboardPage({
     console.error("[dashboard/page] plans fetch failed:", error);
   }
 
-  const initialPlan = (plan?.plan_data as ProPlan | null) ?? null;
+  const planData = plan?.plan_data;
+  const isObjectShape = planData !== null && typeof planData === "object";
+  const isV2Plan =
+    isObjectShape && "phenotypeId" in (planData as Record<string, unknown>);
+  const isErrorMarker =
+    isObjectShape &&
+    "error" in (planData as Record<string, unknown>) &&
+    !("summary" in (planData as Record<string, unknown>));
+
+  // TODO(phase-2): remove this branch when the new V2 dashboard UI ships.
+  // New paid plans use ProPlanV2 shape; legacy DashboardClient can't render
+  // them, so we show a friendly bridge page instead.
+  if (isV2Plan) {
+    return <V2Placeholder />;
+  }
+
+  // TODO(phase-2): merge into the new dashboard's error state.
+  if (isErrorMarker) {
+    return <GenerationErrorCard />;
+  }
+
+  // Legacy plan (or no plan at all) — fall through to the existing UI.
+  // DashboardClient handles the no-plan and fromStripe forging states.
+  const initialPlan = (planData as ProPlan | null) ?? null;
   const initialPlanTier = (plan?.tier as string | null) ?? null;
 
   return (
@@ -44,5 +70,53 @@ export default async function DashboardPage({
       initialPlanTier={initialPlanTier}
       fromStripe={fromStripe}
     />
+  );
+}
+
+// TODO(phase-2): delete. Temporary bridge while the V2 dashboard UI is being
+// built. Hardcoded English per product decision — i18n returns in Phase 2.
+function V2Placeholder() {
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
+        <div className="glass p-10 max-w-lg text-center">
+          <div className="text-6xl mb-6">⚡</div>
+          <h1 className="h-display text-3xl sm:text-4xl mb-4">
+            <span className="gradient-text">Your protocol is being prepared</span>
+          </h1>
+          <p className="text-muted leading-relaxed">
+            We&apos;re launching a redesigned dashboard in the next few days.
+            You&apos;ll see your full personalized plan when it&apos;s ready.
+            Thank you for your patience.
+          </p>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+// TODO(phase-2): delete or merge with new dashboard error states.
+function GenerationErrorCard() {
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
+        <div className="glass p-10 max-w-lg text-center">
+          <div className="text-6xl mb-6">⚠️</div>
+          <h1 className="h-display text-2xl sm:text-3xl mb-4">
+            <span className="gradient-text">Something went wrong</span>
+          </h1>
+          <p className="text-muted leading-relaxed mb-6">
+            Your plan didn&apos;t generate correctly. Retake the quiz to try again.
+          </p>
+          <Link href="/quiz" className="btn-primary">
+            Retake quiz
+          </Link>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }
