@@ -5,6 +5,7 @@ import { getPhenotype } from "@/lib/phenotypes";
 import type { ProPlanV2 } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import EnergyChart from "./EnergyChart";
 
 type Props = {
   plan: ProPlanV2;
@@ -98,10 +99,7 @@ export default function PhenotypeDashboard({
             </div>
           </section>
 
-          {/* TODO Phase 2.2 — Energy chart */}
-          <section className="glass p-8 mb-8 text-center text-muted text-sm">
-            [Phase 2.2 — Energy chart (24h curve) comes here]
-          </section>
+          <EnergyChart phenotype={phenotype} />
 
           {/* TODO Phase 2.3 — Week tabs */}
           <section className="glass p-8 mb-8 text-center text-muted text-sm">
