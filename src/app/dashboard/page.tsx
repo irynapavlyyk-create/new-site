@@ -2,9 +2,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import DashboardClient from "./DashboardClient";
+import PhenotypeDashboard from "./PhenotypeDashboard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import type { ProPlan } from "@/types";
+import type { ProPlan, ProPlanV2 } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -47,10 +48,15 @@ export default async function DashboardPage({
     !("summary" in (planData as Record<string, unknown>));
 
   // TODO(phase-2): remove this branch when the new V2 dashboard UI ships.
-  // New paid plans use ProPlanV2 shape; legacy DashboardClient can't render
-  // them, so we show a friendly bridge page instead.
   if (isV2Plan) {
-    return <V2Placeholder />;
+    return (
+      <PhenotypeDashboard
+        plan={planData as ProPlanV2}
+        userEmail={user.email ?? null}
+        planTier={(plan?.tier as string | null) ?? null}
+        planCreatedAt={plan?.created_at as string}
+      />
+    );
   }
 
   // TODO(phase-2): merge into the new dashboard's error state.
@@ -73,8 +79,8 @@ export default async function DashboardPage({
   );
 }
 
-// TODO(phase-2): delete. Temporary bridge while the V2 dashboard UI is being
-// built. Hardcoded English per product decision — i18n returns in Phase 2.
+// TODO(phase-2.4): delete in cleanup. Kept as rollback fallback for
+// PhenotypeDashboard while the new V2 UI stabilizes.
 function V2Placeholder() {
   return (
     <>
