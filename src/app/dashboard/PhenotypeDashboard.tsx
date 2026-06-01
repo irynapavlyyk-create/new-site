@@ -9,6 +9,8 @@ import EnergyChart from "./EnergyChart";
 import TodayFocus from "./TodayFocus";
 import WeeklyProgram from "./WeeklyProgram";
 import ProtocolCard from "./ProtocolCard";
+import SupplementCard from "./SupplementCard";
+import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 
 type Props = {
   plan: ProPlanV2;
@@ -121,9 +123,21 @@ export default function PhenotypeDashboard({
             />
           </section>
 
-          {/* TODO Phase 2.4 — Supplements */}
-          <section className="glass p-8 mb-8 text-center text-muted text-sm">
-            [Phase 2.4 — Supplements with iHerb/Amazon links come here]
+          <section className="mb-8">
+            <div className="flex flex-wrap gap-3 justify-between items-baseline mb-5">
+              <h2 className="h-display text-xl sm:text-2xl font-bold">
+                Your supplement stack
+              </h2>
+              <span className="text-xs text-muted">
+                {plan.supplements.length} items · two retailers each
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {plan.supplements.map((supp, i) => (
+                <SupplementCard key={i} supplement={supp} index={i} />
+              ))}
+            </div>
+            <MedicalDisclaimer />
           </section>
         </div>
       </main>
