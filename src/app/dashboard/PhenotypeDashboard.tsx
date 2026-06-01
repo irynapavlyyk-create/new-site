@@ -6,6 +6,9 @@ import type { ProPlanV2 } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import EnergyChart from "./EnergyChart";
+import TodayFocus from "./TodayFocus";
+import WeeklyProgram from "./WeeklyProgram";
+import ProtocolCard from "./ProtocolCard";
 
 type Props = {
   plan: ProPlanV2;
@@ -101,9 +104,21 @@ export default function PhenotypeDashboard({
 
           <EnergyChart phenotype={phenotype} />
 
-          {/* TODO Phase 2.3 — Week tabs */}
-          <section className="glass p-8 mb-8 text-center text-muted text-sm">
-            [Phase 2.3 — Week tabs (4 weeks) + Today&apos;s focus + Morning/Sleep protocols come here]
+          <TodayFocus week={plan.weeks[currentWeek - 1]} currentDay={currentDay} />
+
+          <WeeklyProgram weeks={plan.weeks} currentWeek={currentWeek} />
+
+          <section className="grid md:grid-cols-2 gap-6 mb-8">
+            <ProtocolCard
+              variant="morning"
+              title="Morning protocol"
+              steps={plan.morningProtocol}
+            />
+            <ProtocolCard
+              variant="sleep"
+              title="Sleep protocol"
+              steps={plan.sleepProtocol}
+            />
           </section>
 
           {/* TODO Phase 2.4 — Supplements */}
