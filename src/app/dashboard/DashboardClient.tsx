@@ -11,7 +11,7 @@ import FadeUp from "@/components/FadeUp";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 
 const POLL_INTERVAL_MS = 3000;
-const MAX_POLL_ATTEMPTS = 30;
+const MAX_POLL_ATTEMPTS = 60;
 const STORAGE_KEY = "energyforge_plan_forging_attempts";
 
 function readStoredAttempts(): number {
