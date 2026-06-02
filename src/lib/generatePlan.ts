@@ -716,6 +716,118 @@ export type GenerateResult =
   | { ok: true; data: unknown }
   | { ok: false; status: number; error: string; detail?: string };
 
+// ============================================
+// ANTHROPIC RETRY WRAPPER
+// Survives transient 408/409/429/5xx (including 529 overloaded_error) by
+// re-attempting with exponential backoff + jitter. Per-tier configs keep
+// total wall-clock under each route's maxDuration. SDK's own retries are
+// disabled per-call to keep the attempt count under our control.
+// ============================================
+
+type RetryConfig = {
+  maxAttempts: number;
+  /** Length must be maxAttempts - 1. Indexes 0..n-2 used between attempts. */
+  backoffMs: number[];
+  /** Hard stop: refuse to start a new attempt if elapsed exceeds this. */
+  budgetMs: number;
+  /** Used in log lines: "free" / "pro". */
+  label: string;
+};
+
+const RETRY_CONFIG_FREE: RetryConfig = {
+  maxAttempts: 5,
+  backoffMs: [2000, 4000, 8000, 15000],
+  budgetMs: 45_000,
+  label: "free",
+};
+
+const RETRY_CONFIG_PRO: RetryConfig = {
+  maxAttempts: 5,
+  backoffMs: [3000, 8000, 15000, 25000],
+  budgetMs: 240_000,
+  label: "pro",
+};
+
+function isRetryableError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const status = (err as { status?: unknown }).status;
+  if (typeof status === "number") {
+    return (
+      status === 408 ||
+      status === 409 ||
+      status === 429 ||
+      (status >= 500 && status < 600)
+    );
+  }
+  // Network-level errors (no HTTP response): retry.
+  const name = (err as { name?: unknown }).name;
+  return (
+    name === "APIConnectionError" ||
+    name === "APIConnectionTimeoutError" ||
+    name === "AbortError"
+  );
+}
+
+async function callAnthropicWithRetry(
+  params: Anthropic.MessageCreateParamsNonStreaming,
+  config: RetryConfig
+): Promise<Anthropic.Message> {
+  const start = Date.now();
+  let lastErr: unknown;
+
+  for (let attempt = 0; attempt < config.maxAttempts; attempt++) {
+    const elapsed = Date.now() - start;
+    if (elapsed > config.budgetMs) {
+      console.warn(
+        `[generatePlan:${config.label}] retry budget ${config.budgetMs}ms exhausted at ${elapsed}ms — giving up`
+      );
+      break;
+    }
+
+    try {
+      // maxRetries: 0 disables the SDK's built-in retries so our wrapper
+      // is the single source of retry truth.
+      return await anthropic.messages.create(params, { maxRetries: 0 });
+    } catch (err) {
+      lastErr = err;
+      const status = (err as { status?: unknown })?.status;
+      const isLast = attempt === config.maxAttempts - 1;
+
+      if (!isRetryableError(err)) {
+        console.warn(
+          `[generatePlan:${config.label}] non-retryable error status=${String(status)} attempt=${attempt + 1}/${config.maxAttempts}`
+        );
+        throw err;
+      }
+      if (isLast) {
+        console.warn(
+          `[generatePlan:${config.label}] retryable status=${String(status)} attempt=${attempt + 1}/${config.maxAttempts} — final attempt failed`
+        );
+        throw err;
+      }
+
+      const baseDelay = config.backoffMs[attempt];
+      const jitter = Math.floor(Math.random() * 300);
+      const delay = baseDelay + jitter;
+
+      const elapsedAfter = Date.now() - start;
+      if (elapsedAfter + delay > config.budgetMs) {
+        console.warn(
+          `[generatePlan:${config.label}] backoff ${delay}ms after attempt ${attempt + 1} would exceed budget (elapsed=${elapsedAfter}ms) — giving up`
+        );
+        throw err;
+      }
+
+      console.warn(
+        `[generatePlan:${config.label}] retryable status=${String(status)} attempt=${attempt + 1}/${config.maxAttempts} — waiting ${delay}ms before retry`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastErr;
+}
+
 export async function generatePlan(params: {
   answers: QuizAnswers;
   lang: GenerateLang;
@@ -733,6 +845,7 @@ export async function generatePlan(params: {
   const system = isPaid ? PRO_SYSTEM : FREE_SYSTEM;
   const schema = isPaid ? PRO_SCHEMA_V2 : FREE_SCHEMA;
   const validator = isPaid ? ProPlanV2Schema : FreeReportSchema;
+  const retryConfig = isPaid ? RETRY_CONFIG_PRO : RETRY_CONFIG_FREE;
 
   const userPrompt = `${buildUserProfile(answers, lang)}
 
@@ -750,22 +863,25 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
 
   let response;
   try {
-    response = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: isPaid ? 8000 : 3000,
-      temperature: 1.0,
-      // cache_control on system text blocks is supported at runtime (prompt caching
-      // is GA) but the SDK types in ^0.32.1 omit it on TextBlockParam — cast to
-      // unblock typecheck without bumping the SDK.
-      system: [
-        {
-          type: "text",
-          text: system,
-          cache_control: { type: "ephemeral" },
-        },
-      ] as unknown as Anthropic.TextBlockParam[],
-      messages: [{ role: "user", content: userPrompt }],
-    });
+    response = await callAnthropicWithRetry(
+      {
+        model: MODEL,
+        max_tokens: isPaid ? 8000 : 3000,
+        temperature: 1.0,
+        // cache_control on system text blocks is supported at runtime (prompt caching
+        // is GA) but the SDK types in ^0.32.1 omit it on TextBlockParam — cast to
+        // unblock typecheck without bumping the SDK.
+        system: [
+          {
+            type: "text",
+            text: system,
+            cache_control: { type: "ephemeral" },
+          },
+        ] as unknown as Anthropic.TextBlockParam[],
+        messages: [{ role: "user", content: userPrompt }],
+      },
+      retryConfig
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[generatePlan] anthropic call failed:", msg, err);
