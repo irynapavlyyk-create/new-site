@@ -11,38 +11,8 @@ import FadeUp from "@/components/FadeUp";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 
 const POLL_INTERVAL_MS = 3000;
-const MAX_POLL_ATTEMPTS = 60;
-const STORAGE_KEY = "energyforge_plan_forging_attempts";
-
-function readStoredAttempts(): number {
-  if (typeof window === "undefined") return 0;
-  try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    if (raw === null) return 0;
-    const parsed = parseInt(raw, 10);
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function writeStoredAttempts(n: number): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(STORAGE_KEY, String(n));
-  } catch {
-    // sessionStorage may be unavailable (private mode); fall through silently
-  }
-}
-
-function clearStoredAttempts(): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // sessionStorage may be unavailable; ignore
-  }
-}
+const SAFETY_CAP_MS = 180_000; // 3 min hard ceiling on polling
+const READY_HOLD_MS = 400;     // brief 100% hold before reload
 
 export default function DashboardClient({
   userEmail,
@@ -72,13 +42,6 @@ export default function DashboardClient({
     const normalized = raw === "otp_expired" ? "link_expired" : raw;
     window.location.replace(`/login?error=${encodeURIComponent(normalized)}`);
   }, []);
-
-  // Once the plan has loaded, the forging screen is unmounted, so the
-  // attempts counter is no longer needed. Clear it so a fresh checkout
-  // starts counting from zero.
-  useEffect(() => {
-    if (initialPlan) clearStoredAttempts();
-  }, [initialPlan]);
 
   const planMissing = !initialPlan || !initialPlan.summary;
 
@@ -185,55 +148,117 @@ export default function DashboardClient({
 }
 
 function PlanForgingScreen({ lang }: { lang: "en" | "ru" }) {
-  const [attempts, setAttempts] = useState(0);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [stopped, setStopped] = useState(false);   // 401: stop silently
+  const [timedOut, setTimedOut] = useState(false); // hit SAFETY_CAP_MS
+  const startRef = useRef<number>(Date.now());
 
-  // Seed from sessionStorage on mount so the counter survives reloads.
-  // Stays at 0 during SSR / hydration to avoid mismatch; the real value
-  // is applied right after.
+  // Simulated progress: linear toward 90% ceiling over SAFETY_CAP_MS,
+  // then idles. Only hits 100% once `ready` is true.
   useEffect(() => {
-    setAttempts(readStoredAttempts());
-  }, []);
-
-  useEffect(() => {
-    if (attempts >= MAX_POLL_ATTEMPTS) {
-      clearStoredAttempts();
+    if (timedOut || stopped) return; // freeze where it is
+    if (ready) {
+      setProgress(100);
       return;
     }
-    timeoutRef.current = setTimeout(() => {
-      writeStoredAttempts(attempts + 1);
-      window.location.reload();
-    }, POLL_INTERVAL_MS);
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
+    const id = setInterval(() => {
+      const elapsed = Date.now() - startRef.current;
+      setProgress(Math.min(90, (elapsed / SAFETY_CAP_MS) * 90));
+    }, 150);
+    return () => clearInterval(id);
+  }, [ready, stopped, timedOut]);
+
+  // Polling loop — in-page fetch, no reloads.
+  // Stops on ready, 401, or safety cap.
+  useEffect(() => {
+    if (ready || stopped || timedOut) return;
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const tick = async () => {
+      if (cancelled) return;
+      try {
+        const res = await fetch("/api/plan-status", { cache: "no-store" });
+        if (cancelled) return;
+        if (res.status === 401) {
+          setStopped(true);
+          return;
+        }
+        if (res.ok) {
+          const data = (await res.json()) as { ready?: boolean };
+          if (data.ready) {
+            setReady(true);
+            return;
+          }
+        }
+      } catch {
+        // Network glitch — swallow and retry next tick.
+      }
+      if (!cancelled) {
+        timeoutId = setTimeout(tick, POLL_INTERVAL_MS);
       }
     };
-  }, [attempts]);
 
-  const timedOut = attempts >= MAX_POLL_ATTEMPTS;
+    tick();
+
+    return () => {
+      cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [ready, stopped, timedOut]);
+
+  // Safety cap — flip to timedOut after SAFETY_CAP_MS so the polling
+  // loop and the progress ticker both freeze.
+  useEffect(() => {
+    if (ready || stopped) return;
+    const id = setTimeout(() => setTimedOut(true), SAFETY_CAP_MS);
+    return () => clearTimeout(id);
+  }, [ready, stopped]);
+
+  // After ready, hold at 100% briefly, then reload exactly once so
+  // the SSR page renders the real dashboard or the error card.
+  useEffect(() => {
+    if (!ready) return;
+    const id = setTimeout(() => {
+      window.location.reload();
+    }, READY_HOLD_MS);
+    return () => clearTimeout(id);
+  }, [ready]);
+
+  const givenUp = stopped || timedOut;
 
   return (
     <>
       <Navbar />
       <main className="min-h-screen flex flex-col items-center justify-center pt-28 pb-20 px-6">
-        <div className="text-center max-w-lg">
-          <div className="relative w-32 h-32 mx-auto mb-10">
-            <div className="absolute inset-0 rounded-full border-4" style={{ borderColor: "var(--border)" }} />
-            <div className="absolute inset-0 rounded-full border-4 border-t-amber border-r-orange border-b-transparent border-l-transparent animate-spin" />
-            <div className="absolute inset-4 rounded-full bg-gradient-to-br from-amber/30 to-violet/30 blur-2xl" />
-            <div className="absolute inset-0 flex items-center justify-center text-4xl animate-spin-slow">⚡</div>
-          </div>
-
-          {timedOut ? (
-            <p className="text-muted text-base">{pick(t.dashboard.forgingTimeout, lang)}</p>
+        <div className="text-center max-w-lg w-full">
+          {givenUp ? (
+            <>
+              <div className="text-6xl mb-6">⚡</div>
+              <p className="text-muted text-base">{pick(t.dashboard.forgingTimeout, lang)}</p>
+            </>
           ) : (
             <>
+              <div className="text-6xl mb-8">⚡</div>
               <h1 className="h-display text-3xl sm:text-4xl mb-4">
                 <span className="gradient-text">{pick(t.dashboard.forging, lang)}</span>
               </h1>
-              <p className="text-muted">{pick(t.dashboard.forgingSub, lang)}</p>
+              <p className="text-muted mb-10">{pick(t.dashboard.forgingSub, lang)}</p>
+              <div className="max-w-sm mx-auto">
+                <div className="text-2xl font-mono font-bold text-amber mb-3">
+                  {Math.round(progress)}%
+                </div>
+                <div
+                  className="h-2 rounded-full overflow-hidden"
+                  style={{ background: "var(--card-bg)" }}
+                >
+                  <div
+                    className="h-full bg-gradient-to-r from-amber to-orange transition-all duration-200 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
             </>
           )}
         </div>
