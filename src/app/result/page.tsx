@@ -14,7 +14,10 @@ import { createClient } from "@/utils/supabase/client";
 import type { QuizAnswers } from "@/types";
 import { inferPhenotype } from "@/lib/inferPhenotype";
 import { getPhenotype } from "@/lib/phenotypes";
+import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { detectPatterns } from "@/lib/signals";
+import LockedProtocol from "./LockedProtocol";
+import UpsellModal from "./UpsellModal";
 
 export default function ResultPage() {
   return (
@@ -30,6 +33,7 @@ function ResultPageInner() {
   const { lang } = useI18n();
   const [answers, setAnswers] = useState<QuizAnswers | null>(null);
   const [loadingTier, setLoadingTier] = useState<"pro" | "coach" | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [showCanceled, setShowCanceled] = useState(
     searchParams.get("canceled") === "true",
   );
@@ -107,6 +111,7 @@ function ResultPageInner() {
   if (!answers) return null;
 
   const phenotype = getPhenotype(inferPhenotype(answers));
+  const preview = getPhenotypePreview(phenotype.id);
   const insightSignals = detectPatterns(answers)
     .filter((s) => !s.en.startsWith("USER PRIORITY:"))
     .slice(0, 3);
@@ -174,107 +179,64 @@ function ResultPageInner() {
           )}
 
           <FadeUp delay={300}>
-            <div className="relative glass-strong p-8 sm:p-10">
-              <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-amber/10 via-orange/10 to-violet/10" />
-              <div className="relative">
-                <h2 className="h-display text-2xl sm:text-3xl mb-3 text-center">
-                  <span className="gradient-text">🔒 {pick(t.result.lockedTitle, lang)}</span>
-                </h2>
-                <p className="text-center text-muted mb-6">{pick(t.result.lockedSub, lang)}</p>
+            <LockedProtocol
+              phenotype={phenotype}
+              preview={preview}
+              onUnlock={() => setModalOpen(true)}
+            />
+          </FadeUp>
 
-                <div className="relative mb-6 overflow-hidden rounded-2xl">
-                  <div className="glass p-6 sm:p-8 select-none">
-                    <div className="h-display text-lg font-bold text-amber mb-4">
-                      {pick(t.result.teaser.heading, lang)}
-                    </div>
-                    <p className="text-ink leading-relaxed mb-3">
-                      {pick(t.result.teaser.line1, lang)}
-                    </p>
-                    <p className="text-ink leading-relaxed mb-4">
-                      {pick(t.result.teaser.line2, lang)}
-                    </p>
-                    <p
-                      className="text-ink leading-relaxed mb-3"
-                      style={{ filter: "blur(2px)", WebkitFilter: "blur(2px)" }}
-                    >
-                      {pick(t.result.teaser.line3, lang)}
-                    </p>
-                    <p
-                      className="text-ink leading-relaxed mb-3"
-                      style={{ filter: "blur(4px)", WebkitFilter: "blur(4px)" }}
-                    >
-                      {pick(t.result.teaser.line4, lang)}
-                    </p>
-                    <p
-                      className="text-ink leading-relaxed mb-3"
-                      style={{ filter: "blur(6px)", WebkitFilter: "blur(6px)" }}
-                    >
-                      {pick(t.result.teaser.line5, lang)}
-                    </p>
-                    <p
-                      className="text-ink leading-relaxed"
-                      style={{ filter: "blur(6px)", WebkitFilter: "blur(6px)" }}
-                    >
-                      {pick(t.result.teaser.line6, lang)}
-                    </p>
-                  </div>
-                  <div
-                    className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, var(--preview-blur-from) 0%, var(--preview-blur-to) 85%)",
-                    }}
-                  />
-                  <div className="absolute inset-x-0 bottom-6 flex justify-center pointer-events-none">
-                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-amber to-orange shadow-glow">
-                      <span className="text-2xl" style={{ color: "var(--btn-text)" }}>🔒</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center mb-6">
-                  <h3 className="h-display text-2xl sm:text-3xl font-bold mb-2">
-                    {pick(t.result.choose.title, lang)}
-                  </h3>
-                  <p className="text-muted text-sm">{pick(t.result.choose.subtitle, lang)}</p>
-                </div>
-
-                <div className="pricing-grid-2 items-stretch">
-                  <PricingCard
-                    accent="amber"
-                    badge={pick(t.result.choose.pro.badge, lang)}
-                    name={pick(t.result.choose.pro.name, lang)}
-                    price={pick(t.result.choose.pro.price, lang)}
-                    period={pick(t.result.choose.pro.period, lang)}
-                    features={pick(t.result.choose.pro.features, lang)}
-                    cta={pick(t.result.choose.pro.cta, lang)}
-                    loading={loadingTier === "pro"}
-                    disabled={loadingTier !== null}
-                    onClick={() => unlock("pro")}
-                  />
-                  <PricingCard
-                    accent="violet"
-                    highlighted
-                    badge={pick(t.result.choose.coach.badge, lang)}
-                    name={pick(t.result.choose.coach.name, lang)}
-                    price={pick(t.result.choose.coach.price, lang)}
-                    period={pick(t.result.choose.coach.period, lang)}
-                    features={pick(t.result.choose.coach.features, lang)}
-                    cta={pick(t.result.choose.coach.cta, lang)}
-                    loading={loadingTier === "coach"}
-                    disabled={loadingTier !== null}
-                    onClick={() => unlock("coach")}
-                  />
-                </div>
-
-                <p className="text-center text-xs text-muted mt-5">
-                  {pick(t.result.choose.upgradeNote, lang)}
-                </p>
+          <FadeUp delay={400}>
+            <div className="mt-10">
+              <div className="text-center mb-6">
+                <h3 className="h-display text-2xl sm:text-3xl font-bold mb-2">
+                  {pick(t.result.choose.title, lang)}
+                </h3>
+                <p className="text-muted text-sm">{pick(t.result.choose.subtitle, lang)}</p>
               </div>
+
+              <div className="pricing-grid-2 items-stretch">
+                <PricingCard
+                  accent="amber"
+                  badge={pick(t.result.choose.pro.badge, lang)}
+                  name={pick(t.result.choose.pro.name, lang)}
+                  price={pick(t.result.choose.pro.price, lang)}
+                  period={pick(t.result.choose.pro.period, lang)}
+                  features={pick(t.result.choose.pro.features, lang)}
+                  cta={pick(t.result.choose.pro.cta, lang)}
+                  loading={loadingTier === "pro"}
+                  disabled={loadingTier !== null}
+                  onClick={() => unlock("pro")}
+                />
+                <PricingCard
+                  accent="violet"
+                  highlighted
+                  badge={pick(t.result.choose.coach.badge, lang)}
+                  name={pick(t.result.choose.coach.name, lang)}
+                  price={pick(t.result.choose.coach.price, lang)}
+                  period={pick(t.result.choose.coach.period, lang)}
+                  features={pick(t.result.choose.coach.features, lang)}
+                  cta={pick(t.result.choose.coach.cta, lang)}
+                  loading={loadingTier === "coach"}
+                  disabled={loadingTier !== null}
+                  onClick={() => unlock("coach")}
+                />
+              </div>
+
+              <p className="text-center text-xs text-muted mt-5">
+                {pick(t.result.choose.upgradeNote, lang)}
+              </p>
             </div>
           </FadeUp>
         </div>
       </main>
+      <UpsellModal
+        open={modalOpen}
+        phenotypeName={pick(phenotype.name, lang)}
+        loading={loadingTier === "pro"}
+        onClose={() => setModalOpen(false)}
+        onUnlock={() => unlock("pro")}
+      />
       <Footer />
     </>
   );

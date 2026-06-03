@@ -429,6 +429,61 @@ export const t = {
       en: "Unlock PRO and get the 30-day protocol — one-time €9.99.",
       ru: "Открой PRO и получи 30-дневный протокол — разово €9.99.",
     },
+    locked: {
+      badge: {
+        en: "🔒 Locked — €9.99 to unlock",
+        ru: "🔒 Закрыто — €9.99 чтобы открыть",
+      },
+      // H2: "Your 30-day {name} protocol" — phenotype name (accent-colored)
+      // sits between these two halves so EN/RU word order stays independent.
+      titleBefore: { en: "Your 30-day ", ru: "Твой 30-дневный протокол " },
+      titleAfter: { en: " protocol", ru: "" },
+      subline: {
+        en: "Built from your answers — not a generic template.",
+        ru: "Собран по твоим ответам — не шаблон.",
+      },
+      whatsInside: {
+        heading: { en: "What's inside", ru: "Что внутри" },
+        items: {
+          en: [
+            "4-week progression",
+            "Morning + sleep protocols",
+            "Supplement stack (6 items)",
+            "Day-by-day actions",
+          ],
+          ru: [
+            "Прогрессия на 4 недели",
+            "Протоколы утра и сна",
+            "Стек добавок (6 позиций)",
+            "Действия по дням",
+          ],
+        },
+      },
+      progression: {
+        heading: { en: "Your 4-week progression", ru: "Твоя прогрессия на 4 недели" },
+        weekLabel: { en: "Week", ru: "Неделя" },
+        previewBadge: { en: "Preview", ru: "Превью" },
+        lockedBadge: { en: "🔒 Locked", ru: "🔒 Закрыто" },
+      },
+      week1: {
+        hint: {
+          en: "Unlock to see all of Week 1 + Weeks 2–4",
+          ru: "Открой, чтобы увидеть всю Неделю 1 + Недели 2–4",
+        },
+      },
+      modal: {
+        // "Unlock your full {name} protocol" — name (accent) sits between.
+        titleBefore: { en: "Unlock your full ", ru: "Открой полный протокол " },
+        titleAfter: { en: " protocol", ru: "" },
+        sub: {
+          en: "Your complete 30-day plan, supplement stack and daily protocols — one-time €9.99.",
+          ru: "Полный 30-дневный план, стек добавок и ежедневные протоколы — разово €9.99.",
+        },
+        unlockCta: { en: "Unlock now — €9.99", ru: "Открыть — €9.99" },
+        dismiss: { en: "Maybe later", ru: "Может позже" },
+        close: { en: "Close", ru: "Закрыть" },
+      },
+    },
     teaser: {
       heading: { en: "⚡ Your cortisol map", ru: "⚡ Твоя карта кортизола" },
       line1: {

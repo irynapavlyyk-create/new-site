@@ -114,6 +114,25 @@ export type LocalizedString = {
   ru: string;
 };
 
+/**
+ * Static, illustrative "preview" content for the free /result page.
+ * NOT a generated plan — week themes + Week-1 teaser actions are
+ * representative samples shown behind a blur to convey what the paid
+ * 30-day protocol contains. Looked up by PhenotypeId from
+ * src/lib/phenotypePreviews.ts.
+ */
+export type PhenotypePreview = {
+  /** 4 short week-theme lines, one per week (W1–W4). */
+  weekThemes: [LocalizedString, LocalizedString, LocalizedString, LocalizedString];
+  /** Week-1 detail shown (partly blurred) under the active "Preview" tab. */
+  week1Teaser: {
+    /** One-line theme for Week 1. */
+    theme: LocalizedString;
+    /** 2–3 representative timed action lines, e.g. "06:45 — …". */
+    actions: LocalizedString[];
+  };
+};
+
 /** Single insight bullet shown next to the energy chart */
 export type PhenotypeInsight = {
   /** When during the day this insight applies */
