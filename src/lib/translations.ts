@@ -448,13 +448,13 @@ export const t = {
           en: [
             "4-week progression",
             "Morning + sleep protocols",
-            "Supplement stack (6 items)",
+            "Supplement stack",
             "Day-by-day actions",
           ],
           ru: [
             "Прогрессия на 4 недели",
             "Протоколы утра и сна",
-            "Стек добавок (6 позиций)",
+            "Стек добавок",
             "Действия по дням",
           ],
         },
