@@ -423,6 +423,7 @@ export const t = {
     freeTitle: { en: "Your free diagnostic", ru: "Твоя бесплатная диагностика" },
     leaks: { en: "Top energy leaks", ru: "Главные утечки энергии" },
     tips: { en: "Your 5 targeted tips", ru: "5 точечных советов" },
+    whatWeNoticed: { en: "What we noticed", ru: "Что мы заметили" },
     lockedTitle: { en: "The full plan is ready", ru: "Полный план готов" },
     lockedSub: {
       en: "Unlock PRO and get the 30-day protocol — one-time €9.99.",
@@ -526,6 +527,11 @@ export const t = {
       nutrition: { en: "Nutrition", ru: "Питание" },
       stress: { en: "Stress Protocol", ru: "Протокол стресса" },
       plan: { en: "30-day plan", ru: "30-дневный план" },
+    },
+    heroStats: {
+      crashWindow: { en: "Crash window", ru: "Окно спада" },
+      peakHours: { en: "Peak hours", ru: "Часы пика" },
+      secondWind: { en: "Second wind", ru: "Второе дыхание" },
     },
     noPlan: {
       en: "No plan found. Take the quiz first.",

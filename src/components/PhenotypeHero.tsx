@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n-context";
+import { t, pick } from "@/lib/translations";
 import type { PhenotypeData } from "@/types";
 
 type Props = {
@@ -25,19 +26,19 @@ export default function PhenotypeHero({ phenotype }: Props) {
           <div className="text-amber text-lg sm:text-xl font-bold leading-tight">
             {phenotype.crashWindow}
           </div>
-          <div className="text-xs text-muted mt-1">Crash window</div>
+          <div className="text-xs text-muted mt-1">{pick(t.dashboard.heroStats.crashWindow, lang)}</div>
         </div>
         <div>
           <div className="text-amber text-lg sm:text-xl font-bold leading-tight">
             {phenotype.peakHours}
           </div>
-          <div className="text-xs text-muted mt-1">Peak hours</div>
+          <div className="text-xs text-muted mt-1">{pick(t.dashboard.heroStats.peakHours, lang)}</div>
         </div>
         <div>
           <div className="text-amber text-lg sm:text-xl font-bold leading-tight">
             {phenotype.secondWind}
           </div>
-          <div className="text-xs text-muted mt-1">Second wind</div>
+          <div className="text-xs text-muted mt-1">{pick(t.dashboard.heroStats.secondWind, lang)}</div>
         </div>
       </div>
     </div>

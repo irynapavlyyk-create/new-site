@@ -4,13 +4,17 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import type { FreeReport } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
+import PhenotypeHero from "@/components/PhenotypeHero";
+import EnergyChart from "@/app/dashboard/EnergyChart";
 import { safeLoad } from "@/lib/storage";
 import { createClient } from "@/utils/supabase/client";
 import type { QuizAnswers } from "@/types";
+import { inferPhenotype } from "@/lib/inferPhenotype";
+import { getPhenotype } from "@/lib/phenotypes";
+import { detectPatterns } from "@/lib/signals";
 
 export default function ResultPage() {
   return (
@@ -24,19 +28,19 @@ function ResultPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { lang } = useI18n();
-  const [report, setReport] = useState<FreeReport | null>(null);
+  const [answers, setAnswers] = useState<QuizAnswers | null>(null);
   const [loadingTier, setLoadingTier] = useState<"pro" | "coach" | null>(null);
   const [showCanceled, setShowCanceled] = useState(
     searchParams.get("canceled") === "true",
   );
 
   useEffect(() => {
-    const r = safeLoad<FreeReport>("ef_free_report");
-    if (!r) {
+    const a = safeLoad<QuizAnswers>("ef_answers");
+    if (!a) {
       router.replace("/quiz");
       return;
     }
-    setReport(r);
+    setAnswers(a);
   }, [router]);
 
   const unlock = async (tier: "pro" | "coach") => {
@@ -100,7 +104,12 @@ function ResultPageInner() {
     }
   };
 
-  if (!report) return null;
+  if (!answers) return null;
+
+  const phenotype = getPhenotype(inferPhenotype(answers));
+  const insightSignals = detectPatterns(answers)
+    .filter((s) => !s.en.startsWith("USER PRIORITY:"))
+    .slice(0, 3);
 
   return (
     <>
@@ -136,38 +145,33 @@ function ResultPageInner() {
             </h1>
           </FadeUp>
 
-          <FadeUp delay={100}>
-            <div className="glass p-8 mb-6">
-              <h2 className="h-display text-xl font-bold mb-6 text-amber">⚡ {pick(t.result.leaks, lang)}</h2>
-              <div className="space-y-4">
-                {report.topIssues.map((leak, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="w-8 h-8 flex-shrink-0 rounded-lg bg-amber/20 text-amber flex items-center justify-center font-display font-bold">
-                      {i + 1}
-                    </div>
-                    <div>
-                      <h3 className="h-display text-lg font-bold mb-1">{leak.title}</h3>
-                      <p className="text-muted text-sm leading-relaxed">{leak.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <FadeUp delay={50}>
+            <div className="mb-6">
+              <PhenotypeHero phenotype={phenotype} />
             </div>
           </FadeUp>
 
-          <FadeUp delay={200}>
-            <div className="glass p-8 mb-10">
-              <h2 className="h-display text-xl font-bold mb-6 text-violet">✦ {pick(t.result.tips, lang)}</h2>
-              <ul className="space-y-3">
-                {report.tips.map((tip, i) => (
-                  <li key={i} className="flex gap-3 text-sm">
-                    <span className="text-amber flex-shrink-0 mt-0.5">→</span>
-                    <span className="text-ink">{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <FadeUp delay={100}>
+            <EnergyChart phenotype={phenotype} />
           </FadeUp>
+
+          {insightSignals.length > 0 && (
+            <FadeUp delay={150}>
+              <div className="glass p-8 mb-10">
+                <h2 className="h-display text-xl font-bold mb-6 text-amber">
+                  ⚡ {pick(t.result.whatWeNoticed, lang)}
+                </h2>
+                <ul className="space-y-3">
+                  {insightSignals.map((s, i) => (
+                    <li key={i} className="flex gap-3 text-sm">
+                      <span className="text-amber flex-shrink-0 mt-0.5">→</span>
+                      <span className="text-ink leading-relaxed">{pick(s, lang)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </FadeUp>
+          )}
 
           <FadeUp delay={300}>
             <div className="relative glass-strong p-8 sm:p-10">

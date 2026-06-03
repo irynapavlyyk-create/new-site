@@ -4,15 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import { safeLoad, safeSave } from "@/lib/storage";
+import { safeLoad } from "@/lib/storage";
 import type { QuizAnswers } from "@/types";
+
+// Animation cadence: 4 steps × 400ms cycle = 1.6s, then ~200ms breathing
+// room before redirect. Total /loading dwell ~1.8s — keeps perceived
+// "we did analysis" value without an AI call. The actual phenotype +
+// signals are computed deterministically on /result from ef_answers.
+const STEP_INTERVAL_MS = 400;
+const REDIRECT_MS = 1800;
 
 export default function LoadingPage() {
   const router = useRouter();
   const { lang } = useI18n();
   const steps = pick(t.loading.steps, lang);
   const [currentStep, setCurrentStep] = useState(0);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const answers = safeLoad<QuizAnswers>("ef_answers");
@@ -20,30 +26,19 @@ export default function LoadingPage() {
       router.replace("/quiz");
       return;
     }
+    void answers;
 
     const stepTimer = setInterval(() => {
       setCurrentStep((s) => (s < steps.length - 1 ? s + 1 : s));
-    }, 1200);
+    }, STEP_INTERVAL_MS);
+    const redirectTimer = setTimeout(() => {
+      router.replace("/result");
+    }, REDIRECT_MS);
 
-    (async () => {
-      try {
-        const res = await fetch("/api/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers, lang, tier: "free" }),
-        });
-        if (!res.ok) throw new Error("api");
-        const data = await res.json();
-        safeSave("ef_free_report", data);
-        clearInterval(stepTimer);
-        router.replace("/result");
-      } catch (e) {
-        clearInterval(stepTimer);
-        setError("error");
-      }
-    })();
-
-    return () => clearInterval(stepTimer);
+    return () => {
+      clearInterval(stepTimer);
+      clearTimeout(redirectTimer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -87,15 +82,6 @@ export default function LoadingPage() {
             </li>
           ))}
         </ul>
-
-        {error && (
-          <div className="mt-8">
-            <p className="text-red-400 text-sm mb-4">{pick(t.result.error, lang)}</p>
-            <button className="btn-ghost" onClick={() => router.replace("/quiz")}>
-              {pick(t.result.tryAgain, lang)}
-            </button>
-          </div>
-        )}
       </div>
     </main>
   );
