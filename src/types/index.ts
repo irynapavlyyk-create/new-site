@@ -159,12 +159,12 @@ export type PhenotypeData = {
   readonly subtitle: LocalizedString;
   /** Exactly 3 insights for the energy chart sidebar */
   readonly insights: readonly PhenotypeInsight[];
-  /** Display string, e.g. "10am–12pm" */
-  readonly peakHours: string;
-  /** Display string, e.g. "2–4pm" */
-  readonly crashWindow: string;
-  /** Display string, e.g. "8pm" */
-  readonly secondWind: string;
+  /** Display string, e.g. "10am–12pm" (RU uses 24h clock) */
+  readonly peakHours: LocalizedString;
+  /** Display string, e.g. "2–4pm" (RU uses 24h clock) */
+  readonly crashWindow: LocalizedString;
+  /** Display string, e.g. "8pm" (RU uses 24h clock) */
+  readonly secondWind: LocalizedString;
   /**
    * SVG path string ("M ... Q ... T ...") describing the user's 24-hour
    * energy curve. Rendered inside a fixed viewBox in EnergyChart component.

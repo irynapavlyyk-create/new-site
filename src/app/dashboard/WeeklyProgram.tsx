@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { ProPlanV2 } from "@/types";
+import { useI18n } from "@/lib/i18n-context";
+import { t, pick, format } from "@/lib/translations";
 
 type Props = {
   weeks: ProPlanV2["weeks"];
@@ -9,16 +11,18 @@ type Props = {
 };
 
 export default function WeeklyProgram({ weeks, currentWeek }: Props) {
+  const { lang } = useI18n();
   const [selected, setSelected] = useState<number>(currentWeek);
   const selectedWeek = weeks[selected - 1];
+  const weekWord = pick(t.dashboard.week, lang).toUpperCase();
 
   return (
     <section className="mb-8">
       <div className="flex flex-wrap gap-3 justify-between items-baseline mb-5">
         <h2 className="h-display text-xl sm:text-2xl font-bold">
-          30-day protocol
+          {pick(t.dashboard.protocolTitle, lang)}
         </h2>
-        <span className="text-xs text-muted">Tap a week to view its detail</span>
+        <span className="text-xs text-muted">{pick(t.dashboard.tapWeek, lang)}</span>
       </div>
 
       {/* Week tabs */}
@@ -46,7 +50,11 @@ export default function WeeklyProgram({ weeks, currentWeek }: Props) {
                   isActive ? "text-amber" : "text-muted"
                 }`}
               >
-                WEEK {String(num).padStart(2, "0")} · DAYS {dayStart}–{dayEnd}
+                {format(pick(t.dashboard.weekDaysMeta, lang), {
+                  n: String(num).padStart(2, "0"),
+                  a: dayStart,
+                  b: dayEnd,
+                })}
               </div>
               <div className="text-sm font-bold mb-2 leading-tight">
                 {week.title}
@@ -60,7 +68,11 @@ export default function WeeklyProgram({ weeks, currentWeek }: Props) {
                     : "bg-white/5 text-muted"
                 }`}
               >
-                {isCurrent ? "● Active" : isPast ? "Done" : "Upcoming"}
+                {isCurrent
+                  ? pick(t.dashboard.weekStatus.active, lang)
+                  : isPast
+                  ? pick(t.dashboard.weekStatus.done, lang)
+                  : pick(t.dashboard.weekStatus.upcoming, lang)}
               </span>
             </button>
           );
@@ -71,7 +83,7 @@ export default function WeeklyProgram({ weeks, currentWeek }: Props) {
       <div className="glass p-6 sm:p-8">
         <div className="mb-6 pb-5 border-b border-white/5">
           <div className="text-[11px] font-mono tracking-widest text-amber/70 mb-1">
-            WEEK {String(selected).padStart(2, "0")}
+            {weekWord} {String(selected).padStart(2, "0")}
           </div>
           <h3 className="h-display text-xl sm:text-2xl font-bold mb-2">
             {selectedWeek.title}
@@ -84,7 +96,7 @@ export default function WeeklyProgram({ weeks, currentWeek }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <div className="text-[11px] uppercase tracking-widest text-amber/80 font-bold mb-3">
-              Nutrition focus
+              {pick(t.dashboard.weekDetail.nutrition, lang)}
             </div>
             <ul className="space-y-2.5">
               {selectedWeek.nutritionFocus.map((item, i) => (
@@ -97,7 +109,7 @@ export default function WeeklyProgram({ weeks, currentWeek }: Props) {
           </div>
           <div>
             <div className="text-[11px] uppercase tracking-widest text-amber/80 font-bold mb-3">
-              Stress practices
+              {pick(t.dashboard.weekDetail.stress, lang)}
             </div>
             <ul className="space-y-2.5">
               {selectedWeek.stressPractices.map((item, i) => (

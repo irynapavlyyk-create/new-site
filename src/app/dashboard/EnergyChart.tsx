@@ -2,6 +2,7 @@
 
 import type { PhenotypeData } from "@/types";
 import { useI18n } from "@/lib/i18n-context";
+import { t, pick } from "@/lib/translations";
 
 type Props = {
   phenotype: PhenotypeData;
@@ -13,6 +14,7 @@ const NORMAL_CURVE = "M 0,150 Q 100,55 200,45 T 400,75 T 600,95 T 800,160";
 
 export default function EnergyChart({ phenotype }: Props) {
   const { lang } = useI18n();
+  const axis = pick(t.chart.axis, lang);
 
   // Closed path for the area fill — extend the open curve down to the
   // x-axis baseline (y=220) and close.
@@ -22,16 +24,16 @@ export default function EnergyChart({ phenotype }: Props) {
     <section className="glass p-6 sm:p-8 mb-8">
       <div className="flex flex-wrap gap-3 justify-between items-baseline mb-6">
         <h2 className="h-display text-lg sm:text-xl font-bold">
-          Your 24-hour energy pattern
+          {pick(t.chart.title, lang)}
         </h2>
         <div className="flex gap-4 text-xs text-muted">
           <span className="inline-flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-amber" aria-hidden="true" />
-            You
+            {pick(t.chart.you, lang)}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-white/30" aria-hidden="true" />
-            Normal
+            {pick(t.chart.normal, lang)}
           </span>
         </div>
       </div>
@@ -40,7 +42,7 @@ export default function EnergyChart({ phenotype }: Props) {
         viewBox="0 0 800 220"
         preserveAspectRatio="none"
         className="w-full h-44 sm:h-56 block"
-        aria-label="24-hour energy pattern chart"
+        aria-label={pick(t.chart.aria, lang)}
       >
         <defs>
           <linearGradient id="ef-energy-area" x1="0" y1="0" x2="0" y2="1">
@@ -76,11 +78,11 @@ export default function EnergyChart({ phenotype }: Props) {
         />
 
         {/* X-axis time labels */}
-        <text x="4" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">6am</text>
-        <text x="200" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">10am</text>
-        <text x="400" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">2pm</text>
-        <text x="600" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">6pm</text>
-        <text x="755" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">10pm</text>
+        <text x="4" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{axis[0]}</text>
+        <text x="200" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{axis[1]}</text>
+        <text x="400" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{axis[2]}</text>
+        <text x="600" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{axis[3]}</text>
+        <text x="755" y="215" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{axis[4]}</text>
       </svg>
 
       {/* 3 insight cards */}

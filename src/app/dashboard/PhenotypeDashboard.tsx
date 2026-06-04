@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n-context";
+import { t, pick, format } from "@/lib/translations";
 import { getPhenotype } from "@/lib/phenotypes";
 import type { ProPlanV2 } from "@/types";
 import Navbar from "@/components/Navbar";
@@ -51,13 +52,13 @@ export default function PhenotypeDashboard({
 
             {/* Progress card */}
             <div className="glass p-8 flex flex-col">
-              <div className="text-sm text-muted mb-5">Your 30-day protocol</div>
+              <div className="text-sm text-muted mb-5">{pick(t.dashboard.protocolTitle, lang)}</div>
               <div className="text-6xl font-extrabold leading-none mb-2">
                 {String(currentDay).padStart(2, "0")}
                 <span className="text-3xl text-muted/50 font-medium">/30</span>
               </div>
               <div className="text-sm text-muted mb-6">
-                Day {currentDay} — Week {currentWeek} of 4
+                {format(pick(t.dashboard.dayProgress, lang), { d: currentDay, w: currentWeek })}
               </div>
               <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                 <div
@@ -66,10 +67,10 @@ export default function PhenotypeDashboard({
                 />
               </div>
               <div className="flex justify-between text-xs text-muted font-mono mt-3">
-                <span className={currentWeek >= 1 ? "text-amber" : ""}>Week 1</span>
-                <span className={currentWeek >= 2 ? "text-amber" : ""}>Week 2</span>
-                <span className={currentWeek >= 3 ? "text-amber" : ""}>Week 3</span>
-                <span className={currentWeek >= 4 ? "text-amber" : ""}>Week 4</span>
+                <span className={currentWeek >= 1 ? "text-amber" : ""}>{pick(t.dashboard.week, lang)} 1</span>
+                <span className={currentWeek >= 2 ? "text-amber" : ""}>{pick(t.dashboard.week, lang)} 2</span>
+                <span className={currentWeek >= 3 ? "text-amber" : ""}>{pick(t.dashboard.week, lang)} 3</span>
+                <span className={currentWeek >= 4 ? "text-amber" : ""}>{pick(t.dashboard.week, lang)} 4</span>
               </div>
             </div>
           </section>
@@ -83,12 +84,12 @@ export default function PhenotypeDashboard({
           <section className="grid md:grid-cols-2 gap-6 mb-8">
             <ProtocolCard
               variant="morning"
-              title="Morning protocol"
+              title={pick(t.dashboard.sections.morning, lang)}
               steps={plan.morningProtocol}
             />
             <ProtocolCard
               variant="sleep"
-              title="Sleep protocol"
+              title={pick(t.dashboard.sections.sleep, lang)}
               steps={plan.sleepProtocol}
             />
           </section>
@@ -96,10 +97,10 @@ export default function PhenotypeDashboard({
           <section className="mb-8">
             <div className="flex flex-wrap gap-3 justify-between items-baseline mb-5">
               <h2 className="h-display text-xl sm:text-2xl font-bold">
-                Your supplement stack
+                {pick(t.dashboard.supplementStack, lang)}
               </h2>
               <span className="text-xs text-muted">
-                {plan.supplements.length} items · two retailers each
+                {format(pick(t.dashboard.supplementMeta, lang), { n: plan.supplements.length })}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

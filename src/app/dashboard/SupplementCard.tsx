@@ -1,6 +1,8 @@
 "use client";
 
 import type { SupplementItem } from "@/types";
+import { useI18n } from "@/lib/i18n-context";
+import { t, pick, format } from "@/lib/translations";
 
 type Props = {
   supplement: SupplementItem;
@@ -39,6 +41,7 @@ const COLOR_CYCLE = [
 ];
 
 export default function SupplementCard({ supplement, index }: Props) {
+  const { lang } = useI18n();
   const c = COLOR_CYCLE[index % COLOR_CYCLE.length];
 
   // Search URLs — live retailer search, not affiliate yet (Phase 3 task).
@@ -67,7 +70,7 @@ export default function SupplementCard({ supplement, index }: Props) {
             {supplement.timing}
           </span>
           <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/5 text-muted text-[11px]">
-            Start week {supplement.startWeek}
+            {format(pick(t.dashboard.startWeek, lang), { n: supplement.startWeek })}
           </span>
         </div>
 

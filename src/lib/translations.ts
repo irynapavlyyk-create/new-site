@@ -572,6 +572,23 @@ export const t = {
       },
     },
   },
+  chart: {
+    title: {
+      en: "Your 24-hour energy pattern",
+      ru: "Твой 24-часовой паттерн энергии",
+    },
+    you: { en: "You", ru: "Ты" },
+    normal: { en: "Normal", ru: "Норма" },
+    aria: {
+      en: "24-hour energy pattern chart",
+      ru: "График 24-часового паттерна энергии",
+    },
+    // X-axis time labels, left→right. EN keeps am/pm; RU uses 24h clock.
+    axis: {
+      en: ["6am", "10am", "2pm", "6pm", "10pm"],
+      ru: ["06:00", "10:00", "14:00", "18:00", "22:00"],
+    },
+  },
   dashboard: {
     welcome: { en: "Welcome to your plan", ru: "Добро пожаловать в твой план" },
     sub: { en: "Your personal 30-day energy protocol.", ru: "Твой персональный 30-дневный протокол." },
@@ -595,6 +612,41 @@ export const t = {
     startQuiz: { en: "Start quiz", ru: "Пройти анкету" },
     downloadPdf: { en: "Download PDF", ru: "Скачать PDF" },
     week: { en: "Week", ru: "Неделя" },
+    // V2 PhenotypeDashboard / WeeklyProgram / TodayFocus / SupplementCard chrome.
+    // Templated values use {placeholders} resolved via format() at call sites.
+    protocolTitle: { en: "Your 30-day protocol", ru: "Твой 30-дневный протокол" },
+    dayProgress: {
+      en: "Day {d} — Week {w} of 4",
+      ru: "День {d} — Неделя {w} из 4",
+    },
+    supplementStack: { en: "Your supplement stack", ru: "Твой стек добавок" },
+    supplementMeta: {
+      en: "{n} items · two retailers each",
+      ru: "{n} позиций · по два магазина",
+    },
+    tapWeek: {
+      en: "Tap a week to view its detail",
+      ru: "Нажми на неделю, чтобы увидеть детали",
+    },
+    weekDaysMeta: {
+      en: "WEEK {n} · DAYS {a}–{b}",
+      ru: "НЕДЕЛЯ {n} · ДНИ {a}–{b}",
+    },
+    weekStatus: {
+      active: { en: "● Active", ru: "● Активна" },
+      done: { en: "Done", ru: "Готово" },
+      upcoming: { en: "Upcoming", ru: "Впереди" },
+    },
+    weekDetail: {
+      nutrition: { en: "Nutrition focus", ru: "Фокус питания" },
+      stress: { en: "Stress practices", ru: "Практики для стресса" },
+    },
+    todayFocus: {
+      en: "Today's focus · Day {d}",
+      ru: "Сегодняшний фокус · День {d}",
+    },
+    keyActions: { en: "Key actions this week", ru: "Ключевые действия недели" },
+    startWeek: { en: "Start week {n}", ru: "С недели {n}" },
     generating: {
       en: "Generating your full plan…",
       ru: "Генерируем твой полный план…",
@@ -780,4 +832,21 @@ type Mutable<T> = T extends readonly (infer U)[]
 
 export function pick<En, Ru>(node: { en: En; ru: Ru }, lang: Lang): Mutable<En | Ru> {
   return (lang === "en" ? node.en : node.ru) as Mutable<En | Ru>;
+}
+
+/**
+ * Interpolate {placeholder} tokens in a localized template string.
+ * Keeps templated chrome copy in t.* (one EN/RU pair) instead of scattering
+ * .replace() calls across components.
+ *
+ *   format(pick(t.dashboard.dayProgress, lang), { d: 5, w: 1 })
+ *   // "Day 5 — Week 1 of 4"  /  "День 5 — Неделя 1 из 4"
+ */
+export function format(
+  template: string,
+  vars: Record<string, string | number>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    key in vars ? String(vars[key]) : match,
+  );
 }

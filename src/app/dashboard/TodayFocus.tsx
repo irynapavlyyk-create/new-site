@@ -1,6 +1,8 @@
 "use client";
 
 import type { WeekProtocol } from "@/types";
+import { useI18n } from "@/lib/i18n-context";
+import { t, pick, format } from "@/lib/translations";
 
 type Props = {
   week: WeekProtocol;
@@ -8,13 +10,14 @@ type Props = {
 };
 
 export default function TodayFocus({ week, currentDay }: Props) {
+  const { lang } = useI18n();
   return (
     <section className="grid md:grid-cols-2 gap-6 mb-8">
       {/* Hero card — week title + focus paragraph */}
       <div className="glass p-6 sm:p-8 relative overflow-hidden border-amber/20 bg-gradient-to-br from-amber/[0.08] to-orange/[0.04]">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber/15 text-amber text-[11px] font-bold uppercase tracking-widest mb-4">
           <span>⚡</span>
-          <span>Today&apos;s focus · Day {currentDay}</span>
+          <span>{format(pick(t.dashboard.todayFocus, lang), { d: currentDay })}</span>
         </div>
         <h2 className="h-display text-2xl sm:text-3xl font-extrabold mb-3 leading-tight">
           {week.title}
@@ -27,7 +30,7 @@ export default function TodayFocus({ week, currentDay }: Props) {
       {/* Key actions card */}
       <div className="glass p-6 sm:p-8 flex flex-col">
         <div className="text-[11px] uppercase tracking-widest text-muted font-bold mb-4">
-          Key actions this week
+          {pick(t.dashboard.keyActions, lang)}
         </div>
         <ul className="space-y-3 flex-1">
           {week.keyActions.map((action, i) => (

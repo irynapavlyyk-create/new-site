@@ -24,19 +24,19 @@ export default function PhenotypeHero({ phenotype }: Props) {
       <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
         <div>
           <div className="text-amber text-lg sm:text-xl font-bold leading-tight">
-            {phenotype.crashWindow}
+            {phenotype.crashWindow[lang]}
           </div>
           <div className="text-xs text-muted mt-1">{pick(t.dashboard.heroStats.crashWindow, lang)}</div>
         </div>
         <div>
           <div className="text-amber text-lg sm:text-xl font-bold leading-tight">
-            {phenotype.peakHours}
+            {phenotype.peakHours[lang]}
           </div>
           <div className="text-xs text-muted mt-1">{pick(t.dashboard.heroStats.peakHours, lang)}</div>
         </div>
         <div>
           <div className="text-amber text-lg sm:text-xl font-bold leading-tight">
-            {phenotype.secondWind}
+            {phenotype.secondWind[lang]}
           </div>
           <div className="text-xs text-muted mt-1">{pick(t.dashboard.heroStats.secondWind, lang)}</div>
         </div>
