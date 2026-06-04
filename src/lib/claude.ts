@@ -82,9 +82,9 @@ Then, on a new line after the closing </thinking> tag, output a JSON object that
 
 STRUCTURE REQUIREMENTS
 
-- You must select exactly ONE phenotypeId from the fixed enum based on the user's quiz answers and pattern detection. Do not invent new IDs. Valid IDs: "wired-but-tired", "crashed-circadian", "depleted-engine", "afternoon-crasher", "brain-fog-dominant", "stress-burnout-transitioning".
+- The user's phenotypeId is PROVIDED in the user message (it was computed deterministically from their answers). Treat it as fixed: write the entire plan for that phenotype using the matching entry in the PHENOTYPE FRAMEWORK above. Echo it back UNCHANGED in the JSON phenotypeId field — do not select your own and do not invent new IDs. Valid IDs: "wired-but-tired", "crashed-circadian", "depleted-engine", "afternoon-crasher", "brain-fog-dominant", "stress-burnout-transitioning".
 - morningProtocol and sleepProtocol are GLOBAL (apply all 30 days), not per-week. List 4 to 6 timed steps each, each as { time, action, note }.
-- weeks[] must contain exactly 4 entries, numbered 1 through 4 in order. Each week's nutritionFocus and stressPractices should PROGRESS from the previous week (week 1 = foundation, week 4 = integration).
+- weeks[] must contain exactly 4 entries, numbered 1 through 4 in order. The 4 week titles are PROVIDED in the user message — use them verbatim, in order. Write each week's focus, nutritionFocus, stressPractices, and keyActions personalized to the user, progressing from the previous week (week 1 = foundation, week 4 = integration).
 - supplements[] must have 3 to 6 items. Each supplement's startWeek indicates which week it is introduced (1 = from day 1, 4 = late stage).
 - All text content must be written in the user's language (specified separately at the end of the user prompt).
 `;

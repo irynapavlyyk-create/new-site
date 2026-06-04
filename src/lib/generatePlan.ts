@@ -9,8 +9,10 @@ import {
 } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { sendPlanReady } from "@/lib/emails/send";
-import type { QuizAnswers } from "@/types";
+import type { PhenotypeId, QuizAnswers } from "@/types";
 import { describe, detectPatterns, type ProfileLine } from "@/lib/signals";
+import { inferPhenotype } from "@/lib/inferPhenotype";
+import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 
 export type GenerateTier = "free" | "pro" | "coach";
 export type GenerateLang = "en" | "ru";
@@ -325,8 +327,33 @@ export async function generatePlan(params: {
   const validator = isPaid ? ProPlanV2Schema : FreeReportSchema;
   const retryConfig = isPaid ? RETRY_CONFIG_PRO : RETRY_CONFIG_FREE;
 
-  const userPrompt = `${buildUserProfile(answers, lang)}
+  // 5a + 5b (paid only): pin the phenotype + week skeleton deterministically so
+  // the paid plan can never show a different phenotype or week themes than the
+  // free preview (which uses the same inferPhenotype + getPhenotypePreview). The
+  // model writes the plan FOR this phenotype; the values are also force-written
+  // back after validation below as a guarantee. Free path is unaffected.
+  const phenotypeId: PhenotypeId | null = isPaid ? inferPhenotype(answers) : null;
+  const weekTitles: string[] | null = phenotypeId
+    ? getPhenotypePreview(phenotypeId).weekThemes.map((th) => th[lang])
+    : null;
 
+  const pinnedPhenotypeBlock =
+    phenotypeId && weekTitles
+      ? `
+PRE-DETERMINED PHENOTYPE: "${phenotypeId}"
+This phenotype was computed deterministically from the answers above. Build the entire plan for it using the matching PHENOTYPE FRAMEWORK entry, and set the JSON "phenotypeId" field to exactly "${phenotypeId}". Do not choose a different phenotype.
+
+REQUIRED WEEK TITLES — structure the plan as exactly these 4 weeks, in order, and use these titles verbatim:
+- W1: ${weekTitles[0]}
+- W2: ${weekTitles[1]}
+- W3: ${weekTitles[2]}
+- W4: ${weekTitles[3]}
+Write focus, nutritionFocus, stressPractices, and keyActions for each week, personalized to the user and progressing across the 4 weeks — but keep these exact week titles.
+`
+      : "";
+
+  const userPrompt = `${buildUserProfile(answers, lang)}
+${pinnedPhenotypeBlock}
 Write your final output in ${langName}.
 
 Begin with a <thinking> block analyzing this user's phenotype, root causes, and supplement selection (in English is fine). Then, on a new line after the closing </thinking> tag, output a JSON object that exactly matches this shape:
@@ -449,6 +476,22 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
       JSON.stringify(parsed, null, 2)
     );
     return { ok: false, status: 502, error: "schema validation failed", detail };
+  }
+
+  // Defense-in-depth (paid only): force the phenotype id + the 4 week titles to
+  // the deterministic values, regardless of what the model echoed. This makes
+  // the paid dashboard's identity (hero/chart/name) and week themes provably
+  // equal to the free preview. The prompt aligns the CONTENT; this guarantees
+  // the IDENTITY.
+  if (phenotypeId && weekTitles) {
+    const plan = validation.data as {
+      phenotypeId: PhenotypeId;
+      weeks: { title: string }[];
+    };
+    plan.phenotypeId = phenotypeId;
+    plan.weeks.forEach((week, i) => {
+      if (weekTitles[i]) week.title = weekTitles[i];
+    });
   }
 
   return { ok: true, data: validation.data };
