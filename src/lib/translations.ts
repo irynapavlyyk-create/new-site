@@ -622,7 +622,7 @@ export const t = {
     supplementStack: { en: "Your supplement stack", ru: "Твой стек добавок" },
     supplementMeta: {
       en: "{n} items · two retailers each",
-      ru: "{n} позиций · по два магазина",
+      ru: "{n} шт. · по два магазина",
     },
     tapWeek: {
       en: "Tap a week to view its detail",
