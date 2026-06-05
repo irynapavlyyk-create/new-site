@@ -43,7 +43,7 @@ export default function PhenotypeDashboard({
 
   return (
     <>
-      <Navbar />
+      <Navbar showLanguageSwitcher={false} />
       <main className="min-h-screen pt-28 pb-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           {/* TOPBAR — Phenotype card + Progress card */}

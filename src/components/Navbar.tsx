@@ -11,7 +11,11 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
 import UserAvatar from "./UserAvatar";
 
-export default function Navbar() {
+export default function Navbar({
+  showLanguageSwitcher = true,
+}: {
+  showLanguageSwitcher?: boolean;
+} = {}) {
   const { lang } = useI18n();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -133,7 +137,7 @@ export default function Navbar() {
 
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <ThemeToggle />
-              <LanguageSwitcher />
+              {showLanguageSwitcher && <LanguageSwitcher />}
 
               {/* Desktop auth area */}
               <div className="hidden lg:flex items-center gap-3">
@@ -246,6 +250,7 @@ export default function Navbar() {
           profileLabel={pick(t.nav.profile, lang)}
           user={user}
           isLoading={isLoading}
+          showLanguageSwitcher={showLanguageSwitcher}
           onClose={() => setOpen(false)}
           onSignOut={handleSignOut}
         />
@@ -338,6 +343,7 @@ function MobileMenu({
   profileLabel,
   user,
   isLoading,
+  showLanguageSwitcher,
   onClose,
   onSignOut,
 }: {
@@ -351,6 +357,7 @@ function MobileMenu({
   profileLabel: string;
   user: User | null;
   isLoading: boolean;
+  showLanguageSwitcher: boolean;
   onClose: () => void;
   onSignOut: () => void;
 }) {
@@ -473,7 +480,7 @@ function MobileMenu({
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <LanguageSwitcher />
+          {showLanguageSwitcher && <LanguageSwitcher />}
         </div>
 
         {!isLoading && !user && (

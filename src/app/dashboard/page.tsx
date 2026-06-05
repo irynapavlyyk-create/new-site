@@ -5,7 +5,8 @@ import DashboardClient from "./DashboardClient";
 import PhenotypeDashboard from "./PhenotypeDashboard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import type { ProPlan, ProPlanV2 } from "@/types";
+import { FixedLangProvider } from "@/lib/i18n-context";
+import type { Lang, ProPlan, ProPlanV2 } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -49,13 +50,19 @@ export default async function DashboardPage({
 
   // TODO(phase-2): remove this branch when the new V2 dashboard UI ships.
   if (isV2Plan) {
+    // Lock the dashboard to the plan's generation language: the AI content is
+    // single-language, so the chrome must match it (legacy rows lack the column
+    // → fall back to "en"). The EN/RU toggle is hidden here (it'd be a no-op).
+    const planLang = (plan?.language as Lang | null) ?? "en";
     return (
-      <PhenotypeDashboard
-        plan={planData as ProPlanV2}
-        userEmail={user.email ?? null}
-        planTier={(plan?.tier as string | null) ?? null}
-        planCreatedAt={plan?.created_at as string}
-      />
+      <FixedLangProvider lang={planLang}>
+        <PhenotypeDashboard
+          plan={planData as ProPlanV2}
+          userEmail={user.email ?? null}
+          planTier={(plan?.tier as string | null) ?? null}
+          planCreatedAt={plan?.created_at as string}
+        />
+      </FixedLangProvider>
     );
   }
 

@@ -28,3 +28,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 }
 
 export const useI18n = () => useContext(I18nContext);
+
+/**
+ * Pins the i18n context to a fixed language for a subtree, with a no-op setLang.
+ * Used to lock the paid V2 dashboard to the plan's generation language so the
+ * single-language AI content and chrome never disagree.
+ */
+export function FixedLangProvider({ lang, children }: { lang: Lang; children: ReactNode }) {
+  return <I18nContext.Provider value={{ lang, setLang: () => {} }}>{children}</I18nContext.Provider>;
+}
