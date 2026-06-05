@@ -77,11 +77,6 @@ export type QuizAnswers = {
 
 export type QuizKey = keyof QuizAnswers;
 
-export type FreeReport = {
-  topIssues: { title: string; description: string }[];
-  tips: string[];
-};
-
 export type ProPlan = {
   summary: string;
   morningProtocol: string[];

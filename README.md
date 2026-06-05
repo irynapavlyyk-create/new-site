@@ -42,7 +42,6 @@ src/
 │   ├── result/page.tsx       — бесплатный отчёт + блюр PRO
 │   ├── dashboard/page.tsx    — личный кабинет
 │   └── api/
-│       ├── analyze/          — Claude API
 │       ├── checkout/         — Stripe Checkout
 │       └── webhook/          — Stripe webhook
 ├── components/               — Navbar, Hero, Pricing, FAQ, etc.

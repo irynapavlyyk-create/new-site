@@ -424,11 +424,6 @@ export const t = {
     leaks: { en: "Top energy leaks", ru: "Главные утечки энергии" },
     tips: { en: "Your 5 targeted tips", ru: "5 точечных советов" },
     whatWeNoticed: { en: "What we noticed", ru: "Что мы заметили" },
-    lockedTitle: { en: "The full plan is ready", ru: "Полный план готов" },
-    lockedSub: {
-      en: "Unlock PRO and get the 30-day protocol — one-time €9.99.",
-      ru: "Открой PRO и получи 30-дневный протокол — разово €9.99.",
-    },
     locked: {
       badge: {
         en: "🔒 Locked — €9.99 to unlock",
@@ -482,33 +477,6 @@ export const t = {
         unlockCta: { en: "Unlock now — €9.99", ru: "Открыть — €9.99" },
         dismiss: { en: "Maybe later", ru: "Может позже" },
         close: { en: "Close", ru: "Закрыть" },
-      },
-    },
-    teaser: {
-      heading: { en: "⚡ Your cortisol map", ru: "⚡ Твоя карта кортизола" },
-      line1: {
-        en: "Your cortisol pattern shows a late-evening spike — this is why you can't fall asleep before 1am and feel groggy until noon.",
-        ru: "Твой кортизол пикует поздно вечером — именно поэтому ты не можешь заснуть до часу ночи и тупишь до полудня.",
-      },
-      line2: {
-        en: "The fix isn't melatonin. It's a 3-step pre-sleep reset built around your specific stress triggers.",
-        ru: "Мелатонин тут не поможет. Нужен 3-шаговый ритуал сна, собранный под твои конкретные триггеры стресса.",
-      },
-      line3: {
-        en: "Step 1 — between 18:30 and 19:15, before cortisol starts climbing, you need to shift...",
-        ru: "Шаг 1 — между 18:30 и 19:15, до того как кортизол начнёт расти, нужно перевести...",
-      },
-      line4: {
-        en: "...this moves the nervous system into parasympathetic dominance and blocks the...",
-        ru: "...это переводит нервную систему в парасимпатический режим и блокирует...",
-      },
-      line5: {
-        en: "...combined with a specific supplement stack (magnesium glycinate + L-theanine + ...), dosed at...",
-        ru: "...в сочетании со стеком добавок (магний глицинат + L-теанин + ...), дозировка...",
-      },
-      line6: {
-        en: "...result: you fall asleep within 18 minutes, and morning cortisol lands in the ideal window...",
-        ru: "...результат: засыпаешь за 18 минут, а утренний кортизол попадает в идеальное окно...",
       },
     },
     unlock: { en: "Unlock PRO — €9.99", ru: "Открыть PRO — €9.99" },

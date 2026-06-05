@@ -1,12 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import {
-  anthropic,
-  MODEL,
-  FREE_SYSTEM,
-  PRO_SYSTEM,
-  FREE_SCHEMA,
-} from "@/lib/claude";
+import { anthropic, MODEL, PRO_SYSTEM } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { sendPlanReady } from "@/lib/emails/send";
 import type { PhenotypeId, QuizAnswers } from "@/types";
@@ -14,7 +8,7 @@ import { describe, detectPatterns, type ProfileLine } from "@/lib/signals";
 import { inferPhenotype } from "@/lib/inferPhenotype";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 
-export type GenerateTier = "free" | "pro" | "coach";
+export type GenerateTier = "pro" | "coach";
 export type GenerateLang = "en" | "ru";
 
 const ProPlanSchema = z.object({
@@ -128,18 +122,6 @@ const PRO_SCHEMA_V2 = `{
   ]
 }`;
 
-const FreeReportSchema = z.object({
-  topIssues: z
-    .array(
-      z.object({
-        title: z.string().min(1),
-        description: z.string().min(1),
-      })
-    )
-    .min(1),
-  tips: z.array(z.string().min(1)).min(1),
-});
-
 function buildUserProfile(answers: QuizAnswers, lang: GenerateLang): string {
   const keys: (keyof QuizAnswers)[] = [
     "chronotype",
@@ -210,15 +192,8 @@ type RetryConfig = {
   backoffMs: number[];
   /** Hard stop: refuse to start a new attempt if elapsed exceeds this. */
   budgetMs: number;
-  /** Used in log lines: "free" / "pro". */
+  /** Used in log lines, e.g. "pro". */
   label: string;
-};
-
-const RETRY_CONFIG_FREE: RetryConfig = {
-  maxAttempts: 5,
-  backoffMs: [2000, 4000, 8000, 15000],
-  budgetMs: 45_000,
-  label: "free",
 };
 
 const RETRY_CONFIG_PRO: RetryConfig = {
@@ -320,19 +295,18 @@ export async function generatePlan(params: {
     return { ok: false, status: 500, error: "anthropic not configured" };
   }
 
-  const isPaid = tier === "pro" || tier === "coach";
   const langName = lang === "ru" ? "Russian (русский)" : "English";
-  const system = isPaid ? PRO_SYSTEM : FREE_SYSTEM;
-  const schema = isPaid ? PRO_SCHEMA_V2 : FREE_SCHEMA;
-  const validator = isPaid ? ProPlanV2Schema : FreeReportSchema;
-  const retryConfig = isPaid ? RETRY_CONFIG_PRO : RETRY_CONFIG_FREE;
+  const system = PRO_SYSTEM;
+  const schema = PRO_SCHEMA_V2;
+  const validator = ProPlanV2Schema;
+  const retryConfig = RETRY_CONFIG_PRO;
 
-  // 5a + 5b (paid only): pin the phenotype + week skeleton deterministically so
-  // the paid plan can never show a different phenotype or week themes than the
-  // free preview (which uses the same inferPhenotype + getPhenotypePreview). The
+  // 5a + 5b: pin the phenotype + week skeleton deterministically so the paid
+  // plan can never show a different phenotype or week themes than the free
+  // preview (which uses the same inferPhenotype + getPhenotypePreview). The
   // model writes the plan FOR this phenotype; the values are also force-written
-  // back after validation below as a guarantee. Free path is unaffected.
-  const phenotypeId: PhenotypeId | null = isPaid ? inferPhenotype(answers) : null;
+  // back after validation below as a guarantee.
+  const phenotypeId: PhenotypeId | null = inferPhenotype(answers);
   const weekTitles: string[] | null = phenotypeId
     ? getPhenotypePreview(phenotypeId).weekThemes.map((th) => th[lang])
     : null;
@@ -371,7 +345,7 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
     response = await callAnthropicWithRetry(
       {
         model: MODEL,
-        max_tokens: isPaid ? 8000 : 3000,
+        max_tokens: 8000,
         temperature: 1.0,
         // cache_control on system text blocks is supported at runtime (prompt caching
         // is GA) but the SDK types in ^0.32.1 omit it on TextBlockParam — cast to
@@ -413,7 +387,7 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
   if (response.stop_reason === "max_tokens") {
     console.warn("[generatePlan] response truncated by max_tokens cap", {
       tier,
-      max_tokens: isPaid ? 8000 : 3000,
+      max_tokens: 8000,
       output_tokens: usage?.output_tokens,
     });
     return {
@@ -580,9 +554,9 @@ export async function generateAndSavePlan(params: {
     console.log("[generateAndSavePlan] saved error marker for session", sessionId);
   }
 
-  // Plan-ready email — only when generation succeeded for a paid tier.
+  // Plan-ready email — only when generation succeeded.
   // Best-effort: never blocks; logs success/failure.
-  if (!result.ok || tier === "free") return;
+  if (!result.ok) return;
 
   const planId = insertedPlan?.id as string | undefined;
   if (!planId) {
