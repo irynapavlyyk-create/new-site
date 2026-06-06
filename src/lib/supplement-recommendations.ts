@@ -18,6 +18,14 @@ export function amazonUrl(asin: string): string {
   return `https://www.amazon.com/dp/${asin}/?tag=${AMAZON_AFFILIATE_TAG}`;
 }
 
+/**
+ * Plain iHerb search URL — NOT affiliate yet (program not approved). Affiliate
+ * upgrade lands later via Product.iherbId.
+ */
+export function iherbSearchUrl(query: string): string {
+  return `https://www.iherb.com/search?kw=${encodeURIComponent(query)}`;
+}
+
 export type Product = {
   brand: string;
   name: string;
