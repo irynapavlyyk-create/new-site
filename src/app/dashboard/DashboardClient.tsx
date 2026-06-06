@@ -18,16 +18,19 @@ export default function DashboardClient({
   userEmail,
   initialPlan = null,
   initialPlanTier = null,
-  fromStripe = false,
+  sessionId = null,
 }: {
   userEmail?: string | null;
   initialPlan?: ProPlan | null;
   initialPlanTier?: string | null;
-  fromStripe?: boolean;
+  sessionId?: string | null;
 }) {
   const { lang } = useI18n();
   void userEmail;
   void initialPlanTier;
+
+  // Arrived from a fresh purchase (Stripe success_url carries session_id).
+  const fromStripe = Boolean(sessionId);
 
   // Supabase returns auth errors (e.g. expired magic link) via URL hash
   // because it uses the implicit flow. Server code can't see the hash,
@@ -46,7 +49,7 @@ export default function DashboardClient({
   const planMissing = !initialPlan || !initialPlan.summary;
 
   if (planMissing && fromStripe) {
-    return <PlanForgingScreen lang={lang} />;
+    return <PlanForgingScreen lang={lang} sessionId={sessionId} />;
   }
 
   if (planMissing) {
@@ -147,7 +150,13 @@ export default function DashboardClient({
   );
 }
 
-function PlanForgingScreen({ lang }: { lang: "en" | "ru" }) {
+function PlanForgingScreen({
+  lang,
+  sessionId = null,
+}: {
+  lang: "en" | "ru";
+  sessionId?: string | null;
+}) {
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
   const [stopped, setStopped] = useState(false);   // 401: stop silently
@@ -179,7 +188,13 @@ function PlanForgingScreen({ lang }: { lang: "en" | "ru" }) {
     const tick = async () => {
       if (cancelled) return;
       try {
-        const res = await fetch("/api/plan-status", { cache: "no-store" });
+        // Scope the poll to this purchase so it waits for THIS plan, not a
+        // prior one. The reload on ready preserves ?session_id, so the SSR
+        // re-render is scoped to the same session.
+        const url = sessionId
+          ? `/api/plan-status?session_id=${encodeURIComponent(sessionId)}`
+          : "/api/plan-status";
+        const res = await fetch(url, { cache: "no-store" });
         if (cancelled) return;
         if (res.status === 401) {
           setStopped(true);
@@ -206,7 +221,7 @@ function PlanForgingScreen({ lang }: { lang: "en" | "ru" }) {
       cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [ready, stopped, timedOut]);
+  }, [ready, stopped, timedOut, sessionId]);
 
   // Safety cap — flip to timedOut after SAFETY_CAP_MS so the polling
   // loop and the progress ticker both freeze.

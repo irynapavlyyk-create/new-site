@@ -16,7 +16,7 @@ export default async function DashboardPage({
   searchParams: Promise<{ session_id?: string }>;
 }) {
   const params = await searchParams;
-  const fromStripe = Boolean(params.session_id);
+  const sessionId = params.session_id ?? null;
 
   const supabase = await createClient();
   const {
@@ -27,10 +27,14 @@ export default async function DashboardPage({
     redirect("/login?redirect=/dashboard");
   }
 
-  const { data: plan, error } = await supabase
-    .from("plans")
-    .select("*")
-    .eq("user_id", user.id)
+  // Session-scope when arriving from a fresh purchase so the buyer sees THEIR
+  // plan (and the forging screen until it lands), not a prior plan. Without a
+  // session_id (returning user via the Dashboard link) fall back to their most
+  // recent plan.
+  let query = supabase.from("plans").select("*").eq("user_id", user.id);
+  if (sessionId) query = query.eq("stripe_session_id", sessionId);
+
+  const { data: plan, error } = await query
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -81,7 +85,7 @@ export default async function DashboardPage({
       userEmail={user.email ?? null}
       initialPlan={initialPlan}
       initialPlanTier={initialPlanTier}
-      fromStripe={fromStripe}
+      sessionId={sessionId}
     />
   );
 }
