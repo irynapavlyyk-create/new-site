@@ -651,6 +651,15 @@ export const t = {
       },
       learnMore: { en: "Full disclaimer", ru: "Полный текст" },
     },
+    supplement: {
+      good: { en: "Good", ru: "Базовый" },
+      premium: { en: "Premium", ru: "Премиум" },
+      findOnAmazon: { en: "Find on Amazon", ru: "Найти на Amazon" },
+    },
+    affiliateDisclosure: {
+      en: "As an Amazon Associate, EnergyForge earns from qualifying purchases — at no extra cost to you.",
+      ru: "Как участник партнёрской программы Amazon, EnergyForge получает комиссию с соответствующих покупок — без доплаты с вашей стороны.",
+    },
   },
   paymentSuccess: {
     title: { en: "Payment Successful!", ru: "Платёж прошёл!" },

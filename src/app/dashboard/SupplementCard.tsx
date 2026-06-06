@@ -3,6 +3,7 @@
 import type { SupplementItem } from "@/types";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick, format } from "@/lib/translations";
+import { resolveSupplement, amazonSearchUrl } from "@/lib/supplement-recommendations";
 
 type Props = {
   supplement: SupplementItem;
@@ -44,10 +45,10 @@ export default function SupplementCard({ supplement, index }: Props) {
   const { lang } = useI18n();
   const c = COLOR_CYCLE[index % COLOR_CYCLE.length];
 
-  // Search URLs — live retailer search, not affiliate yet (Phase 3 task).
-  const query = encodeURIComponent(supplement.name);
-  const iherbUrl = `https://www.iherb.com/search?kw=${query}`;
-  const amazonUrl = `https://www.amazon.com/s?k=${query}`;
+  // Map the AI's free-text name to a curated Good/Premium pair (Amazon-only for
+  // now; iHerb returns later via iherbId). Unknown actives fall back to a single
+  // tagged Amazon search on the raw name.
+  const entry = resolveSupplement(supplement.name);
 
   return (
     <article className="glass p-5 grid grid-cols-[80px_1fr] gap-5 items-start">
@@ -78,23 +79,49 @@ export default function SupplementCard({ supplement, index }: Props) {
           {supplement.note}
         </p>
 
+        {entry?.caveat && (
+          <div
+            role="note"
+            className="flex items-start gap-2 mb-3.5 px-3 py-2 rounded-lg bg-amber/[0.08]"
+            style={{ border: "1px solid rgba(245, 158, 11, 0.35)" }}
+          >
+            <span className="text-sm flex-shrink-0 leading-none mt-0.5">⚠️</span>
+            <p className="text-[11px] text-amber leading-relaxed">
+              {pick(entry.caveat, lang)}
+            </p>
+          </div>
+        )}
+
         <div className="flex gap-2">
-          <a
-            href={iherbUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex-1 text-center px-3 py-1.5 rounded-lg ${c.btnBg} ${c.text} ${c.btnHover} transition text-[11px] font-bold`}
-          >
-            iHerb →
-          </a>
-          <a
-            href={amazonUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 text-center px-3 py-1.5 rounded-lg bg-white/5 text-muted hover:bg-white/10 hover:text-white transition text-[11px] font-bold"
-          >
-            Amazon →
-          </a>
+          {entry ? (
+            <>
+              <a
+                href={amazonSearchUrl(entry.good.searchQuery)}
+                target="_blank"
+                rel="sponsored nofollow noopener"
+                className={`flex-1 text-center px-3 py-1.5 rounded-lg ${c.btnBg} ${c.text} ${c.btnHover} transition text-[11px] font-bold leading-tight`}
+              >
+                {pick(t.dashboard.supplement.good, lang)} · {entry.good.brand} →
+              </a>
+              <a
+                href={amazonSearchUrl(entry.premium.searchQuery)}
+                target="_blank"
+                rel="sponsored nofollow noopener"
+                className="flex-1 text-center px-3 py-1.5 rounded-lg bg-white/5 text-muted hover:bg-white/10 hover:text-white transition text-[11px] font-bold leading-tight"
+              >
+                {pick(t.dashboard.supplement.premium, lang)} · {entry.premium.brand} →
+              </a>
+            </>
+          ) : (
+            <a
+              href={amazonSearchUrl(supplement.name)}
+              target="_blank"
+              rel="sponsored nofollow noopener"
+              className={`flex-1 text-center px-3 py-1.5 rounded-lg ${c.btnBg} ${c.text} ${c.btnHover} transition text-[11px] font-bold`}
+            >
+              {pick(t.dashboard.supplement.findOnAmazon, lang)} →
+            </a>
+          )}
         </div>
       </div>
     </article>

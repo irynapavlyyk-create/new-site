@@ -12,6 +12,7 @@ import WeeklyProgram from "./WeeklyProgram";
 import ProtocolCard from "./ProtocolCard";
 import SupplementCard from "./SupplementCard";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
+import AffiliateDisclosure from "@/components/AffiliateDisclosure";
 import PhenotypeHero from "@/components/PhenotypeHero";
 
 type Props = {
@@ -109,6 +110,7 @@ export default function PhenotypeDashboard({
               ))}
             </div>
             <MedicalDisclaimer />
+            <AffiliateDisclosure />
           </section>
         </div>
       </main>
