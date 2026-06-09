@@ -7,6 +7,7 @@ import type { PhenotypeId, QuizAnswers } from "@/types";
 import { describe, detectPatterns, type ProfileLine } from "@/lib/signals";
 import { inferPhenotype } from "@/lib/inferPhenotype";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
+import { getPhenotype, PHENOTYPES } from "@/lib/phenotypes";
 
 export type GenerateTier = "pro" | "coach";
 export type GenerateLang = "en" | "ru";
@@ -584,12 +585,25 @@ export async function generateAndSavePlan(params: {
   const summary = extractSummary(result.data, lang);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.energyforge.app";
 
+  // Personalize with the plan's phenotype display name (localized). result.data
+  // is validated ProPlanV2, but typed unknown here — guard before lookup and
+  // skip the personalization gracefully if the id is missing/unknown.
+  const rawPhenotypeId =
+    result.data && typeof result.data === "object" && "phenotypeId" in result.data
+      ? (result.data as Record<string, unknown>).phenotypeId
+      : null;
+  const phenotypeName =
+    typeof rawPhenotypeId === "string" && rawPhenotypeId in PHENOTYPES
+      ? getPhenotype(rawPhenotypeId as PhenotypeId).name[lang]
+      : undefined;
+
   const emailResult = await sendPlanReady(
     {
       to: userEmail,
       locale: lang,
       dashboardUrl: `${siteUrl}/dashboard`,
       planPreview: summary,
+      phenotypeName,
     },
     `plan-ready:${planId}`
   );

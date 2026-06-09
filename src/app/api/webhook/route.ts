@@ -228,7 +228,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       to: email,
       locale: language,
       tier,
-      dashboardUrl: `${siteUrl}/dashboard`,
+      // Land the buyer on THEIR plan (session-scoped → forging screen until it
+      // lands), not the most-recent-by-user fallback. Bare /dashboard if absent.
+      dashboardUrl: sessionId
+        ? `${siteUrl}/dashboard?session_id=${sessionId}`
+        : `${siteUrl}/dashboard`,
     },
     `purchase-confirmation:${sessionId}`
   );

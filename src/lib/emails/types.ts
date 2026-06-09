@@ -14,6 +14,8 @@ export type PurchaseConfirmationContext = BaseEmailContext & {
 export type PlanReadyContext = BaseEmailContext & {
   dashboardUrl: string;
   planPreview: string;
+  /** Localized phenotype display name; omit to skip the personalization line. */
+  phenotypeName?: string;
 };
 
 export type EmailSendResult = {

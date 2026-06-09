@@ -21,15 +21,24 @@ function renderBullet(text: string): string {
   return `<p style="font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;font-size:15px;line-height:1.6;margin:0 0 10px 0;">${escapeHtml(text)}</p>`;
 }
 
+// Renders the phenotype line with the type name accented, splitting the
+// localized template around its {name} placeholder.
+function renderPhenotypeLine(template: string, name: string): string {
+  const [before, after] = template.split("{name}");
+  return `<p style="font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;font-size:16px;line-height:1.6;margin:0 0 20px 0;">${escapeHtml(before ?? "")}<strong style="color:#F59E0B;">${escapeHtml(name)}</strong>${escapeHtml(after ?? "")}</p>`;
+}
+
 export function renderPlanReady(
   ctx: PlanReadyContext
 ): { subject: string; html: string; text: string } {
   const s = emailStrings[ctx.locale].planReady;
   const preview = truncatePreview(ctx.planPreview);
+  const phenotypeName = ctx.phenotypeName?.trim();
 
   const innerHtml = `${renderHeader()}
 <p style="font-family:Arial,Helvetica,sans-serif;font-size:16px;color:#1A1A1A;margin:0 0 8px 0;">${escapeHtml(s.greeting)}</p>
 <h1 style="font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;font-weight:700;font-size:26px;line-height:1.3;margin:0 0 16px 0;">${escapeHtml(s.heading)}</h1>
+${phenotypeName ? renderPhenotypeLine(s.phenotypeIntro, phenotypeName) : ""}
 <p style="font-family:Arial,Helvetica,sans-serif;color:#555555;font-size:16px;line-height:1.6;margin:0 0 20px 0;">${escapeHtml(s.intro)}</p>
 <div style="margin:0 0 24px 0;padding:20px;background:#F8F8F5;border:1px solid #E5E5E0;border-radius:8px;">
   <p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#999999;letter-spacing:0.05em;text-transform:uppercase;margin:0 0 8px 0;">${escapeHtml(s.previewLabel)}</p>
@@ -52,6 +61,9 @@ ${renderFooter(ctx.locale)}`;
     "",
     s.heading,
     "",
+    ...(phenotypeName
+      ? [s.phenotypeIntro.replace("{name}", phenotypeName), ""]
+      : []),
     s.intro,
     "",
     `${s.previewLabel}`,
