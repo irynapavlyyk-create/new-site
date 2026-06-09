@@ -105,11 +105,30 @@ function LoginForm() {
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: magicEmail,
       options: {
+        // Don't mint a new empty account for an unknown/typo'd email — that
+        // silently signs the user into a planless dashboard. Surface a clear
+        // "no account" message instead. (Signup flow is unaffected.)
+        shouldCreateUser: false,
         emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
       },
     });
     if (otpError) {
-      setMagicError(otpError.message || pick(t.auth.magicLinkError, lang));
+      // With shouldCreateUser:false, an unknown email comes back as an error
+      // (e.g. otp_disabled / 422 / "Signups not allowed"). Map that to the
+      // friendly "no account" copy; anything else is a generic send failure.
+      const e = otpError as { message?: string; status?: number; code?: string };
+      const msg = (e.message || "").toLowerCase();
+      const noAccount =
+        e.code === "otp_disabled" ||
+        e.status === 422 ||
+        msg.includes("not allowed") ||
+        msg.includes("not found") ||
+        msg.includes("signups");
+      setMagicError(
+        noAccount
+          ? pick(t.auth.magicLinkNoAccount, lang)
+          : pick(t.auth.magicLinkError, lang)
+      );
       setLoading(null);
       return;
     }

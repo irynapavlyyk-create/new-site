@@ -376,6 +376,10 @@ export const t = {
       en: "Couldn't send the magic link. Please try again.",
       ru: "Не удалось отправить ссылку. Попробуйте ещё раз.",
     },
+    magicLinkNoAccount: {
+      en: "No account found for that email. Check the spelling, or use the email you purchased with.",
+      ru: "Аккаунт с такой почтой не найден. Проверьте написание или войдите той почтой, которой оплачивали.",
+    },
     clickToLoginTitle: {
       en: "One more click to sign you in",
       ru: "Один клик до входа",

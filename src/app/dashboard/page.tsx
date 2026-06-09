@@ -24,7 +24,13 @@ export default async function DashboardPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?redirect=/dashboard");
+    // Preserve session_id through login so the buyer returns to THEIR plan
+    // (session-scoped → forging screen until ready), not the most-recent
+    // fallback. login → emailRedirectTo → /auth/callback?next=… honors this.
+    const target = sessionId
+      ? `/dashboard?session_id=${sessionId}`
+      : "/dashboard";
+    redirect(`/login?redirect=${encodeURIComponent(target)}`);
   }
 
   // Session-scope when arriving from a fresh purchase so the buyer sees THEIR
