@@ -561,6 +561,16 @@ export const t = {
       ru: ["06:00", "10:00", "14:00", "18:00", "22:00"],
     },
   },
+  // PDF-export-only section labels not covered by dashboard/chart strings.
+  pdf: {
+    phenotypeLabel: { en: "Your phenotype", ru: "Твой фенотип" },
+    insights: { en: "Key insights", ru: "Ключевые наблюдения" },
+    keyActions: { en: "Key actions", ru: "Ключевые действия" },
+    disclaimer: {
+      en: "Not medical advice. Consult a healthcare professional before changing supplements or routines.",
+      ru: "Не медицинский совет. Проконсультируйтесь с врачом перед изменением добавок или режима.",
+    },
+  },
   dashboard: {
     welcome: { en: "Welcome to your plan", ru: "Добро пожаловать в твой план" },
     sub: { en: "Your personal 30-day energy protocol.", ru: "Твой персональный 30-дневный протокол." },

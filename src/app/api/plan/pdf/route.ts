@@ -45,13 +45,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const lang = (plan?.language as Lang | null) ?? "en";
   const phenotype = getPhenotype(v2.phenotypeId);
 
+  const generatedAt = new Date().toLocaleDateString(
+    lang === "ru" ? "ru-RU" : "en-US",
+    { year: "numeric", month: "long", day: "numeric" },
+  );
+
   registerFonts();
   // renderToBuffer is typed to want a <Document> element directly; a wrapper
   // component's element needs a cast through the expected DocumentProps shape.
   const element = createElement(PlanDocument, {
-    phenotypeName: phenotype.name[lang],
-    summary: v2.summary,
+    plan: v2,
+    phenotype,
     lang,
+    generatedAt,
   }) as unknown as ReactElement<DocumentProps>;
   const pdf = await renderToBuffer(element);
 

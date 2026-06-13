@@ -71,6 +71,7 @@ export default async function DashboardPage({
           userEmail={user.email ?? null}
           planTier={(plan?.tier as string | null) ?? null}
           planCreatedAt={plan?.created_at as string}
+          sessionId={sessionId}
         />
       </FixedLangProvider>
     );

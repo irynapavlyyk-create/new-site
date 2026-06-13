@@ -14,12 +14,14 @@ import SupplementCard from "./SupplementCard";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 import AffiliateDisclosure from "@/components/AffiliateDisclosure";
 import PhenotypeHero from "@/components/PhenotypeHero";
+import { PdfIcon } from "@/components/icons";
 
 type Props = {
   plan: ProPlanV2;
   userEmail: string | null;
   planTier: string | null;
   planCreatedAt: string;
+  sessionId?: string | null;
 };
 
 export default function PhenotypeDashboard({
@@ -27,6 +29,7 @@ export default function PhenotypeDashboard({
   userEmail,
   planTier,
   planCreatedAt,
+  sessionId = null,
 }: Props) {
   const { lang } = useI18n();
   const phenotype = getPhenotype(plan.phenotypeId);
@@ -114,8 +117,13 @@ export default function PhenotypeDashboard({
           </section>
 
           <div className="flex justify-center">
-            <a href="/api/plan/pdf" download className="btn-ghost">
-              🖨 {pick(t.dashboard.downloadPdf, lang)}
+            <a
+              href={`/api/plan/pdf${sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ""}`}
+              download
+              className="btn-ghost inline-flex items-center gap-2"
+            >
+              <PdfIcon className="w-4 h-4" />
+              {pick(t.dashboard.downloadPdf, lang)}
             </a>
           </div>
         </div>
