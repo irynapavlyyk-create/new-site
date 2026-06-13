@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
 
   // Header
   header: { flexDirection: "row", alignItems: "center", marginBottom: 28 },
-  brand: { fontSize: 18, fontWeight: 700, color: INK, letterSpacing: -0.3 },
+  brand: { fontSize: 18, fontWeight: 700, color: INK },
   accentBar: { width: 32, height: 4, borderRadius: 2, backgroundColor: AMBER, marginLeft: 10 },
 
   // Section
@@ -56,8 +56,11 @@ const styles = StyleSheet.create({
   // Phenotype identity
   labelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 4 },
   shortCode: { fontSize: 8, fontWeight: 700, color: MUTED, letterSpacing: 1 },
-  phenoName: { fontSize: 26, fontWeight: 700, color: INK, letterSpacing: -0.5 },
-  underline: { width: 110, height: 3, borderRadius: 2, backgroundColor: ORANGE, marginTop: 5, marginBottom: 10 },
+  // Explicit lineHeight + marginBottom give the name a deterministic box so the
+  // underline (its own block below) can't overlap. No negative letterSpacing —
+  // it triggers leading/trailing glyph clipping in @react-pdf.
+  phenoName: { fontSize: 26, lineHeight: 1.15, fontWeight: 700, color: INK, marginBottom: 8 },
+  underline: { width: 110, height: 3, borderRadius: 2, backgroundColor: ORANGE, marginBottom: 12 },
   subtitle: { fontSize: 11, color: MUTED, lineHeight: 1.5, marginBottom: 14 },
 
   statsRow: { flexDirection: "row", marginBottom: 14 },
@@ -98,8 +101,9 @@ const styles = StyleSheet.create({
   // Mini labeled lists (key actions / nutrition / stress)
   miniList: { marginBottom: 7 },
   miniLabel: { fontSize: 8, fontWeight: 700, color: AMBER, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 },
-  bulletRow: { flexDirection: "row", marginBottom: 2 },
-  bulletMark: { width: 12, fontSize: 9.5, color: AMBER },
+  // Drawn marker — not a "→" text glyph — so the bullet is font-independent.
+  bulletRow: { flexDirection: "row", marginBottom: 2, alignItems: "flex-start" },
+  bulletDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: AMBER, marginTop: 4.5, marginRight: 6 },
   bulletText: { flex: 1, fontSize: 9.5, color: INK, lineHeight: 1.45 },
 
   // Supplements
@@ -141,8 +145,8 @@ function MiniList({ label, items }: { label: string; items: string[] }) {
     <View style={styles.miniList}>
       <Text style={styles.miniLabel}>{label}</Text>
       {items.map((it, i) => (
-        <View key={i} style={styles.bulletRow}>
-          <Text style={styles.bulletMark}>→</Text>
+        <View key={i} style={styles.bulletRow} wrap={false}>
+          <View style={styles.bulletDot} />
           <Text style={styles.bulletText}>{it}</Text>
         </View>
       ))}
