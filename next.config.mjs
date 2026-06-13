@@ -8,6 +8,17 @@ const nextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
     ],
   },
+  experimental: {
+    // @react-pdf/renderer ships yoga.wasm + a Node-only build; let Next require
+    // it at runtime instead of webpack-bundling it (which breaks the wasm load).
+    serverComponentsExternalPackages: ["@react-pdf/renderer"],
+    // The bundled Manrope .ttf files are read from disk at runtime via a
+    // path string, so file tracing can't detect them — force their inclusion
+    // in the /api/plan/pdf serverless function.
+    outputFileTracingIncludes: {
+      "/api/plan/pdf": ["./src/lib/pdf/fonts/**/*.ttf"],
+    },
+  },
 };
 
 export default withSentryConfig(nextConfig, {

@@ -112,6 +112,12 @@ export default function PhenotypeDashboard({
             <MedicalDisclaimer />
             <AffiliateDisclosure />
           </section>
+
+          <div className="flex justify-center">
+            <a href="/api/plan/pdf" download className="btn-ghost">
+              🖨 {pick(t.dashboard.downloadPdf, lang)}
+            </a>
+          </div>
         </div>
       </main>
       <Footer />
