@@ -195,7 +195,7 @@ export default function QuizPage() {
                   isMultiSelect ? "mb-3" : "mb-8"
                 } animate-fade-up`}
               >
-                <span className="gradient-text">
+                <span className="text-ink">
                   {lang === "ru" ? current.qRu : current.qEn}
                 </span>
               </h1>
