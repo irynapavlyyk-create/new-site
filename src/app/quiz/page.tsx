@@ -26,6 +26,50 @@ function toggleMultiSelect(
   return [...current, value];
 }
 
+/**
+ * Purely presentational selection marker for an answer option.
+ * round = radio (single-select), square = checkbox (multi-select).
+ * Theme-aware: brand amber accent (var(--amber)) when selected, a muted
+ * theme-aware outline (var(--text) at low alpha) when not. The check uses
+ * var(--btn-text) — the design system's on-amber contrast color — so it stays
+ * legible on the amber fill in both light and dark themes.
+ */
+function OptionMarker({
+  shape,
+  selected,
+}: {
+  shape: "round" | "square";
+  selected: boolean;
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex-shrink-0 grid place-items-center w-5 h-5 border transition-all duration-150 ${
+        shape === "round" ? "rounded-full" : "rounded-md"
+      }`}
+      style={{
+        borderColor: selected ? "rgb(var(--amber))" : "rgb(var(--text) / 0.3)",
+        backgroundColor: selected ? "rgb(var(--amber))" : "transparent",
+      }}
+    >
+      {selected && shape === "square" && (
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--btn-text)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      )}
+    </span>
+  );
+}
+
 export default function QuizPage() {
   const router = useRouter();
   const { lang } = useI18n();
@@ -149,12 +193,13 @@ export default function QuizPage() {
                       <button
                         key={opt.value}
                         onClick={() => setSleepAnswer("sleepDuration", opt.value)}
-                        className={`glass px-6 py-5 text-left transition-all hover:border-amber/50 hover:translate-x-1 ${
+                        className={`glass flex items-center gap-4 px-6 py-5 text-left transition-all hover:border-amber/50 hover:translate-x-1 ${
                           active ? "!border-amber bg-amber/10" : ""
                         }`}
                         style={{ animationDelay: `${i * 60}ms` }}
                       >
-                        <span className="text-base text-ink">
+                        <OptionMarker shape="round" selected={active} />
+                        <span className={`text-base ${active ? "text-ink" : "text-ink/80"}`}>
                           {lang === "ru" ? opt.labelRu : opt.labelEn}
                         </span>
                       </button>
@@ -173,12 +218,13 @@ export default function QuizPage() {
                       <button
                         key={opt.value}
                         onClick={() => setSleepAnswer("sleepQuality", opt.value)}
-                        className={`glass px-6 py-5 text-left transition-all hover:border-amber/50 hover:translate-x-1 ${
+                        className={`glass flex items-center gap-4 px-6 py-5 text-left transition-all hover:border-amber/50 hover:translate-x-1 ${
                           active ? "!border-amber bg-amber/10" : ""
                         }`}
                         style={{ animationDelay: `${i * 60}ms` }}
                       >
-                        <span className="text-base text-ink">
+                        <OptionMarker shape="round" selected={active} />
+                        <span className={`text-base ${active ? "text-ink" : "text-ink/80"}`}>
                           {lang === "ru" ? opt.labelRu : opt.labelEn}
                         </span>
                       </button>
@@ -215,12 +261,13 @@ export default function QuizPage() {
                       onClick={() =>
                         isMultiSelect ? toggleMulti(opt.value) : chooseSingle(opt.value)
                       }
-                      className={`glass px-6 py-5 text-left transition-all hover:border-amber/50 hover:translate-x-1 ${
+                      className={`glass flex items-center gap-4 px-6 py-5 text-left transition-all hover:border-amber/50 hover:translate-x-1 ${
                         active ? "!border-amber bg-amber/10" : ""
                       }`}
                       style={{ animationDelay: `${i * 60}ms` }}
                     >
-                      <span className="text-base text-ink">
+                      <OptionMarker shape={isMultiSelect ? "square" : "round"} selected={active} />
+                      <span className={`text-base ${active ? "text-ink" : "text-ink/80"}`}>
                         {lang === "ru" ? opt.labelRu : opt.labelEn}
                       </span>
                     </button>
