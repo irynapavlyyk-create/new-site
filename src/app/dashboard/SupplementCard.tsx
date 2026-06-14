@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import type { SupplementItem } from "@/types";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick, format } from "@/lib/translations";
@@ -47,25 +49,47 @@ const COLOR_CYCLE = [
 
 export default function SupplementCard({ supplement, index }: Props) {
   const { lang } = useI18n();
+  const [imgError, setImgError] = useState(false);
   const c = COLOR_CYCLE[index % COLOR_CYCLE.length];
 
   // Map the AI's free-text name to a curated Good/Premium pair (Amazon-only for
   // now; iHerb returns later via iherbId). Unknown actives fall back to a single
   // tagged Amazon search on the raw name.
   const entry = resolveSupplement(supplement.name);
+  const imageSrc = entry?.image;
+  const showImage = Boolean(imageSrc) && !imgError;
 
   return (
-    <article className="glass p-5 grid grid-cols-[80px_1fr] gap-5 items-start">
-      {/* Visual marker — placeholder for AI-generated images in Phase 3 */}
-      <div className={`aspect-square rounded-xl flex items-center justify-center ${c.bgSoft}`}>
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${c.bgIcon}`}>
-          <PillIcon className={c.text} />
-        </div>
-      </div>
+    <article className="glass p-5 flex flex-col">
+      {/* Top row — image tile on the LEFT, text block on the RIGHT, top-aligned
+          so it still reads when the text is taller than the image. */}
+      <div className="flex items-start gap-4 mb-4">
+        {showImage ? (
+          <Image
+            src={imageSrc as string}
+            alt={supplement.name}
+            width={112}
+            height={112}
+            onError={() => setImgError(true)}
+            className="flex-shrink-0 w-28 h-28 object-contain rounded-[14px]"
+            style={{ border: "1px solid var(--border)", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.3)" }}
+          />
+        ) : (
+          // Graceful fallback — same tile, pill icon — when there's no image or
+          // it fails to load (never a broken-image icon).
+          <div
+            className={`flex-shrink-0 w-28 h-28 rounded-[14px] flex items-center justify-center ${c.bgSoft}`}
+            style={{ border: "1px solid var(--border)", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.3)" }}
+          >
+            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${c.bgIcon}`}>
+              <PillIcon className={c.text} />
+            </div>
+          </div>
+        )}
 
-      {/* Content */}
-      <div className="min-w-0">
-        <h3 className="font-bold text-base mb-2 leading-tight">{supplement.name}</h3>
+        {/* Text block */}
+        <div className="min-w-0 flex-1">
+          <h3 className="font-bold text-base mb-2 leading-tight">{supplement.name}</h3>
 
         <div className="flex flex-wrap gap-1.5 mb-3">
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full ${c.bgIcon} ${c.text} font-mono text-[11px] font-bold`}>
@@ -79,11 +103,13 @@ export default function SupplementCard({ supplement, index }: Props) {
           </span>
         </div>
 
-        <p className="text-xs text-muted leading-relaxed mb-3.5 line-clamp-3">
+        <p className="text-xs text-muted leading-relaxed line-clamp-3">
           {supplement.note}
         </p>
+        </div>
+      </div>
 
-        {entry?.caveat && (
+      {entry?.caveat && (
           <div
             role="note"
             className="flex items-start gap-2 mb-3.5 px-3 py-2 rounded-lg bg-amber/[0.08]"
@@ -168,7 +194,6 @@ export default function SupplementCard({ supplement, index }: Props) {
             {pick(t.dashboard.supplement.findOnAmazon, lang)} →
           </a>
         )}
-      </div>
     </article>
   );
 }
