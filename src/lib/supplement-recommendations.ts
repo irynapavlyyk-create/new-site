@@ -383,6 +383,120 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
       ru: "Подбирай дозу по анализам крови (уровень витамина D).",
     },
   },
+
+  chromium: {
+    id: "chromium",
+    image: "/supplements/chromium.png",
+    name: { en: "Chromium", ru: "Хром (пиколинат)" },
+    aliases: ["chromium", "chromium picolinate", "хром", "хром пиколинат"],
+    good: {
+      brand: "NOW Foods",
+      name: "Chromium Picolinate 200 mcg",
+      searchQuery: "NOW Foods Chromium Picolinate 200 mcg",
+    },
+    premium: {
+      brand: "Thorne",
+      name: "Chromium Picolinate",
+      searchQuery: "Thorne Chromium Picolinate",
+    },
+  },
+
+  "alpha-lipoic-acid": {
+    id: "alpha-lipoic-acid",
+    image: "/supplements/alpha-lipoic-acid.png",
+    name: { en: "Alpha-Lipoic Acid", ru: "Альфа-липоевая кислота" },
+    aliases: [
+      "alpha-lipoic acid",
+      "alpha lipoic acid",
+      "альфа-липоевая кислота",
+      "альфа липоевая",
+    ],
+    good: {
+      brand: "Doctor's Best",
+      name: "Alpha-Lipoic Acid 600 mg",
+      searchQuery: "Doctor's Best Alpha-Lipoic Acid 600 mg",
+    },
+    premium: {
+      brand: "Pure Encapsulations",
+      name: "Alpha Lipoic Acid",
+      searchQuery: "Pure Encapsulations Alpha Lipoic Acid",
+    },
+  },
+
+  curcumin: {
+    id: "curcumin",
+    image: "/supplements/curcumin.png",
+    name: { en: "Curcumin", ru: "Куркумин" },
+    aliases: ["curcumin", "turmeric", "curcumin piperine", "куркумин", "куркума"],
+    good: {
+      brand: "NOW Foods",
+      name: "Curcumin (Turmeric Extract)",
+      searchQuery: "NOW Foods Curcumin Turmeric Extract",
+    },
+    premium: {
+      brand: "Thorne",
+      name: "Curcumin Phytosome (Meriva)",
+      searchQuery: "Thorne Curcumin Phytosome Meriva",
+    },
+  },
+
+  rhodiola: {
+    id: "rhodiola",
+    image: "/supplements/rhodiola.png",
+    name: { en: "Rhodiola", ru: "Родиола" },
+    aliases: ["rhodiola", "rhodiola rosea", "родиола"],
+    good: {
+      brand: "NOW Foods",
+      name: "Rhodiola 500 mg",
+      searchQuery: "NOW Foods Rhodiola 500 mg",
+    },
+    premium: {
+      brand: "Gaia Herbs",
+      name: "Rhodiola Rosea",
+      searchQuery: "Gaia Herbs Rhodiola Rosea",
+    },
+  },
+
+  "magnolia-bark": {
+    id: "magnolia-bark",
+    image: "/supplements/magnolia-bark.png",
+    name: { en: "Magnolia Bark", ru: "Кора магнолии" },
+    aliases: [
+      "magnolia bark",
+      "magnolia",
+      "honokiol",
+      "relora",
+      "кора магнолии",
+      "магнолия",
+    ],
+    good: {
+      brand: "Swanson",
+      name: "Magnolia Bark",
+      searchQuery: "Swanson Magnolia Bark",
+    },
+    premium: {
+      brand: "Life Extension",
+      name: "Magnolia Bark Extract",
+      searchQuery: "Life Extension Magnolia Bark honokiol",
+    },
+  },
+
+  "holy-basil": {
+    id: "holy-basil",
+    image: "/supplements/holy-basil.png",
+    name: { en: "Holy Basil", ru: "Базилик священный (туласи)" },
+    aliases: ["holy basil", "tulsi", "базилик священный", "туласи", "тулси"],
+    good: {
+      brand: "Organic India",
+      name: "Tulsi Holy Basil",
+      searchQuery: "Organic India Tulsi Holy Basil",
+    },
+    premium: {
+      brand: "Gaia Herbs",
+      name: "Holy Basil Leaf",
+      searchQuery: "Gaia Herbs Holy Basil Leaf",
+    },
+  },
 };
 
 /**
