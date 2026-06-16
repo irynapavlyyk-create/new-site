@@ -16,6 +16,7 @@ import { inferPhenotype } from "@/lib/inferPhenotype";
 import { getPhenotype } from "@/lib/phenotypes";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { detectPatterns } from "@/lib/signals";
+import { track, getDistinctId } from "@/lib/analytics";
 import LockedProtocol from "./LockedProtocol";
 import UpsellModal from "./UpsellModal";
 
@@ -47,8 +48,23 @@ function ResultPageInner() {
     setAnswers(a);
   }, [router]);
 
+  // Funnel: the quiz result + paywall are now shown. Fires once when answers
+  // load (phenotype is known here, so attach it to quiz_completed).
+  useEffect(() => {
+    if (!answers) return;
+    track("quiz_completed", { phenotype: inferPhenotype(answers) });
+    track("pricing_viewed", { location: "result" });
+  }, [answers]);
+
   const unlock = async (tier: "pro" | "coach") => {
     setLoadingTier(tier);
+
+    // Funnel: user clicked buy. Capture the PostHog distinct_id so the
+    // server-side purchase_completed event (fired from the Stripe webhook) can
+    // be attributed to the same person.
+    track("checkout_started", { plan: tier === "coach" ? "Coach" : "PRO" });
+    const posthogDistinctId = getDistinctId();
+
     try {
       let answers: QuizAnswers | null = null;
       if (typeof window !== "undefined") {
@@ -86,6 +102,8 @@ function ResultPageInner() {
             sessionStorage.setItem("quiz_answers", JSON.stringify(answers));
             sessionStorage.setItem("quiz_lang", lang);
             sessionStorage.setItem("quiz_tier", tier);
+            if (posthogDistinctId)
+              sessionStorage.setItem("ph_distinct_id", posthogDistinctId);
           } catch (e) {
             console.error("[result] sessionStorage write failed:", e);
           }
@@ -98,7 +116,7 @@ function ResultPageInner() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier, lang, userId, answers }),
+        body: JSON.stringify({ tier, lang, userId, answers, posthogDistinctId }),
       });
       const { url } = await res.json();
       if (url) window.location.href = url;

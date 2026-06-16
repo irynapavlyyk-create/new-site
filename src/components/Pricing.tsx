@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { track } from "@/lib/analytics";
 import FadeUp from "./FadeUp";
 
 export default function Pricing() {
@@ -11,8 +13,29 @@ export default function Pricing() {
   const ctaHref = (name: string) =>
     name === "Starter" ? "/quiz" : name === "PRO" ? "/quiz?goto=pro" : "/quiz?goto=coach";
 
+  // Funnel: fire pricing_viewed only once the section actually scrolls into
+  // view (not on every homepage load) so the metric reflects real views.
+  const sectionRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    let fired = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !fired) {
+          fired = true;
+          track("pricing_viewed", { location: "landing" });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="section" id="pricing">
+    <section className="section" id="pricing" ref={sectionRef}>
       <FadeUp>
         <h2 className="h-display text-4xl sm:text-5xl text-center mb-4">
           <span className="gradient-text">{pick(t.pricing.title, lang)}</span>

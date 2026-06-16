@@ -50,6 +50,9 @@ export default function SignupForm() {
     let answers: QuizAnswers | null = null;
     let tier: "pro" | "coach" = "pro";
     let quizLang: "en" | "ru" = lang;
+    // PostHog distinct_id carried over from /result so the server-side
+    // purchase_completed event ties to the same person.
+    let posthogDistinctId: string | null = null;
     if (fromQuiz && typeof window !== "undefined") {
       try {
         const a = sessionStorage.getItem("quiz_answers");
@@ -58,6 +61,7 @@ export default function SignupForm() {
         if (storedTier === "pro" || storedTier === "coach") tier = storedTier;
         const storedLang = sessionStorage.getItem("quiz_lang");
         if (storedLang === "en" || storedLang === "ru") quizLang = storedLang;
+        posthogDistinctId = sessionStorage.getItem("ph_distinct_id");
       } catch (e) {
         console.warn("[signup] failed to read quiz context from sessionStorage:", e);
       }
@@ -68,7 +72,14 @@ export default function SignupForm() {
       const res = await fetch("/api/signup-and-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, tier, lang: quizLang, answers }),
+        body: JSON.stringify({
+          email,
+          password,
+          tier,
+          lang: quizLang,
+          answers,
+          posthogDistinctId,
+        }),
       });
       const body = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) {

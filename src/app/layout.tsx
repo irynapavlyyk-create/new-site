@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import AuroraBackground from "@/components/AuroraBackground";
 import AuthHashHandler from "@/components/AuthHashHandler";
 import CookieBanner from "@/components/CookieBanner";
+import PostHogProvider from "@/components/PostHogProvider";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
@@ -58,12 +59,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <AuthHashHandler />
         <AuroraBackground />
-        <ThemeProvider>
-          <I18nProvider>
-            {children}
-            <CookieBanner />
-          </I18nProvider>
-        </ThemeProvider>
+        <PostHogProvider>
+          <ThemeProvider>
+            <I18nProvider>
+              {children}
+              <CookieBanner />
+            </I18nProvider>
+          </ThemeProvider>
+        </PostHogProvider>
         <Analytics />
       </body>
     </html>

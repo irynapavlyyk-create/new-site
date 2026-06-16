@@ -12,6 +12,7 @@ type Body = {
   tier: "pro" | "coach";
   lang: "en" | "ru";
   answers?: QuizAnswers | null;
+  posthogDistinctId?: string | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -87,6 +88,10 @@ export async function POST(req: NextRequest) {
       language: resolvedLang,
       user_id: authData.user.id,
     };
+    // Carried to the webhook so the server-side purchase_completed event ties
+    // to the same PostHog person who clicked buy.
+    if (body.posthogDistinctId)
+      metadata.posthog_distinct_id = body.posthogDistinctId;
     if (answers) {
       const answersJson = JSON.stringify(answers);
       if (answersJson.length <= 500) {

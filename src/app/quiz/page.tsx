@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { track } from "@/lib/analytics";
 import { quizSteps } from "@/lib/quiz-data";
 import type { QuizAnswers } from "@/types";
 import Navbar from "@/components/Navbar";
@@ -75,6 +76,11 @@ export default function QuizPage() {
   const { lang } = useI18n();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
+
+  // Funnel: user begins the quiz. Fires once on mount.
+  useEffect(() => {
+    track("quiz_started");
+  }, []);
 
   const current = quizSteps[step];
   const isCompoundSleep = current.key === "sleepDuration";

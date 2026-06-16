@@ -6,6 +6,7 @@ import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { generateAndSavePlan } from "@/lib/generatePlan";
 import { sendPurchaseConfirmation } from "@/lib/emails/send";
+import { captureServerEvent } from "@/lib/posthog-server";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
@@ -190,6 +191,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   console.log("[webhook] user resolved", { userId, isNewUser });
+
+  // Funnel (server-side): attribute the successful purchase to the PostHog
+  // person who clicked buy. distinct_id comes from Stripe metadata (set at
+  // checkout); fall back to the resolved user id, then email. Gated on
+  // !existingPlan so Stripe webhook retries don't double-count purchases.
+  if (!existingPlan) {
+    await captureServerEvent({
+      distinctId: metadata.posthog_distinct_id || userId || email,
+      event: "purchase_completed",
+      properties: {
+        plan: tier === "coach" ? "Coach" : "PRO",
+        amount: session.amount_total,
+        currency: session.currency,
+        tier,
+      },
+    });
+  }
 
   // Profile upsert is fast (<200ms) and idempotent — run it before the magic
   // link so the user has a profile row by the time they click through.

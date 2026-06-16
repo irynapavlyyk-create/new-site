@@ -12,8 +12,9 @@ export async function POST(req: NextRequest) {
       lang: "en" | "ru";
       userId?: string | null;
       answers?: QuizAnswers;
+      posthogDistinctId?: string | null;
     };
-    const { tier, lang, userId, answers } = body;
+    const { tier, lang, userId, answers, posthogDistinctId } = body;
 
     const isDev = process.env.NODE_ENV !== "production";
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest) {
       language: lang,
       user_id: userId || "anonymous",
     };
+    // Carried to the webhook so the server-side purchase_completed event ties
+    // to the same PostHog person who clicked buy.
+    if (posthogDistinctId) metadata.posthog_distinct_id = posthogDistinctId;
     if (answers) {
       // Stripe metadata values are capped at 500 chars each.
       const answersJson = JSON.stringify(answers);
