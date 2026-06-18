@@ -32,6 +32,9 @@ export default function CookieBanner() {
       } catch {
         // ignore: user will see the banner again next session
       }
+      // Broadcast acceptance so consent-gated tags (e.g. PinterestTag) can
+      // load immediately this session, without waiting for a reload.
+      window.dispatchEvent(new Event("ef-cookie-consent"));
     }
     setVisible(false);
   };
