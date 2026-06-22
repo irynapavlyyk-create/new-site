@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
+import { isPromoActive } from "@/lib/promo";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
@@ -59,10 +60,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const priceId =
+    // Launch promo: discounted price id during the window; defensive fallback to
+    // the original if the PROMO env var is missing/empty (never break checkout).
+    const originalPriceId =
       resolvedTier === "coach"
         ? process.env.STRIPE_PRICE_COACH
         : process.env.STRIPE_PRICE_PRO;
+    const promoPriceId =
+      resolvedTier === "coach"
+        ? process.env.STRIPE_PRICE_COACH_PROMO
+        : process.env.STRIPE_PRICE_PRO_PROMO;
+    const priceId =
+      isPromoActive() && promoPriceId ? promoPriceId : originalPriceId;
     if (!process.env.STRIPE_SECRET_KEY || !priceId) {
       console.error("[signup-and-checkout] Stripe not configured", {
         hasSecret: Boolean(process.env.STRIPE_SECRET_KEY),

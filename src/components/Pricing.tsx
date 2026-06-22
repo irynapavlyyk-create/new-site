@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import { track } from "@/lib/analytics";
+import { isPromoActive, PROMO_PRICES, PROMO_LABEL } from "@/lib/promo";
 import FadeUp from "./FadeUp";
 
 export default function Pricing() {
@@ -12,6 +13,12 @@ export default function Pricing() {
   const plans = pick(t.pricing.plans, lang);
   const ctaHref = (name: string) =>
     name === "Starter" ? "/quiz" : name === "PRO" ? "/quiz?goto=pro" : "/quiz?goto=coach";
+
+  // Launch promo (auto-reverts after PROMO_END). Map the landing plan names to
+  // the promo tiers; Starter (free) never has a promo.
+  const promo = isPromoActive();
+  const promoTier = (name: string): "pro" | "coach" | null =>
+    name === "PRO" ? "pro" : name === "Coach" ? "coach" : null;
 
   // Funnel: fire pricing_viewed only once the section actually scrolls into
   // view (not on every homepage load) so the metric reflects real views.
@@ -45,6 +52,7 @@ export default function Pricing() {
       <div className="pricing-grid-3">
         {plans.map((p, i) => {
           const isPro = p.name === "PRO";
+          const pt = promo ? promoTier(p.name) : null;
           return (
             <FadeUp key={p.name} delay={i * 100}>
               <div
@@ -77,11 +85,19 @@ export default function Pricing() {
                   {p.name}
                 </h3>
                 <div className="mt-3 mb-2 flex items-baseline flex-wrap gap-x-2 gap-y-1 min-w-0">
+                  {pt && (
+                    <span
+                      className="h-display font-bold text-muted line-through break-words"
+                      style={{ fontSize: "clamp(16px, 2.6vw, 34px)", lineHeight: 1.1 }}
+                    >
+                      {PROMO_PRICES[pt].original}
+                    </span>
+                  )}
                   <span
                     className="h-display font-bold break-words max-w-full"
                     style={{ fontSize: "clamp(20px, 3.5vw, 48px)", lineHeight: 1.1 }}
                   >
-                    {p.price}
+                    {pt ? PROMO_PRICES[pt].discounted : p.price}
                   </span>
                   {p.period && (
                     <span
@@ -92,6 +108,14 @@ export default function Pricing() {
                     </span>
                   )}
                 </div>
+                {pt && (
+                  <p
+                    className="font-semibold text-amber mb-2 break-words"
+                    style={{ fontSize: "clamp(10px, 1.1vw, 13px)" }}
+                  >
+                    {pick(PROMO_LABEL, lang)}
+                  </p>
+                )}
                 <p
                   className="text-muted mb-6 break-words"
                   style={{ fontSize: "clamp(12px, 1.4vw, 15px)" }}

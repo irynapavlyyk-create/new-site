@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { isPromoActive } from "@/lib/promo";
 import type { QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
@@ -18,8 +19,17 @@ export async function POST(req: NextRequest) {
 
     const isDev = process.env.NODE_ENV !== "production";
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const priceId =
+
+    // Launch promo: use the discounted price id during the window. Defensive
+    // fallback — if the PROMO env var is missing/empty, use the original so a
+    // missing id can never break checkout.
+    const originalPriceId =
       tier === "coach" ? process.env.STRIPE_PRICE_COACH : process.env.STRIPE_PRICE_PRO;
+    const promoPriceId =
+      tier === "coach"
+        ? process.env.STRIPE_PRICE_COACH_PROMO
+        : process.env.STRIPE_PRICE_PRO_PROMO;
+    const priceId = isPromoActive() && promoPriceId ? promoPriceId : originalPriceId;
 
     if (!process.env.STRIPE_SECRET_KEY || !priceId) {
       if (isDev) {

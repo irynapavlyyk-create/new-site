@@ -19,8 +19,11 @@ type Tier = "pro" | "coach";
 
 function tierFromAmount(amount: number | null | undefined): Tier | null {
   if (amount == null) return null;
-  if (amount === 999) return "pro";
-  if (amount === 2499) return "coach";
+  // Exact known prices first — regular AND launch-promo amounts (in cents).
+  // 1249 MUST be matched here: the `<= 1500` heuristic below would otherwise
+  // misclassify the Coach promo price as "pro".
+  if (amount === 999 || amount === 499) return "pro"; // €9.99 / €4.99
+  if (amount === 2499 || amount === 1249) return "coach"; // €24.99 / €12.49
   if (amount <= 1500) return "pro";
   return "coach";
 }

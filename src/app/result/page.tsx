@@ -17,6 +17,7 @@ import { getPhenotype } from "@/lib/phenotypes";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { detectPatterns } from "@/lib/signals";
 import { track, getDistinctId } from "@/lib/analytics";
+import { isPromoActive, PROMO_PRICES, PROMO_LABEL } from "@/lib/promo";
 import LockedProtocol from "./LockedProtocol";
 import UpsellModal from "./UpsellModal";
 
@@ -133,6 +134,7 @@ function ResultPageInner() {
   const insightSignals = detectPatterns(answers)
     .filter((s) => !s.en.startsWith("USER PRIORITY:"))
     .slice(0, 3);
+  const promo = isPromoActive();
 
   return (
     <>
@@ -218,7 +220,9 @@ function ResultPageInner() {
                   accent="amber"
                   badge={pick(t.result.choose.pro.badge, lang)}
                   name={pick(t.result.choose.pro.name, lang)}
-                  price={pick(t.result.choose.pro.price, lang)}
+                  price={promo ? PROMO_PRICES.pro.discounted : pick(t.result.choose.pro.price, lang)}
+                  originalPrice={promo ? PROMO_PRICES.pro.original : undefined}
+                  promoLabel={promo ? pick(PROMO_LABEL, lang) : undefined}
                   period={pick(t.result.choose.pro.period, lang)}
                   features={pick(t.result.choose.pro.features, lang)}
                   cta={pick(t.result.choose.pro.cta, lang)}
@@ -231,7 +235,9 @@ function ResultPageInner() {
                   highlighted
                   badge={pick(t.result.choose.coach.badge, lang)}
                   name={pick(t.result.choose.coach.name, lang)}
-                  price={pick(t.result.choose.coach.price, lang)}
+                  price={promo ? PROMO_PRICES.coach.discounted : pick(t.result.choose.coach.price, lang)}
+                  originalPrice={promo ? PROMO_PRICES.coach.original : undefined}
+                  promoLabel={promo ? pick(PROMO_LABEL, lang) : undefined}
                   period={pick(t.result.choose.coach.period, lang)}
                   features={pick(t.result.choose.coach.features, lang)}
                   cta={pick(t.result.choose.coach.cta, lang)}
@@ -266,6 +272,8 @@ function PricingCard({
   badge,
   name,
   price,
+  originalPrice,
+  promoLabel,
   period,
   features,
   cta,
@@ -278,6 +286,8 @@ function PricingCard({
   badge: string;
   name: string;
   price: string;
+  originalPrice?: string;
+  promoLabel?: string;
   period: string;
   features: string[];
   cta: string;
@@ -330,6 +340,14 @@ function PricingCard({
         {name}
       </h4>
       <div className="mt-2 mb-1 flex items-baseline flex-wrap gap-x-2 gap-y-1 min-w-0">
+        {originalPrice && (
+          <span
+            className="h-display font-bold text-muted line-through break-words"
+            style={{ fontSize: "clamp(16px, 2.6vw, 34px)", lineHeight: 1.1 }}
+          >
+            {originalPrice}
+          </span>
+        )}
         <span
           className="h-display font-bold text-ink break-words max-w-full"
           style={{ fontSize: "clamp(20px, 3.5vw, 48px)", lineHeight: 1.1 }}
@@ -337,6 +355,14 @@ function PricingCard({
           {price}
         </span>
       </div>
+      {promoLabel && (
+        <p
+          className="font-semibold text-amber mb-1 break-words"
+          style={{ fontSize: "clamp(10px, 1.1vw, 13px)" }}
+        >
+          {promoLabel}
+        </p>
+      )}
       <p
         className="text-muted mb-5 break-words"
         style={{ fontSize: "clamp(11px, 1.2vw, 14px)" }}
