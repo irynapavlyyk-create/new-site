@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n-context";
-import { t, pick, format } from "@/lib/translations";
+import { t, pick, format, plural } from "@/lib/translations";
 import { getPhenotype } from "@/lib/phenotypes";
 import type { ProPlanV2 } from "@/types";
 import Navbar from "@/components/Navbar";
@@ -104,7 +104,10 @@ export default function PhenotypeDashboard({
                 {pick(t.dashboard.supplementStack, lang)}
               </h2>
               <span className="text-xs text-muted">
-                {format(pick(t.dashboard.supplementMeta, lang), { n: plan.supplements.length })}
+                {format(pick(t.dashboard.supplementMeta, lang), {
+                  n: plan.supplements.length,
+                  items: plural(plan.supplements.length, pick(t.dashboard.supplementNoun, lang)),
+                })}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

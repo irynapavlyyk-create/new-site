@@ -50,7 +50,7 @@ function PrivacyEN() {
       <h3>a) Information you provide directly:</h3>
       <ul>
         <li>
-          Answers to our 9-question energy diagnostic questionnaire (sleep
+          Answers to our 10-question energy diagnostic questionnaire (sleep
           patterns, lifestyle, nutrition, stress levels, etc.)
         </li>
         <li>Email address (if you register or subscribe)</li>
@@ -255,7 +255,7 @@ function PrivacyRU() {
       <h3>а) Данные, которые вы предоставляете напрямую:</h3>
       <ul>
         <li>
-          Ответы на 9 вопросов энергетической диагностики (сон, образ жизни,
+          Ответы на 10 вопросов энергетической диагностики (сон, образ жизни,
           питание, стресс и т.д.)
         </li>
         <li>Email (при регистрации или подписке)</li>

@@ -34,8 +34,8 @@ export const t = {
       cs: "Přestaň hádat. Začni to řešit.",
     },
     subtitle: {
-      en: "Answer 9 questions — your answers build a personal 30-day protocol shaped around your sleep, stress, and energy patterns.",
-      cs: "Odpověz na 9 otázek — z tvých odpovědí sestavíme osobní 30denní protokol na míru tvému spánku, stresu a energii.",
+      en: "Answer 10 questions — your answers build a personal 30-day protocol shaped around your sleep, stress, and energy patterns.",
+      cs: "Odpověz na 10 otázek — z tvých odpovědí sestavíme osobní 30denní protokol na míru tvému spánku, stresu a energii.",
     },
     cta: { en: "Start FREE diagnostic", cs: "Spustit diagnostiku ZDARMA" },
     sub: { en: "Takes 2 minutes.", cs: "Zabere 2 minuty." },
@@ -100,12 +100,12 @@ export const t = {
     title: { en: "How it works", cs: "Jak to funguje" },
     steps: {
       en: [
-        { t: "Answer 9 questions", d: "Sleep, stress, nutrition, energy — the whole picture." },
+        { t: "Answer 10 questions", d: "Sleep, stress, nutrition, energy — the whole picture." },
         { t: "Every answer shapes your plan", d: "Your specific patterns reveal your top energy leaks and root causes — not generic advice." },
         { t: "Get your protocol", d: "Morning, sleep, supplements, 30-day plan — on screen in 40 seconds." },
       ],
       cs: [
-        { t: "Odpověz na 9 otázek", d: "Spánek, stres, strava, energie — celý obraz." },
+        { t: "Odpověz na 10 otázek", d: "Spánek, stres, strava, energie — celý obraz." },
         { t: "Každá odpověď tvaruje tvůj plán", d: "Tvoje konkrétní vzorce odhalí největší úniky energie a jejich příčiny — žádné obecné rady." },
         { t: "Získej svůj protokol", d: "Ráno, spánek, doplňky, 30denní plán — na obrazovce za 40 sekund." },
       ],
@@ -135,7 +135,7 @@ export const t = {
         { t: "Osobní 30denní plán", d: "Týden po týdnu — co dělat a kdy." },
         { t: "Ranní protokol", d: "Prvních 60 minut — navržených pro energii." },
         { t: "Spánkový protokol", d: "Usni do 15 minut. Probuď se svěží." },
-        { t: "Stack doplňků", d: "Přesně co, kdy a kolik — včetně dávkování." },
+        { t: "Sestava doplňků", d: "Přesně co, kdy a kolik — včetně dávkování." },
         { t: "Plán stravy", d: "Načasování jídel, makra, co vyřadit." },
         { t: "Protokol proti stresu", d: "Dýchání, pauzy, hranice — ověřené v praxi." },
         { t: "PDF ke stažení", d: "Vezmi si ho kamkoliv. Vytiskni. Přilep na lednici." },
@@ -213,7 +213,7 @@ export const t = {
           features: [
             "Vše ze Starteru",
             "Kompletní 30denní plán",
-            "Stack doplňků",
+            "Sestava doplňků",
             "Všechny protokoly",
             "PDF ke stažení",
             "Doživotní přístup",
@@ -235,21 +235,6 @@ export const t = {
           cta: "Chci Coach",
           tag: "",
         },
-      ],
-    },
-  },
-  testimonials: {
-    title: { en: "Real results", cs: "Skutečné výsledky" },
-    items: {
-      en: [
-        { name: "Marco, 32", text: "Fell asleep in 10 min on day 3. Haven't touched the phone in bed since." },
-        { name: "Elena, 28", text: "The afternoon crash is gone. I don't even recognise this version of me." },
-        { name: "Dmitri, 41", text: "Paid 9€ expecting nothing. Used the plan for 3 weeks. Worth 10x." },
-      ],
-      cs: [
-        { name: "Marco, 32", text: "Třetí den jsem usnul za 10 minut. Telefon jsem od té doby v posteli neměl v ruce." },
-        { name: "Elena, 28", text: "Odpolední útlum je pryč. Sama sebe nepoznávám." },
-        { name: "Dmitri, 41", text: "Zaplatil jsem 9 € a nečekal nic. Tři týdny podle plánu — stojí za desetinásobek." },
       ],
     },
   },
@@ -357,13 +342,13 @@ export const t = {
     },
     magicLinkTitle: {
       en: "Sign in with magic link",
-      cs: "Přihlásit se přes magic link",
+      cs: "Přihlásit se přes přihlašovací odkaz",
     },
     magicLinkSubtitle: {
       en: "We'll email you a one-time login link",
       cs: "Pošleme ti jednorázový přihlašovací odkaz na e-mail",
     },
-    magicLinkButton: { en: "Send magic link", cs: "Poslat odkaz" },
+    magicLinkButton: { en: "Send magic link", cs: "Poslat přihlašovací odkaz" },
     magicLinkSent: {
       en: "Check your email — link sent to",
       cs: "Zkontroluj e-mail — odkaz jsme poslali na",
@@ -453,7 +438,7 @@ export const t = {
           cs: [
             "Progrese na 4 týdny",
             "Ranní a spánkový protokol",
-            "Stack doplňků",
+            "Sestava doplňků",
             "Kroky den po dni",
           ],
         },
@@ -476,7 +461,7 @@ export const t = {
         titleAfter: { en: " protocol", cs: "" },
         sub: {
           en: "Your complete 30-day plan, supplement stack and daily protocols — one-time €9.99.",
-          cs: "Kompletní 30denní plán, stack doplňků a denní protokoly — jednorázově €9.99.",
+          cs: "Kompletní 30denní plán, sestava doplňků a denní protokoly — jednorázově €9.99.",
         },
         unlockCta: { en: "Unlock now — €9.99", cs: "Odemknout — €9.99" },
         dismiss: { en: "Maybe later", cs: "Možná později" },
@@ -511,7 +496,7 @@ export const t = {
           ],
           cs: [
             "Kompletní 30denní plán",
-            "Osobní stack doplňků",
+            "Osobní sestava doplňků",
             "Protokoly pro ráno, spánek i stres",
             "PDF export",
             "Doživotní přístup",
@@ -550,7 +535,7 @@ export const t = {
       cs: "Tvoje energie během 24 hodin",
     },
     you: { en: "You", cs: "Ty" },
-    normal: { en: "Normal", cs: "Norma" },
+    normal: { en: "Normal", cs: "Průměr" },
     aria: {
       en: "24-hour energy pattern chart",
       cs: "Graf energie během 24 hodin",
@@ -584,7 +569,7 @@ export const t = {
     },
     heroStats: {
       crashWindow: { en: "Crash window", cs: "Okno útlumu" },
-      peakHours: { en: "Peak hours", cs: "Nejlepší hodiny" },
+      peakHours: { en: "Peak hours", cs: "Energetická špička" },
       secondWind: { en: "Second wind", cs: "Druhý dech" },
     },
     noPlan: {
@@ -601,10 +586,15 @@ export const t = {
       en: "Day {d} — Week {w} of 4",
       cs: "Den {d} — Týden {w} ze 4",
     },
-    supplementStack: { en: "Your supplement stack", cs: "Tvůj stack doplňků" },
+    supplementStack: { en: "Your supplement stack", cs: "Tvoje sestava doplňků" },
     supplementMeta: {
-      en: "{n} items · two retailers each",
-      cs: "Položek: {n} · u každé dva obchody",
+      en: "{n} {items} · two retailers each",
+      cs: "{n} {items} · u každé dva obchody",
+    },
+    /** Plural forms for supplementMeta's {items} slot: [one, few, many] — see plural(). */
+    supplementNoun: {
+      en: ["item", "items", "items"],
+      cs: ["položka", "položky", "položek"],
     },
     tapWeek: {
       en: "Tap a week to view its detail",
@@ -634,8 +624,8 @@ export const t = {
       cs: "Generujeme tvůj kompletní plán…",
     },
     generatingSub: {
-      en: "Your AI is analyzing 9 dimensions of your energy profile. This usually takes 60-90 seconds — please don't close this tab.",
-      cs: "AI analyzuje 9 dimenzí tvého energetického profilu. Obvykle to trvá 60–90 sekund — nezavírej prosím tuhle záložku.",
+      en: "Your AI is analyzing 10 dimensions of your energy profile. This usually takes 60-90 seconds — please don't close this tab.",
+      cs: "AI analyzuje 10 dimenzí tvého energetického profilu. Obvykle to trvá 60–90 sekund — nezavírej prosím tuhle záložku.",
     },
     answersLost: {
       en: "Your quiz answers are missing. Please retake the quiz to get your plan.",
@@ -840,4 +830,17 @@ export function format(
   return template.replace(/\{(\w+)\}/g, (match, key: string) =>
     key in vars ? String(vars[key]) : match,
   );
+}
+
+/**
+ * Czech-aware plural picker. forms = [one, few, many]:
+ * 1 → one, 2–4 → few, 0 and 5+ → many (the Czech pattern).
+ * EN entries just repeat the plural form: ["item", "items", "items"].
+ *
+ *   plural(3, pick(t.dashboard.supplementNoun, lang)) // "položky"
+ */
+export function plural(n: number, forms: readonly string[]): string {
+  const abs = Math.abs(n);
+  const idx = abs === 1 ? 0 : abs >= 2 && abs <= 4 ? 1 : 2;
+  return forms[idx] ?? forms[forms.length - 1] ?? "";
 }

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ),
   title: "EnergyForge — Discover your energy phenotype",
   description:
-    "Six energy types. One is yours. AI-powered diagnostic finds why you're tired and builds your personalized 30-day protocol. Take the 9-question quiz in 3 minutes.",
+    "Six energy types. One is yours. AI-powered diagnostic finds why you're tired and builds your personalized 30-day protocol. Take the 10-question quiz in 3 minutes.",
   openGraph: {
     title: "Discover your energy phenotype",
     description:

@@ -33,7 +33,7 @@ function TermsEN() {
       <h2>2. Description of Service</h2>
       <p>
         EnergyForge is an AI-powered personal energy diagnostic platform.
-        Based on your answers to a 9-question questionnaire, our AI (powered
+        Based on your answers to a 10-question questionnaire, our AI (powered
         by Anthropic Claude) generates a personalized 30-day plan covering:
       </p>
       <ul>
@@ -299,7 +299,7 @@ function TermsRU() {
       <h2>2. Описание Сервиса</h2>
       <p>
         EnergyForge — ИИ-платформа персональной энергетической диагностики.
-        На основе ваших ответов на 9 вопросов наш ИИ (Anthropic Claude)
+        На основе ваших ответов на 10 вопросов наш ИИ (Anthropic Claude)
         генерирует персональный 30-дневный план:
       </p>
       <ul>
