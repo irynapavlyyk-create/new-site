@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import Counter from "./Counter";
 
 export default function Hero() {
   const { lang } = useI18n();
@@ -68,17 +67,12 @@ export default function Hero() {
           <span className="text-sm text-white/60">{pick(t.hero.sub, lang)}</span>
         </div>
         <div className="grid grid-cols-3 gap-4 max-w-xl mt-20 animate-fade-up" style={{ animationDelay: "360ms" }}>
-          {[
-            { n: 4821, suf: "", label: pick(t.hero.stats.users, lang) },
-            { n: 4396, suf: "", label: pick(t.hero.stats.plans, lang) },
-            { n: 0, suf: "/5", label: pick(t.hero.stats.rating, lang) },
-          ].map((s, i) => (
+          {[t.hero.claims.time, t.hero.claims.plan, t.hero.claims.pricing].map((c, i) => (
             <div key={i} className="glass p-5 sm:p-6">
-              <div className="h-display text-3xl sm:text-4xl gradient-text">
-                {i === 2 ? <><Counter to={4} />{"."}<Counter to={87} />/5</> : <Counter to={s.n} />}
-                {i !== 2 && s.suf}
+              <div className="h-display text-xl sm:text-2xl gradient-text">
+                {pick(c.value, lang)}
               </div>
-              <div className="text-xs sm:text-sm text-muted mt-1">{s.label}</div>
+              <div className="text-xs sm:text-sm text-muted mt-1">{pick(c.label, lang)}</div>
             </div>
           ))}
         </div>

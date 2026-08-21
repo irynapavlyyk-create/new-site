@@ -39,10 +39,20 @@ export const t = {
     },
     cta: { en: "Start FREE diagnostic", cs: "Spustit diagnostiku ZDARMA" },
     sub: { en: "Takes 2 minutes.", cs: "Zabere 2 minuty." },
-    stats: {
-      users: { en: "people diagnosed", cs: "lidí prošlo diagnostikou" },
-      plans: { en: "plans generated", cs: "vytvořených plánů" },
-      rating: { en: "average rating", cs: "průměrné hodnocení" },
+    // Factual product claims (replaced fabricated user/rating stats).
+    claims: {
+      time: {
+        value: { en: "2 minutes", cs: "2 minuty" },
+        label: { en: "to complete", cs: "a máš hotovo" },
+      },
+      plan: {
+        value: { en: "30-day plan", cs: "30denní plán" },
+        label: { en: "built from your answers", cs: "podle tvých odpovědí" },
+      },
+      pricing: {
+        value: { en: "No subscription", cs: "Bez předplatného" },
+        label: { en: "PRO is one payment", cs: "PRO platíš jednou" },
+      },
     },
   },
   marquee: {
