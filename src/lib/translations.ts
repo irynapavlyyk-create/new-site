@@ -253,14 +253,14 @@ export const t = {
     items: {
       en: [
         { q: "Is this medical advice?", a: "No. EnergyForge is a lifestyle diagnostic. For medical issues see a doctor." },
-        { q: "How fast will I feel it?", a: "Most users report changes in 3–7 days. The 30-day plan is designed for compound gains." },
+        { q: "How fast will I feel it?", a: "The 30-day plan is structured so the early changes are the easiest ones — sleep timing and morning light. The compounding effects come later." },
         { q: "What if it doesn't work?", a: "14-day money-back on PRO. No questions, no forms." },
         { q: "Do I need to buy supplements?", a: "No. The plan works without them — supplements are a boost, not a must." },
         { q: "My data is safe?", a: "Answers are never shared. No email required for Starter." },
       ],
       cs: [
         { q: "Je to lékařská rada?", a: "Ne. EnergyForge je lifestylová diagnostika. Se zdravotními problémy zajdi k lékaři." },
-        { q: "Za jak dlouho to pocítím?", a: "Většina lidí hlásí změny za 3–7 dní. 30denní plán je postavený tak, aby se efekt postupně sčítal." },
+        { q: "Za jak dlouho to pocítím?", a: "30denní plán je postavený tak, aby první změny byly ty nejsnazší — načasování spánku a ranní světlo. Efekty se pak postupně sčítají." },
         { q: "Co když to nezafunguje?", a: "14 dní na vrácení peněz u PRO. Bez otázek, bez formulářů." },
         { q: "Musím kupovat doplňky?", a: "Ne. Plán funguje i bez nich — doplňky jsou bonus, ne podmínka." },
         { q: "Jsou moje data v bezpečí?", a: "Tvoje odpovědi nikdy nikomu nepředáváme. U Starteru nepotřebuješ ani e-mail." },
