@@ -39,7 +39,7 @@ export type Product = {
 
 export type SupplementEntry = {
   id: string;
-  name: { en: string; ru: string };
+  name: { en: string; cs: string };
   /** Bottle photo served from /public/supplements, keyed by id (the slug). */
   image: string;
   /** Lowercased keywords (EN + RU) the AI's free-text name is matched against. */
@@ -47,14 +47,14 @@ export type SupplementEntry = {
   good: Product;
   premium: Product;
   /** Medical/dosing caveat surfaced in the UI when present. */
-  caveat?: { en: string; ru: string };
+  caveat?: { en: string; cs: string };
 };
 
 export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "l-theanine": {
     id: "l-theanine",
     image: "/supplements/l-theanine.png",
-    name: { en: "L-Theanine", ru: "L-Теанин" },
+    name: { en: "L-Theanine", cs: "L-Теанин" },
     aliases: ["l-theanine", "theanine", "l-теанин", "теанин"],
     good: {
       brand: "NOW Foods",
@@ -71,7 +71,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "magnesium-glycinate": {
     id: "magnesium-glycinate",
     image: "/supplements/magnesium-glycinate.png",
-    name: { en: "Magnesium Glycinate", ru: "Магний глицинат" },
+    name: { en: "Magnesium Glycinate", cs: "Магний глицинат" },
     aliases: [
       "magnesium glycinate",
       "mg glycinate",
@@ -93,7 +93,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "magnesium-l-threonate": {
     id: "magnesium-l-threonate",
     image: "/supplements/magnesium-l-threonate.png",
-    name: { en: "Magnesium L-Threonate", ru: "Магний L-треонат" },
+    name: { en: "Magnesium L-Threonate", cs: "Магний L-треонат" },
     aliases: [
       "magnesium l-threonate",
       "mg l-threonate",
@@ -117,7 +117,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "ashwagandha-ksm66": {
     id: "ashwagandha-ksm66",
     image: "/supplements/ashwagandha-ksm66.png",
-    name: { en: "Ashwagandha (KSM-66)", ru: "Ашваганда (KSM-66)" },
+    name: { en: "Ashwagandha (KSM-66)", cs: "Ашваганда (KSM-66)" },
     aliases: ["ashwagandha", "ksm-66", "ksm 66", "ашваганда"],
     good: {
       brand: "Sports Research",
@@ -134,7 +134,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   phosphatidylserine: {
     id: "phosphatidylserine",
     image: "/supplements/phosphatidylserine.png",
-    name: { en: "Phosphatidylserine", ru: "Фосфатидилсерин" },
+    name: { en: "Phosphatidylserine", cs: "Фосфатидилсерин" },
     aliases: ["phosphatidylserine", "phosphatidyl serine", "фосфатидилсерин"],
     good: {
       brand: "NOW Foods",
@@ -151,7 +151,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "active-b-complex": {
     id: "active-b-complex",
     image: "/supplements/active-b-complex.png",
-    name: { en: "Active B-Complex", ru: "Активный B-комплекс" },
+    name: { en: "Active B-Complex", cs: "Активный B-комплекс" },
     aliases: [
       "b-complex",
       "b complex",
@@ -176,7 +176,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "alpha-gpc": {
     id: "alpha-gpc",
     image: "/supplements/alpha-gpc.png",
-    name: { en: "Alpha-GPC", ru: "Альфа-GPC" },
+    name: { en: "Alpha-GPC", cs: "Альфа-GPC" },
     aliases: ["alpha-gpc", "alpha gpc", "альфа-gpc", "альфа gpc"],
     good: {
       brand: "NOW Foods",
@@ -193,7 +193,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "omega-3-epa": {
     id: "omega-3-epa",
     image: "/supplements/omega-3-epa.png",
-    name: { en: "Omega-3 (high-EPA)", ru: "Омега-3 (высокий EPA)" },
+    name: { en: "Omega-3 (high-EPA)", cs: "Омега-3 (высокий EPA)" },
     aliases: [
       "omega-3",
       "omega 3",
@@ -219,7 +219,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "melatonin-low-dose": {
     id: "melatonin-low-dose",
     image: "/supplements/melatonin-low-dose.png",
-    name: { en: "Melatonin (low-dose)", ru: "Мелатонин (низкая доза)" },
+    name: { en: "Melatonin (low-dose)", cs: "Мелатонин (низкая доза)" },
     aliases: ["melatonin", "мелатонин"],
     good: {
       brand: "Life Extension",
@@ -233,14 +233,14 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
     },
     caveat: {
       en: "Use the low dose (0.3 mg / 300 mcg) — do not increase it.",
-      ru: "Используй низкую дозу (0.3 мг / 300 мкг) — не увеличивай её.",
+      cs: "Используй низкую дозу (0.3 мг / 300 мкг) — не увеличивай её.",
     },
   },
 
   "creatine-monohydrate": {
     id: "creatine-monohydrate",
     image: "/supplements/creatine-monohydrate.png",
-    name: { en: "Creatine Monohydrate", ru: "Креатин моногидрат" },
+    name: { en: "Creatine Monohydrate", cs: "Креатин моногидрат" },
     aliases: ["creatine", "creatine monohydrate", "креатин", "креатин моногидрат"],
     good: {
       brand: "Optimum Nutrition",
@@ -257,7 +257,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   berberine: {
     id: "berberine",
     image: "/supplements/berberine.png",
-    name: { en: "Berberine", ru: "Берберин" },
+    name: { en: "Berberine", cs: "Берберин" },
     aliases: ["berberine", "берберин"],
     good: {
       brand: "NOW Foods",
@@ -274,7 +274,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "iron-bisglycinate": {
     id: "iron-bisglycinate",
     image: "/supplements/iron-bisglycinate.png",
-    name: { en: "Iron (ferrous bisglycinate)", ru: "Железо (бисглицинат)" },
+    name: { en: "Iron (ferrous bisglycinate)", cs: "Железо (бисглицинат)" },
     aliases: [
       "iron",
       "ferrous bisglycinate",
@@ -294,14 +294,14 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
     },
     caveat: {
       en: "Confirm low ferritin with bloodwork before supplementing iron.",
-      ru: "Подтверди низкий ферритин анализом крови перед приёмом железа.",
+      cs: "Подтверди низкий ферритин анализом крови перед приёмом железа.",
     },
   },
 
   "lions-mane": {
     id: "lions-mane",
     image: "/supplements/lions-mane.png",
-    name: { en: "Lion's Mane (standardized extract)", ru: "Ежовик гребенчатый (экстракт)" },
+    name: { en: "Lion's Mane (standardized extract)", cs: "Ежовик гребенчатый (экстракт)" },
     aliases: [
       "lion's mane",
       "lions mane",
@@ -324,7 +324,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   apigenin: {
     id: "apigenin",
     image: "/supplements/apigenin.png",
-    name: { en: "Apigenin", ru: "Апигенин" },
+    name: { en: "Apigenin", cs: "Апигенин" },
     aliases: ["apigenin", "апигенин"],
     good: {
       brand: "Nutricost",
@@ -341,7 +341,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "coq10-ubiquinol": {
     id: "coq10-ubiquinol",
     image: "/supplements/coq10-ubiquinol.png",
-    name: { en: "CoQ10 (Ubiquinol)", ru: "CoQ10 (Убихинол)" },
+    name: { en: "CoQ10 (Ubiquinol)", cs: "CoQ10 (Убихинол)" },
     aliases: ["coq10", "co q10", "ubiquinol", "убихинол", "коэнзим q10"],
     good: {
       brand: "Qunol",
@@ -358,7 +358,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "vitamin-d3-k2": {
     id: "vitamin-d3-k2",
     image: "/supplements/vitamin-d3-k2.png",
-    name: { en: "Vitamin D3 + K2", ru: "Витамин D3 + K2" },
+    name: { en: "Vitamin D3 + K2", cs: "Витамин D3 + K2" },
     aliases: [
       "vitamin d3 + k2",
       "vitamin d3 k2",
@@ -380,14 +380,14 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
     },
     caveat: {
       en: "Adjust the dose to your bloodwork (vitamin D level).",
-      ru: "Подбирай дозу по анализам крови (уровень витамина D).",
+      cs: "Подбирай дозу по анализам крови (уровень витамина D).",
     },
   },
 
   chromium: {
     id: "chromium",
     image: "/supplements/chromium.png",
-    name: { en: "Chromium", ru: "Хром (пиколинат)" },
+    name: { en: "Chromium", cs: "Хром (пиколинат)" },
     aliases: ["chromium", "chromium picolinate", "хром", "хром пиколинат"],
     good: {
       brand: "NOW Foods",
@@ -404,7 +404,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "alpha-lipoic-acid": {
     id: "alpha-lipoic-acid",
     image: "/supplements/alpha-lipoic-acid.png",
-    name: { en: "Alpha-Lipoic Acid", ru: "Альфа-липоевая кислота" },
+    name: { en: "Alpha-Lipoic Acid", cs: "Альфа-липоевая кислота" },
     aliases: [
       "alpha-lipoic acid",
       "alpha lipoic acid",
@@ -426,7 +426,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   curcumin: {
     id: "curcumin",
     image: "/supplements/curcumin.png",
-    name: { en: "Curcumin", ru: "Куркумин" },
+    name: { en: "Curcumin", cs: "Куркумин" },
     aliases: ["curcumin", "turmeric", "curcumin piperine", "куркумин", "куркума"],
     good: {
       brand: "NOW Foods",
@@ -443,7 +443,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   rhodiola: {
     id: "rhodiola",
     image: "/supplements/rhodiola.png",
-    name: { en: "Rhodiola", ru: "Родиола" },
+    name: { en: "Rhodiola", cs: "Родиола" },
     aliases: ["rhodiola", "rhodiola rosea", "родиола"],
     good: {
       brand: "NOW Foods",
@@ -460,7 +460,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "magnolia-bark": {
     id: "magnolia-bark",
     image: "/supplements/magnolia-bark.png",
-    name: { en: "Magnolia Bark", ru: "Кора магнолии" },
+    name: { en: "Magnolia Bark", cs: "Кора магнолии" },
     aliases: [
       "magnolia bark",
       "magnolia",
@@ -484,7 +484,7 @@ export const SUPPLEMENT_CATALOG: Record<string, SupplementEntry> = {
   "holy-basil": {
     id: "holy-basil",
     image: "/supplements/holy-basil.png",
-    name: { en: "Holy Basil", ru: "Базилик священный (туласи)" },
+    name: { en: "Holy Basil", cs: "Базилик священный (туласи)" },
     aliases: ["holy basil", "tulsi", "базилик священный", "туласи", "тулси"],
     good: {
       brand: "Organic India",

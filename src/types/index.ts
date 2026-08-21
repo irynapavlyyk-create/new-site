@@ -1,4 +1,4 @@
-export type Lang = "en" | "ru";
+export type Lang = "en" | "cs";
 
 /**
  * Quiz V2 answer shape. All fields optional during in-progress entry —
@@ -103,10 +103,10 @@ export type PhenotypeId =
   | "brain-fog-dominant"
   | "stress-burnout-transitioning";
 
-/** Standard EN/RU pair for static localized content */
+/** Standard EN/CS pair for static localized content */
 export type LocalizedString = {
   en: string;
-  ru: string;
+  cs: string;
 };
 
 /**
@@ -154,11 +154,11 @@ export type PhenotypeData = {
   readonly subtitle: LocalizedString;
   /** Exactly 3 insights for the energy chart sidebar */
   readonly insights: readonly PhenotypeInsight[];
-  /** Display string, e.g. "10am–12pm" (RU uses 24h clock) */
+  /** Display string, e.g. "10am–12pm" (CS uses 24h clock) */
   readonly peakHours: LocalizedString;
-  /** Display string, e.g. "2–4pm" (RU uses 24h clock) */
+  /** Display string, e.g. "2–4pm" (CS uses 24h clock) */
   readonly crashWindow: LocalizedString;
-  /** Display string, e.g. "8pm" (RU uses 24h clock) */
+  /** Display string, e.g. "8pm" (CS uses 24h clock) */
   readonly secondWind: LocalizedString;
   /**
    * SVG path string ("M ... Q ... T ...") describing the user's 24-hour

@@ -1,8 +1,12 @@
-export type Locale = "en" | "ru";
+// Relative import (not "@/types") so tsx-run scripts (render-email-previews)
+// resolve it without tsconfig path aliases.
+import type { Lang } from "../../types";
+
+export type { Lang };
 
 export type BaseEmailContext = {
   to: string;
-  locale: Locale;
+  locale: Lang;
   userName?: string;
 };
 

@@ -1,4 +1,4 @@
-import type { Locale } from "../types";
+import type { Lang } from "../types";
 
 export const SITE_URL = "https://www.energyforge.app";
 
@@ -46,16 +46,16 @@ export function renderButton(text: string, url: string): string {
 </table>`;
 }
 
-export function renderFooter(locale: Locale): string {
-  const refundLabel = locale === "ru" ? "Возврат средств" : "Refund Policy";
-  const termsLabel = locale === "ru" ? "Условия" : "Terms";
-  const privacyLabel = locale === "ru" ? "Конфиденциальность" : "Privacy";
+export function renderFooter(locale: Lang): string {
+  const refundLabel = locale === "cs" ? "Возврат средств" : "Refund Policy";
+  const termsLabel = locale === "cs" ? "Условия" : "Terms";
+  const privacyLabel = locale === "cs" ? "Конфиденциальность" : "Privacy";
   const tagline =
-    locale === "ru"
+    locale === "cs"
       ? "AI-платформа персональной энергетической диагностики"
       : "AI-powered personal energy diagnostics";
   const copyright =
-    locale === "ru"
+    locale === "cs"
       ? "© 2026 EnergyForge · Прага, Чехия"
       : "© 2026 EnergyForge · Prague, Czech Republic";
 

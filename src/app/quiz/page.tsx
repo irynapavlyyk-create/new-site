@@ -186,11 +186,11 @@ export default function QuizPage() {
           {isCompoundSleep && sleepQualityStep ? (
             <>
               <h1 className="h-display text-3xl sm:text-4xl mb-8 animate-fade-up">
-                <span className="gradient-text">{lang === "ru" ? "Сон" : "Sleep"}</span>
+                <span className="gradient-text">{lang === "cs" ? "Сон" : "Sleep"}</span>
               </h1>
               <div className="mb-8">
                 <h2 className="text-base font-semibold text-ink mb-4">
-                  {lang === "ru" ? current.qRu : current.qEn}
+                  {lang === "cs" ? current.qCs : current.qEn}
                 </h2>
                 <div className="grid gap-3">
                   {current.options.map((opt, i) => {
@@ -206,7 +206,7 @@ export default function QuizPage() {
                       >
                         <OptionMarker shape="round" selected={active} />
                         <span className={`text-base ${active ? "text-ink" : "text-ink/80"}`}>
-                          {lang === "ru" ? opt.labelRu : opt.labelEn}
+                          {lang === "cs" ? opt.labelCs : opt.labelEn}
                         </span>
                       </button>
                     );
@@ -215,7 +215,7 @@ export default function QuizPage() {
               </div>
               <div className="pt-6 border-t border-white/5">
                 <h2 className="text-base font-semibold text-ink mb-4">
-                  {lang === "ru" ? sleepQualityStep.qRu : sleepQualityStep.qEn}
+                  {lang === "cs" ? sleepQualityStep.qCs : sleepQualityStep.qEn}
                 </h2>
                 <div className="grid gap-3">
                   {sleepQualityStep.options.map((opt, i) => {
@@ -231,7 +231,7 @@ export default function QuizPage() {
                       >
                         <OptionMarker shape="round" selected={active} />
                         <span className={`text-base ${active ? "text-ink" : "text-ink/80"}`}>
-                          {lang === "ru" ? opt.labelRu : opt.labelEn}
+                          {lang === "cs" ? opt.labelCs : opt.labelEn}
                         </span>
                       </button>
                     );
@@ -248,12 +248,12 @@ export default function QuizPage() {
                 } animate-fade-up`}
               >
                 <span className="text-ink">
-                  {lang === "ru" ? current.qRu : current.qEn}
+                  {lang === "cs" ? current.qCs : current.qEn}
                 </span>
               </h1>
               {isMultiSelect && (
                 <p className="text-sm text-muted mb-8">
-                  {lang === "ru" ? "Отметь всё что подходит" : "Pick all that apply"}
+                  {lang === "cs" ? "Отметь всё что подходит" : "Pick all that apply"}
                 </p>
               )}
               <div className="grid gap-3">
@@ -274,7 +274,7 @@ export default function QuizPage() {
                     >
                       <OptionMarker shape={isMultiSelect ? "square" : "round"} selected={active} />
                       <span className={`text-base ${active ? "text-ink" : "text-ink/80"}`}>
-                        {lang === "ru" ? opt.labelRu : opt.labelEn}
+                        {lang === "cs" ? opt.labelCs : opt.labelEn}
                       </span>
                     </button>
                   );

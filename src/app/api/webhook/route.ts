@@ -7,7 +7,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { generateAndSavePlan } from "@/lib/generatePlan";
 import { sendPurchaseConfirmation } from "@/lib/emails/send";
 import { captureServerEvent } from "@/lib/posthog-server";
-import type { QuizAnswers } from "@/types";
+import type { Lang, QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
 // Webhook itself returns 200 in <5s. The remainder runs under waitUntil()
@@ -98,14 +98,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const metadata = session.metadata || {};
   const metadataUserId = metadata.user_id || "anonymous";
   // Normalize whitespace/case before comparing — defensive against any
-  // upstream serialization that might mangle "ru" into " ru\n" or "RU".
+  // upstream serialization that might mangle "cs" into " cs\n" or "CS".
   // Prefer canonical `language` key; `lang` is a legacy fallback from older
   // checkout sessions that only set the short key.
   const langRaw = (metadata.language ?? metadata.lang ?? "")
     .toString()
     .trim()
     .toLowerCase();
-  const language: "en" | "ru" = langRaw === "ru" ? "ru" : "en";
+  const language: Lang = langRaw === "cs" ? "cs" : "en";
   const stripeCustomerId =
     typeof session.customer === "string"
       ? session.customer

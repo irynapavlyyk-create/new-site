@@ -26,9 +26,9 @@ async function main(): Promise<void> {
     tier: "pro",
     dashboardUrl,
   });
-  const purchaseProRu = renderPurchaseConfirmation({
+  const purchaseProCs = renderPurchaseConfirmation({
     to: "test@example.com",
-    locale: "ru",
+    locale: "cs",
     tier: "pro",
     dashboardUrl,
   });
@@ -38,9 +38,9 @@ async function main(): Promise<void> {
     tier: "coach",
     dashboardUrl,
   });
-  const purchaseCoachRu = renderPurchaseConfirmation({
+  const purchaseCoachCs = renderPurchaseConfirmation({
     to: "test@example.com",
-    locale: "ru",
+    locale: "cs",
     tier: "coach",
     dashboardUrl,
   });
@@ -50,20 +50,20 @@ async function main(): Promise<void> {
     dashboardUrl,
     planPreview: SAMPLE_PLAN_PREVIEW,
   });
-  const planReadyRu = renderPlanReady({
+  const planReadyCs = renderPlanReady({
     to: "test@example.com",
-    locale: "ru",
+    locale: "cs",
     dashboardUrl,
     planPreview: SAMPLE_PLAN_PREVIEW,
   });
 
   const files: Array<[string, string]> = [
     ["purchase-pro-en.html", purchaseProEn.html],
-    ["purchase-pro-ru.html", purchaseProRu.html],
+    ["purchase-pro-cs.html", purchaseProCs.html],
     ["purchase-coach-en.html", purchaseCoachEn.html],
-    ["purchase-coach-ru.html", purchaseCoachRu.html],
+    ["purchase-coach-cs.html", purchaseCoachCs.html],
     ["plan-ready-en.html", planReadyEn.html],
-    ["plan-ready-ru.html", planReadyRu.html],
+    ["plan-ready-cs.html", planReadyCs.html],
   ];
 
   await Promise.all(

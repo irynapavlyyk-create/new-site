@@ -46,7 +46,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const phenotype = getPhenotype(v2.phenotypeId);
 
   const generatedAt = new Date().toLocaleDateString(
-    lang === "ru" ? "ru-RU" : "en-US",
+    lang === "cs" ? "cs-CZ" : "en-US",
     { year: "numeric", month: "long", day: "numeric" },
   );
 

@@ -9,7 +9,7 @@ export default function LanguageSwitcher() {
       className="inline-flex items-center rounded-full p-1 backdrop-blur"
       style={{ border: "1px solid var(--border)", background: "var(--card-bg)" }}
     >
-      {(["en", "ru"] as const).map((l) => (
+      {(["en", "cs"] as const).map((l) => (
         <button
           key={l}
           onClick={() => setLang(l)}

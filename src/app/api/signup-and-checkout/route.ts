@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
 import { isPromoActive } from "@/lib/promo";
-import type { QuizAnswers } from "@/types";
+import type { Lang, QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ type Body = {
   email: string;
   password: string;
   tier: "pro" | "coach";
-  lang: "en" | "ru";
+  lang: Lang;
   answers?: QuizAnswers | null;
   posthogDistinctId?: string | null;
 };
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Password too short" }, { status: 400 });
     }
     const resolvedTier: "pro" | "coach" = tier === "coach" ? "coach" : "pro";
-    const resolvedLang: "en" | "ru" = lang === "ru" ? "ru" : "en";
+    const resolvedLang: Lang = lang === "cs" ? "cs" : "en";
 
     const supabase = await createClient();
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${siteUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/result?canceled=true`,
-      locale: resolvedLang === "ru" ? "ru" : "en",
+      locale: resolvedLang === "cs" ? "cs" : "en",
       allow_promotion_codes: true,
       customer_email: email,
       client_reference_id: authData.user.id,

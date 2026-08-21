@@ -3,14 +3,13 @@ import { z } from "zod";
 import { anthropic, MODEL, PRO_SYSTEM } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { sendPlanReady } from "@/lib/emails/send";
-import type { PhenotypeId, QuizAnswers } from "@/types";
+import type { Lang, PhenotypeId, QuizAnswers } from "@/types";
 import { describe, detectPatterns, type ProfileLine } from "@/lib/signals";
 import { inferPhenotype } from "@/lib/inferPhenotype";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { getPhenotype, PHENOTYPES } from "@/lib/phenotypes";
 
 export type GenerateTier = "pro" | "coach";
-export type GenerateLang = "en" | "ru";
 
 const ProPlanSchema = z.object({
   summary: z.string().min(1),
@@ -123,7 +122,8 @@ const PRO_SCHEMA_V2 = `{
   ]
 }`;
 
-function buildUserProfile(answers: QuizAnswers, lang: GenerateLang): string {
+// Profile language follows langName. Restore the cs branch when plan output switches to Czech.
+function buildUserProfile(answers: QuizAnswers): string {
   const keys: (keyof QuizAnswers)[] = [
     "chronotype",
     "age",
@@ -140,21 +140,18 @@ function buildUserProfile(answers: QuizAnswers, lang: GenerateLang): string {
   const lines = keys
     .map((k) => describe(k, answers[k]))
     .filter((x): x is ProfileLine => x !== null)
-    .map((p) => (lang === "ru" ? p.ru : p.en));
+    .map((p) => p.en);
 
   const signals = detectPatterns(answers);
 
-  const header = lang === "ru" ? "ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ" : "USER PROFILE";
-  const signalsHeader = lang === "ru" ? "Сигналы паттернов:" : "Pattern signals:";
-  const closing =
-    lang === "ru"
-      ? "Сгенерируй протокол на основе именно этого профиля."
-      : "Generate the protocol based on this specific profile.";
+  const header = "USER PROFILE";
+  const signalsHeader = "Pattern signals:";
+  const closing = "Generate the protocol based on this specific profile.";
 
   const parts: string[] = [header, "", ...lines];
   if (signals.length > 0) {
     parts.push("", signalsHeader);
-    for (const s of signals) parts.push(`- ${lang === "ru" ? s.ru : s.en}`);
+    for (const s of signals) parts.push(`- ${s.en}`);
   }
   parts.push("", closing);
   return parts.join("\n");
@@ -286,7 +283,7 @@ async function callAnthropicWithRetry(
 
 export async function generatePlan(params: {
   answers: QuizAnswers;
-  lang: GenerateLang;
+  lang: Lang;
   tier: GenerateTier;
 }): Promise<GenerateResult> {
   const { answers, lang, tier } = params;
@@ -296,7 +293,8 @@ export async function generatePlan(params: {
     return { ok: false, status: 500, error: "anthropic not configured" };
   }
 
-  const langName = lang === "ru" ? "Russian (русский)" : "English";
+  // TODO: switch to Czech once native review confirms quality.
+  const langName = "English";
   const system = PRO_SYSTEM;
   const schema = PRO_SCHEMA_V2;
   const validator = ProPlanV2Schema;
@@ -327,7 +325,7 @@ Write focus, nutritionFocus, stressPractices, and keyActions for each week, pers
 `
       : "";
 
-  const userPrompt = `${buildUserProfile(answers, lang)}
+  const userPrompt = `${buildUserProfile(answers)}
 ${pinnedPhenotypeBlock}
 Write your final output in ${langName}.
 
@@ -472,7 +470,7 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
   return { ok: true, data: validation.data };
 }
 
-function extractSummary(planData: unknown, lang: GenerateLang): string {
+function extractSummary(planData: unknown, lang: Lang): string {
   const raw =
     planData && typeof planData === "object" && "summary" in planData
       ? String((planData as { summary: unknown }).summary ?? "")
@@ -489,7 +487,7 @@ function extractSummary(planData: unknown, lang: GenerateLang): string {
     .trim();
 
   if (!cleaned) {
-    return lang === "ru"
+    return lang === "cs"
       ? "Ваш персональный 30-дневный энергетический протокол готов."
       : "Your personalized 30-day energy protocol is ready.";
   }
@@ -507,7 +505,7 @@ export async function generateAndSavePlan(params: {
   userId: string;
   sessionId: string;
   answers: QuizAnswers;
-  lang: GenerateLang;
+  lang: Lang;
   tier: GenerateTier;
 }): Promise<void> {
   const { userId, sessionId, answers, lang, tier } = params;

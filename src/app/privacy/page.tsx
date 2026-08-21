@@ -7,14 +7,14 @@ import { Mail, Ext } from "@/components/LegalHelpers";
 
 export default function PrivacyPage() {
   const { lang } = useI18n();
-  const lastUpdated = lang === "ru" ? "20 апреля 2026" : "April 20, 2026";
+  const lastUpdated = lang === "cs" ? "20 апреля 2026" : "April 20, 2026";
 
   return (
     <LegalLayout
       title={pick(t.legal.privacyTitle, lang)}
       lastUpdated={lastUpdated}
     >
-      {lang === "ru" ? <PrivacyRU /> : <PrivacyEN />}
+      {lang === "cs" ? <PrivacyRU /> : <PrivacyEN />}
     </LegalLayout>
   );
 }

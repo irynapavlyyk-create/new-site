@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import type { Lang } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
@@ -19,7 +20,7 @@ export default function LoginPage() {
 
 function authErrorMessage(
   code: string | null,
-  lang: "en" | "ru"
+  lang: Lang
 ): string | null {
   if (!code) return null;
   if (code === "link_expired" || code === "otp_expired") {

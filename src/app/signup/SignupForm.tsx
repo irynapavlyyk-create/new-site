@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import AuthLayout from "@/components/AuthLayout";
-import type { QuizAnswers } from "@/types";
+import type { Lang, QuizAnswers } from "@/types";
 
 export default function SignupForm() {
   const { lang } = useI18n();
@@ -49,7 +49,7 @@ export default function SignupForm() {
     // Quiz context lives in sessionStorage when the user arrived from /result.
     let answers: QuizAnswers | null = null;
     let tier: "pro" | "coach" = "pro";
-    let quizLang: "en" | "ru" = lang;
+    let quizLang: Lang = lang;
     // PostHog distinct_id carried over from /result so the server-side
     // purchase_completed event ties to the same person.
     let posthogDistinctId: string | null = null;
@@ -60,7 +60,7 @@ export default function SignupForm() {
         const storedTier = sessionStorage.getItem("quiz_tier");
         if (storedTier === "pro" || storedTier === "coach") tier = storedTier;
         const storedLang = sessionStorage.getItem("quiz_lang");
-        if (storedLang === "en" || storedLang === "ru") quizLang = storedLang;
+        if (storedLang === "en" || storedLang === "cs") quizLang = storedLang;
         posthogDistinctId = sessionStorage.getItem("ph_distinct_id");
       } catch (e) {
         console.warn("[signup] failed to read quiz context from sessionStorage:", e);

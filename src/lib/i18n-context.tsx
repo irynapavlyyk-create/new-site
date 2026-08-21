@@ -12,10 +12,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? (localStorage.getItem("ef_lang") as Lang | null) : null;
-    if (stored === "en" || stored === "ru") {
+    if (stored === "en" || stored === "cs") {
       setLangState(stored);
-    } else if (typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("ru")) {
-      setLangState("ru");
+    } else if (typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("cs")) {
+      setLangState("cs");
     }
   }, []);
 

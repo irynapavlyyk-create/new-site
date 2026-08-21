@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { isPromoActive } from "@/lib/promo";
-import type { QuizAnswers } from "@/types";
+import type { Lang, QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
 
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as {
       tier: "pro" | "coach";
-      lang: "en" | "ru";
+      lang: Lang;
       userId?: string | null;
       answers?: QuizAnswers;
       posthogDistinctId?: string | null;
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${siteUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/result?canceled=true`,
-      locale: lang === "ru" ? "ru" : "en",
+      locale: lang === "cs" ? "cs" : "en",
       allow_promotion_codes: true,
       metadata,
       ...(userId ? { client_reference_id: userId } : {}),

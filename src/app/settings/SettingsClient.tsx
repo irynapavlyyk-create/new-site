@@ -9,13 +9,13 @@ import FadeUp from "@/components/FadeUp";
 import SignOutButton from "./SignOutButton";
 
 const copy = {
-  emailLabel: { en: "Email", ru: "Email" },
+  emailLabel: { en: "Email", cs: "Email" },
   comingSoon: {
     en: "More settings coming soon — account details, subscription management, notification preferences.",
-    ru: "Другие настройки появятся скоро — данные аккаунта, управление подпиской, настройки уведомлений.",
+    cs: "Другие настройки появятся скоро — данные аккаунта, управление подпиской, настройки уведомлений.",
   },
-  accountSection: { en: "Account", ru: "Аккаунт" },
-  back: { en: "← Back to dashboard", ru: "← Назад в личный кабинет" },
+  accountSection: { en: "Account", cs: "Аккаунт" },
+  back: { en: "← Back to dashboard", cs: "← Назад в личный кабинет" },
 };
 
 export default function SettingsClient({ email }: { email: string | null }) {

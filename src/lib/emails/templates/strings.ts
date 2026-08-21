@@ -45,7 +45,7 @@ export const emailStrings = {
       footerCopyright: "© 2026 EnergyForge · Prague, Czech Republic",
     },
   },
-  ru: {
+  cs: {
     purchaseConfirmation: {
       subject: {
         pro: "Добро пожаловать в EnergyForge PRO 🎉",

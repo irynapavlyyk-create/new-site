@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import type { ProPlan } from "@/types";
+import type { Lang, ProPlan } from "@/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
@@ -154,7 +154,7 @@ function PlanForgingScreen({
   lang,
   sessionId = null,
 }: {
-  lang: "en" | "ru";
+  lang: Lang;
   sessionId?: string | null;
 }) {
   const [progress, setProgress] = useState(0);

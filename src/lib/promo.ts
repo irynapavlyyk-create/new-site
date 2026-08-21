@@ -27,5 +27,5 @@ export const PROMO_PRICES = {
 /** Short, honest launch label shown next to the discounted price. */
 export const PROMO_LABEL = {
   en: "Launch price · 50% off · ends July 6",
-  ru: "Старт-цена · −50% · до 6 июля",
+  cs: "Старт-цена · −50% · до 6 июля",
 } as const;

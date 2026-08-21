@@ -7,14 +7,14 @@ import { Mail } from "@/components/LegalHelpers";
 
 export default function RefundPolicyPage() {
   const { lang } = useI18n();
-  const lastUpdated = lang === "ru" ? "13 мая 2026" : "May 13, 2026";
+  const lastUpdated = lang === "cs" ? "13 мая 2026" : "May 13, 2026";
 
   return (
     <LegalLayout
       title={pick(t.legal.refundTitle, lang)}
       lastUpdated={lastUpdated}
     >
-      {lang === "ru" ? <RefundRU /> : <RefundEN />}
+      {lang === "cs" ? <RefundRU /> : <RefundEN />}
     </LegalLayout>
   );
 }
