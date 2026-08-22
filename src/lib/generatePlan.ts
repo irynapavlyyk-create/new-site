@@ -488,7 +488,7 @@ function extractSummary(planData: unknown, lang: Lang): string {
 
   if (!cleaned) {
     return lang === "cs"
-      ? "Ваш персональный 30-дневный энергетический протокол готов."
+      ? "Tvůj osobní 30denní energetický protokol je hotový."
       : "Your personalized 30-day energy protocol is ready.";
   }
 

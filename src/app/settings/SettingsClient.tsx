@@ -12,10 +12,10 @@ const copy = {
   emailLabel: { en: "Email", cs: "Email" },
   comingSoon: {
     en: "More settings coming soon — account details, subscription management, notification preferences.",
-    cs: "Другие настройки появятся скоро — данные аккаунта, управление подпиской, настройки уведомлений.",
+    cs: "Další nastavení už brzy — údaje účtu, správa předplatného, nastavení notifikací.",
   },
-  accountSection: { en: "Account", cs: "Аккаунт" },
-  back: { en: "← Back to dashboard", cs: "← Назад в личный кабинет" },
+  accountSection: { en: "Account", cs: "Účet" },
+  back: { en: "← Back to dashboard", cs: "← Zpět na přehled" },
 };
 
 export default function SettingsClient({ email }: { email: string | null }) {
