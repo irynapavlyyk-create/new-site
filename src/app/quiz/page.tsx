@@ -186,7 +186,7 @@ export default function QuizPage() {
           {isCompoundSleep && sleepQualityStep ? (
             <>
               <h1 className="h-display text-3xl sm:text-4xl mb-8 animate-fade-up">
-                <span className="gradient-text">{lang === "cs" ? "Сон" : "Sleep"}</span>
+                <span className="gradient-text">{lang === "cs" ? "Spánek" : "Sleep"}</span>
               </h1>
               <div className="mb-8">
                 <h2 className="text-base font-semibold text-ink mb-4">
@@ -253,7 +253,7 @@ export default function QuizPage() {
               </h1>
               {isMultiSelect && (
                 <p className="text-sm text-muted mb-8">
-                  {lang === "cs" ? "Отметь всё что подходит" : "Pick all that apply"}
+                  {lang === "cs" ? "Označ vše, co sedí" : "Pick all that apply"}
                 </p>
               )}
               <div className="grid gap-3">
