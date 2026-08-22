@@ -1,5 +1,12 @@
 // Launch discount — single source of truth.
 //
+// DORMANT BY DESIGN — do not delete as dead code. The launch window ended
+// 2026-07-06, so isPromoActive() now always returns false and every consumer
+// (Pricing badge, result-page cards, checkout price-id selection) is inert.
+// To revive for the next campaign: set a new PROMO_END, update the prices/
+// label below, and point STRIPE_PRICE_PRO_PROMO / STRIPE_PRICE_COACH_PROMO
+// at the new Stripe prices.
+//
 // A real, time-boxed 50% price cut on both paid tiers that AUTO-REVERTS after
 // PROMO_END with no redeploy: isPromoActive() simply returns false, so the UI
 // drops the badge and checkout falls back to the original Stripe price.
