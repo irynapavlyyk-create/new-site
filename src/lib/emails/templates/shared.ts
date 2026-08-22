@@ -47,16 +47,16 @@ export function renderButton(text: string, url: string): string {
 }
 
 export function renderFooter(locale: Lang): string {
-  const refundLabel = locale === "cs" ? "Возврат средств" : "Refund Policy";
-  const termsLabel = locale === "cs" ? "Условия" : "Terms";
-  const privacyLabel = locale === "cs" ? "Конфиденциальность" : "Privacy";
+  const refundLabel = locale === "cs" ? "Podmínky vrácení peněz" : "Refund Policy";
+  const termsLabel = locale === "cs" ? "Obchodní podmínky" : "Terms";
+  const privacyLabel = locale === "cs" ? "Ochrana soukromí" : "Privacy";
   const tagline =
     locale === "cs"
-      ? "AI-платформа персональной энергетической диагностики"
+      ? "Osobní energetická diagnostika poháněná AI"
       : "AI-powered personal energy diagnostics";
   const copyright =
     locale === "cs"
-      ? "© 2026 EnergyForge · Прага, Чехия"
+      ? "© 2026 EnergyForge · Praha, Česká republika"
       : "© 2026 EnergyForge · Prague, Czech Republic";
 
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:32px;border-top:1px solid #E5E5E0;">
