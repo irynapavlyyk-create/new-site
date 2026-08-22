@@ -23,7 +23,7 @@ export const quizSteps: QuizStep[] = [
     qCs: "Jsi spíš ranní ptáče, nebo noční sova?",
     options: [
       { value: "early-bird",   labelEn: "Morning person — I wake up easily before 7am", labelCs: "Ranní ptáče — bez problému vstávám před 7:00" },
-      { value: "intermediate", labelEn: "Somewhere in the middle — wake by 8-9am",      labelCs: "Něco mezi — vstávám kolem 8.–9. hodiny" },
+      { value: "intermediate", labelEn: "Somewhere in the middle — wake by 8-9am",      labelCs: "Něco mezi — vstávám mezi 8. a 9. hodinou" },
       { value: "night-owl",    labelEn: "Night person — most energetic after 9pm",      labelCs: "Noční sova — nejvíc energie mám po 21:00" },
       { value: "irregular",    labelEn: "Depends on the day, no real pattern",          labelCs: "Podle dne, žádný stálý vzorec" },
     ],
@@ -84,7 +84,7 @@ export const quizSteps: QuizStep[] = [
       { value: "3+-morning",     labelEn: "3+ cups, all before noon",                labelCs: "3+ šálků, vše před polednem" },
       { value: "1-2-afternoon",  labelEn: "1-2 cups, at least one after 2pm",        labelCs: "1-2 šálky, aspoň jeden po 14:00" },
       { value: "3+-afternoon",   labelEn: "3+ cups, including afternoon/evening",    labelCs: "3+ šálků, včetně odpoledne/večera" },
-      { value: "energy-drinks",  labelEn: "Mostly energy drinks or pre-workout",     labelCs: "Hlavně energeťáky nebo pre-workout" },
+      { value: "energy-drinks",  labelEn: "Mostly energy drinks or pre-workout",     labelCs: "Hlavně energetické nápoje nebo pre-workout" },
     ],
   },
   {
