@@ -21,19 +21,19 @@ export function describe(
       const map: Record<string, ProfileLine> = {
         "early-bird": {
           en: "Chronotype: morning person (lark) — natural wake before 7am, peak alertness early in the day.",
-          cs: "Хронотип: жаворонок — естественное пробуждение до 7 утра, пик активности в первой половине дня.",
+          cs: "Chronotyp: ranní typ (skřivan) — přirozené probuzení před 7. hodinou, vrchol bdělosti brzy během dne.",
         },
         intermediate: {
           en: "Chronotype: intermediate — natural wake 7-9am, peak in late morning to early afternoon.",
-          cs: "Хронотип: промежуточный — естественное пробуждение в 7-9 утра, пик с позднего утра до раннего дня.",
+          cs: "Chronotyp: střední — přirozené probuzení mezi 7. a 9. hodinou, vrchol od pozdního dopoledne do časného odpoledne.",
         },
         "night-owl": {
           en: "Chronotype: night person (owl) — natural wake after 9am, peak alertness in late evening.",
-          cs: "Хронотип: сова — естественное пробуждение после 9 утра, пик активности поздним вечером.",
+          cs: "Chronotyp: večerní typ (sova) — přirozené probuzení po 9. hodině, vrchol bdělosti pozdě večer.",
         },
         irregular: {
           en: "Chronotype: irregular — no consistent natural sleep/wake pattern, suggesting circadian dysregulation.",
-          cs: "Хронотип: нерегулярный — нет устойчивого естественного цикла сон/бодрствование, признак дисрегуляции циркадного ритма.",
+          cs: "Chronotyp: nepravidelný — žádný stálý přirozený rytmus spánku a bdění, ukazuje na cirkadiánní dysregulaci.",
         },
       };
       return map[value] ?? null;
@@ -41,19 +41,19 @@ export function describe(
     case "age": {
       if (typeof value !== "string") return null;
       const map: Record<string, ProfileLine> = {
-        "18-24": { en: "Demographics: 18-24 years old.", cs: "Возраст: 18-24 года." },
-        "25-34": { en: "Demographics: 25-34 years old.", cs: "Возраст: 25-34 года." },
+        "18-24": { en: "Demographics: 18-24 years old.", cs: "Demografie: 18-24 let." },
+        "25-34": { en: "Demographics: 25-34 years old.", cs: "Demografie: 25-34 let." },
         "35-44": {
           en: "Demographics: 35-44 years old (mitochondrial decline window begins in this bracket).",
-          cs: "Возраст: 35-44 года (в этом диапазоне начинается окно митохондриального спада).",
+          cs: "Demografie: 35-44 let (v tomto pásmu začíná okno mitochondriálního poklesu).",
         },
         "45-54": {
           en: "Demographics: 45-54 years old (perimenopause window for females; testosterone decline window for males).",
-          cs: "Возраст: 45-54 года (окно перименопаузы у женщин; окно снижения тестостерона у мужчин).",
+          cs: "Demografie: 45-54 let (okno perimenopauzy u žen; okno poklesu testosteronu u mužů).",
         },
         "55+": {
           en: "Demographics: 55+ years old (consider bloodwork before lifestyle interventions for unexplained fatigue).",
-          cs: "Возраст: 55+ лет (при необъяснимой усталости — сначала анализы, потом коррекция образа жизни).",
+          cs: "Demografie: 55+ let (při nevysvětlené únavě zvážit krevní testy před zásahy do životního stylu).",
         },
       };
       return map[value] ?? null;
@@ -63,23 +63,23 @@ export function describe(
       const map: Record<string, ProfileLine> = {
         "morning-peak": {
           en: "Energy pattern: strong morning, fades by afternoon — typical lark/cortisol-aligned pattern.",
-          cs: "Паттерн энергии: сильное утро, угасает к обеду — типичный жаворонок, кривая выровнена с кортизолом.",
+          cs: "Vzorec energie: silné ráno, k odpoledni slábne — typický skřivaní vzorec sladěný s kortizolem.",
         },
         "afternoon-crash": {
           en: "Energy pattern: OK until 2pm then hard crash — typical post-lunch insulin/cortisol dip with glycemic instability overlay likely.",
-          cs: "Паттерн энергии: норм до 2 дня, потом резкий спад — типичный послеобеденный инсулиновый/кортизоловый провал, вероятна нестабильность гликемии.",
+          cs: "Vzorec energie: v pořádku do 14:00, pak tvrdý propad — typický poobědový inzulinový/kortizolový pokles, pravděpodobně s vrstvou glykemické nestability.",
         },
         "evening-peak": {
           en: "Energy pattern: slow morning, energy peaks by evening — typical owl pattern; may indicate phase-delayed circadian if forced into early schedule.",
-          cs: "Паттерн энергии: медленное утро, пик к вечеру — типичный паттерн совы; может указывать на отставание фазы циркадного ритма при навязанном раннем графике.",
+          cs: "Vzorec energie: pomalé ráno, vrchol k večeru — typický vzorec sovy; při vynuceném časném režimu může značit fázově zpožděný cirkadiánní rytmus.",
         },
         "flat-low": {
           en: "Energy pattern: low all day, no real peaks — chronic baseline fatigue without diurnal variation, suggests systemic issue not just timing.",
-          cs: "Паттерн энергии: низкая весь день, без пиков — хроническая базовая усталость без суточной вариации, признак системной проблемы, а не только тайминга.",
+          cs: "Vzorec energie: nízká celý den, bez skutečných vrcholů — chronická základní únava bez denní variace, ukazuje na systémový problém, ne jen na načasování.",
         },
         "flat-high": {
           en: "Energy pattern: high all day, cannot switch off even when needed — classic Wired-but-tired/sympathetic-dominance pattern. Body operating in continuous arousal mode.",
-          cs: "Паттерн энергии: высокая весь день, невозможно выключиться даже когда надо — классический паттерн «на взводе, но в нуле» / симпатическое доминирование. Тело в непрерывном режиме возбуждения.",
+          cs: "Vzorec energie: vysoká celý den, nejde vypnout, ani když je potřeba — klasický vzorec Wired-but-tired / sympatické dominance. Tělo běží v režimu nepřetržitého nabuzení.",
         },
       };
       return map[value] ?? null;
@@ -89,19 +89,19 @@ export function describe(
       const map: Record<string, ProfileLine> = {
         "<6h": {
           en: "Sleep duration: less than 6 hours per night (deficit territory for nearly all adults).",
-          cs: "Длительность сна: меньше 6 часов за ночь (зона дефицита для подавляющего большинства взрослых).",
+          cs: "Délka spánku: méně než 6 hodin za noc (pásmo deficitu pro téměř všechny dospělé).",
         },
         "6-7h": {
           en: "Sleep duration: 6-7 hours per night (below optimal for most adults but not severe deficit).",
-          cs: "Длительность сна: 6-7 часов за ночь (ниже оптимума для большинства взрослых, но не острый дефицит).",
+          cs: "Délka spánku: 6-7 hodin za noc (pod optimem pro většinu dospělých, ale ne těžký deficit).",
         },
         "7-8h": {
           en: "Sleep duration: 7-8 hours per night (within recommended range).",
-          cs: "Длительность сна: 7-8 часов за ночь (в рекомендуемом диапазоне).",
+          cs: "Délka spánku: 7-8 hodin za noc (v doporučeném rozmezí).",
         },
         ">8h": {
           en: "Sleep duration: more than 8 hours per night.",
-          cs: "Длительность сна: больше 8 часов за ночь.",
+          cs: "Délka spánku: více než 8 hodin za noc.",
         },
       };
       return map[value] ?? null;
@@ -111,19 +111,19 @@ export function describe(
       const map: Record<string, ProfileLine> = {
         refreshed: {
           en: "Sleep quality: wakes refreshed and ready — sleep architecture intact.",
-          cs: "Качество сна: просыпается бодрым и готовым — архитектура сна сохранна.",
+          cs: "Kvalita spánku: probouzí se odpočatě a svěží — architektura spánku je neporušená.",
         },
         groggy: {
           en: "Sleep quality: wakes groggy, needs 30+ minutes to alert — sleep inertia pattern, possible deeper-than-needed N3 sleep or interrupted REM at wake time.",
-          cs: "Качество сна: просыпается заторможенным, нужно 30+ минут для включения — паттерн инерции сна, возможен слишком глубокий N3-сон или прерванная REM-фаза в момент пробуждения.",
+          cs: "Kvalita spánku: probouzí se rozlámaně, potřebuje 30+ minut na probrání — vzorec spánkové setrvačnosti, možný příliš hluboký spánek N3 nebo přerušená REM fáze v okamžiku probuzení.",
         },
         tired: {
           en: "Sleep quality: wakes tired even after adequate duration — sleep ARCHITECTURE problem, not duration deficit. Suspect fragmented deep sleep, possible airway/cortisol/alcohol involvement.",
-          cs: "Качество сна: просыпается уставшим даже после достаточной длительности — проблема АРХИТЕКТУРЫ сна, а не дефицита времени. Подозрение на фрагментированный глубокий сон, возможна роль дыхательных путей / кортизола / алкоголя.",
+          cs: "Kvalita spánku: probouzí se unaveně i po dostatečné délce — problém ARCHITEKTURY spánku, ne deficit délky. Podezření na fragmentovaný hluboký spánek, možný podíl dýchacích cest / kortizolu / alkoholu.",
         },
         interrupted: {
           en: "Sleep quality: wakes 1-2+ times during the night — sleep maintenance insomnia. Suspect cortisol elevation, blood sugar instability, or stimulus (caffeine half-life, alcohol, fluid timing).",
-          cs: "Качество сна: просыпается 1-2+ раза за ночь — инсомния поддержания сна. Подозрение на повышенный кортизол, нестабильность сахара крови или стимулы (период полувыведения кофеина, алкоголь, тайминг жидкости).",
+          cs: "Kvalita spánku: budí se 1-2+ krát za noc — insomnie udržení spánku. Podezření na zvýšený kortizol, nestabilitu krevního cukru nebo stimuly (poločas kofeinu, alkohol, načasování tekutin).",
         },
       };
       return map[value] ?? null;
@@ -131,26 +131,26 @@ export function describe(
     case "caffeine": {
       if (typeof value !== "string") return null;
       const map: Record<string, ProfileLine> = {
-        none: { en: "Caffeine intake: none.", cs: "Кофеин: не употребляет." },
+        none: { en: "Caffeine intake: none.", cs: "Kofein: žádný." },
         "1-2-morning": {
           en: "Caffeine intake: 1-2 cups daily, all before noon (well-timed for cortisol/sleep architecture).",
-          cs: "Кофеин: 1-2 чашки в день, все до полудня (тайминг хорош для кортизола и архитектуры сна).",
+          cs: "Kofein: 1-2 šálky denně, vše před polednem (dobré načasování pro kortizol i architekturu spánku).",
         },
         "3+-morning": {
           en: "Caffeine intake: 3+ cups daily, all before noon (high amount but timing protects sleep — adrenal load on the high side).",
-          cs: "Кофеин: 3+ чашек в день, все до полудня (количество высокое, но тайминг защищает сон — нагрузка на надпочечники выше нормы).",
+          cs: "Kofein: 3+ šálků denně, vše před polednem (množství vysoké, ale načasování chrání spánek — zátěž nadledvin na horní hranici).",
         },
         "1-2-afternoon": {
           en: "Caffeine intake: 1-2 cups daily including at least one after 2pm (5-6h half-life means measurable amount in system at bedtime — likely fragmenting sleep architecture).",
-          cs: "Кофеин: 1-2 чашки в день, минимум одна после 2 дня (период полувыведения 5-6 часов — к моменту отхода ко сну в системе остаётся измеримое количество, скорее всего фрагментирует архитектуру сна).",
+          cs: "Kofein: 1-2 šálky denně, aspoň jeden po 14:00 (poločas 5-6 hodin znamená měřitelné množství v těle při usínání — pravděpodobně fragmentuje architekturu spánku).",
         },
         "3+-afternoon": {
           en: "Caffeine intake: 3+ cups daily including afternoon/evening (substantial sleep-disrupting load, almost certainly contributing to interrupted/unrefreshing sleep).",
-          cs: "Кофеин: 3+ чашек в день, включая день и вечер (существенная нарушающая сон нагрузка, почти наверняка вклад в прерывистый/не восстанавливающий сон).",
+          cs: "Kofein: 3+ šálků denně včetně odpoledne/večera (výrazná zátěž narušující spánek, téměř jistě přispívá k přerušovanému / neosvěžujícímu spánku).",
         },
         "energy-drinks": {
           en: "Caffeine source: mostly energy drinks or pre-workout formulas (high caffeine + frequent additional stimulants like taurine, beta-alanine, and added sugars; sugar crashes confound the energy picture).",
-          cs: "Источник кофеина: в основном энергетики или pre-workout формулы (высокий кофеин + частые дополнительные стимуляторы — таурин, бета-аланин, добавленные сахара; сахарные спады искажают картину энергии).",
+          cs: "Zdroj kofeinu: převážně energetické nápoje nebo pre-workout směsi (vysoký kofein + často další stimulanty jako taurin, beta-alanin a přidané cukry; cukrové propady zkreslují obraz energie).",
         },
       };
       return map[value] ?? null;
@@ -163,7 +163,7 @@ export function describe(
       if (symptoms.length === 0) {
         return {
           en: "Stress symptoms: none reported regularly.",
-          cs: "Симптомы стресса: регулярно не наблюдаются.",
+          cs: "Symptomy stresu: pravidelně se žádné neobjevují.",
         };
       }
       const labelsEn: Record<string, string> = {
@@ -174,32 +174,32 @@ export function describe(
         "dread-anxiety": "anticipatory anxiety / dread of upcoming events",
         overwhelmed: "feeling of being overwhelmed by daily load",
       };
-      const labelsRu: Record<string, string> = {
-        "racing-thoughts": "несущиеся мысли / ментальная гиперактивация",
-        "tension-headaches": "головные боли напряжения / сжатие челюсти (соматические маркеры стресса)",
-        irritable: "низкий порог раздражения / дефицит терпения",
-        "wired-cant-relax": "физическая невозможность расслабиться (симпатическое доминирование)",
-        "dread-anxiety": "предвосхищающая тревога / страх перед предстоящими событиями",
-        overwhelmed: "ощущение перегрузки повседневными задачами",
+      const labelsCs: Record<string, string> = {
+        "racing-thoughts": "překotné myšlenky / mentální hyperaktivace",
+        "tension-headaches": "tenzní bolesti hlavy / zatínání čelisti (somatické markery stresu)",
+        irritable: "nízký práh podráždění / deficit trpělivosti",
+        "wired-cant-relax": "fyzická neschopnost se uvolnit (sympatická dominance)",
+        "dread-anxiety": "anticipační úzkost / strach z nadcházejících událostí",
+        overwhelmed: "pocit zahlcení denní zátěží",
       };
       const joinedEn = symptoms.map((s) => labelsEn[s] ?? s).join("; ");
-      const joinedRu = symptoms.map((s) => labelsRu[s] ?? s).join("; ");
+      const joinedCs = symptoms.map((s) => labelsCs[s] ?? s).join("; ");
 
       let severityEn: string;
-      let severityRu: string;
+      let severityCs: string;
       if (symptoms.length <= 2) {
         severityEn = "mild";
-        severityRu = "лёгкие";
+        severityCs = "mírné";
       } else if (symptoms.length <= 4) {
         severityEn = "moderate-to-high, multi-system manifestation";
-        severityRu = "умеренные-высокие, многосистемное проявление";
+        severityCs = "střední až vysoké, multisystémový projev";
       } else {
         severityEn = "severe overload, classic HPA dysregulation candidate";
-        severityRu = "тяжёлая перегрузка, классический кандидат на дисрегуляцию оси ГГН";
+        severityCs = "těžké přetížení, klasický kandidát na dysregulaci osy HPA";
       }
       return {
         en: `Stress symptoms (${severityEn}): ${joinedEn}.`,
-        cs: `Симптомы стресса (${severityRu}): ${joinedRu}.`,
+        cs: `Symptomy stresu (${severityCs}): ${joinedCs}.`,
       };
     }
     case "nutrition": {
@@ -207,23 +207,23 @@ export function describe(
       const map: Record<string, ProfileLine> = {
         "skip-meals": {
           en: "Eating pattern: frequently skips breakfast or lunch (creates extended fasts that destabilize blood sugar, especially during cortisol-elevated morning hours).",
-          cs: "Паттерн питания: часто пропускает завтрак или обед (создаёт удлинённые периоды голодания, дестабилизирующие сахар крови, особенно на фоне утренне-повышенного кортизола).",
+          cs: "Vzorec stravování: často vynechává snídani nebo oběd (vytváří prodloužené hladovění destabilizující krevní cukr, zvlášť v ranních hodinách se zvýšeným kortizolem).",
         },
         irregular: {
           en: "Eating pattern: meals happen but timing varies significantly (disrupts circadian metabolic signaling).",
-          cs: "Паттерн питания: приёмы пищи происходят, но время сильно варьируется (нарушает циркадную метаболическую сигнализацию).",
+          cs: "Vzorec stravování: jídla probíhají, ale jejich čas se výrazně mění (narušuje cirkadiánní metabolickou signalizaci).",
         },
         "regular-3": {
           en: "Eating pattern: 3 meals at consistent times (good baseline timing structure).",
-          cs: "Паттерн питания: 3 приёма пищи в стабильное время (хорошая базовая временна́я структура).",
+          cs: "Vzorec stravování: 3 jídla v konzistentních časech (dobrá základní časová struktura).",
         },
         "regular-3-snacks": {
           en: "Eating pattern: 3 meals + planned snacks (consistent grazing pattern, good glycemic management).",
-          cs: "Паттерн питания: 3 приёма + запланированные перекусы (стабильный паттерн дробного питания, хорошее управление гликемией).",
+          cs: "Vzorec stravování: 3 jídla + plánované svačiny (konzistentní vzorec častějšího jídla, dobré řízení glykemie).",
         },
         restricted: {
           en: "Eating pattern: follows a specific restrictive protocol (intermittent fasting, OMAD, ketogenic, or similar). Verify protocol fit with training load and chronotype before recommending changes.",
-          cs: "Паттерн питания: соблюдает специфический ограничительный протокол (интервальное голодание, OMAD, кетогенный или подобный). Проверить совместимость протокола с тренировочной нагрузкой и хронотипом перед рекомендацией изменений.",
+          cs: "Vzorec stravování: dodržuje specifický restriktivní protokol (přerušovaný půst, OMAD, ketogenní apod.). Před doporučením změn ověřit soulad protokolu s tréninkovou zátěží a chronotypem.",
         },
       };
       return map[value] ?? null;
@@ -236,7 +236,7 @@ export function describe(
       if (value.includes("sedentary")) {
         return {
           en: "Activity level: sedentary, less than 5k steps daily, no regular training.",
-          cs: "Уровень активности: сидячий, меньше 5k шагов в день, нет регулярных тренировок.",
+          cs: "Úroveň aktivity: sedavá, méně než 5 000 kroků denně, žádný pravidelný trénink.",
         };
       }
       if (value.length === 0) return null;
@@ -249,27 +249,27 @@ export function describe(
         "mind-body": "yoga, Pilates, stretching practice",
         "daily-pro": "daily training, multiple disciplines or competitive level (recovery margin is thin)",
       };
-      const labelsRu: Record<string, string> = {
-        walking: "регулярная ходьба / базовое движение в Зоне 2",
-        "cardio-moderate": "умеренное кардио 2-3× в неделю (бег, велосипед, плавание)",
-        strength: "силовые тренировки 1-3× в неделю (резистенс/штанга)",
-        combat: "боевые единоборства 1-3× в неделю (бокс/BJJ/MMA — высокий кортизоловый стимул и требования к восстановлению)",
-        "intense-cardio": "интенсивное кардио 3+× в неделю (HIIT/CrossFit/бег на дистанции)",
-        "mind-body": "йога, пилатес, практика растяжки",
-        "daily-pro": "ежедневные тренировки, несколько дисциплин или соревновательный уровень (запас восстановления тонкий)",
+      const labelsCs: Record<string, string> = {
+        walking: "pravidelná chůze / základní pohyb v zóně 2",
+        "cardio-moderate": "mírné kardio 2-3× týdně (běh, kolo, plavání)",
+        strength: "silový trénink 1-3× týdně (odporový trénink/činky)",
+        combat: "bojové sporty 1-3× týdně (box/BJJ/MMA — vysoký kortizolový stimul + nároky na regeneraci)",
+        "intense-cardio": "intenzivní kardio 3+× týdně (HIIT/CrossFit/vytrvalostní běh)",
+        "mind-body": "jóga, pilates, strečink",
+        "daily-pro": "denní trénink, více disciplín nebo závodní úroveň (rezerva na regeneraci je tenká)",
       };
       if (value.length === 1) {
         const m = value[0];
         return {
           en: `Activity: ${labelsEn[m] ?? m}.`,
-          cs: `Активность: ${labelsRu[m] ?? m}.`,
+          cs: `Aktivita: ${labelsCs[m] ?? m}.`,
         };
       }
       const joinedEn = value.map((m) => labelsEn[m] ?? m).join(", ");
-      const joinedRu = value.map((m) => labelsRu[m] ?? m).join(", ");
+      const joinedCs = value.map((m) => labelsCs[m] ?? m).join(", ");
       return {
         en: `Activity mix: combines ${joinedEn}. Cumulative training load is significant — recovery infrastructure must match.`,
-        cs: `Микс активности: сочетает ${joinedRu}. Суммарная тренировочная нагрузка существенная — инфраструктура восстановления должна соответствовать.`,
+        cs: `Mix aktivit: kombinuje ${joinedCs}. Kumulativní tréninková zátěž je významná — infrastruktura regenerace jí musí odpovídat.`,
       };
     }
     case "priority": {
@@ -277,23 +277,23 @@ export function describe(
       const map: Record<string, ProfileLine> = {
         energy: {
           en: "User's stated priority — fix FIRST: energy stability. Weight protocol toward consistent, reliable daily energy.",
-          cs: "Заявленный приоритет пользователя — исправить В ПЕРВУЮ ОЧЕРЕДЬ: стабильность энергии. Сместить акцент протокола на устойчивую надёжную ежедневную энергию.",
+          cs: "Deklarovaná priorita uživatele — řešit NEJDŘÍV: stabilita energie. Vážit protokol směrem ke konzistentní, spolehlivé denní energii.",
         },
         sleep: {
           en: "User's stated priority — fix FIRST: sleep quality (not just duration). Weight protocol toward sleep architecture interventions.",
-          cs: "Заявленный приоритет пользователя — исправить В ПЕРВУЮ ОЧЕРЕДЬ: качество сна (не просто длительность). Сместить акцент протокола на вмешательства по архитектуре сна.",
+          cs: "Deklarovaná priorita uživatele — řešit NEJDŘÍV: kvalita spánku (ne jen délka). Vážit protokol směrem k zásahům do architektury spánku.",
         },
         focus: {
           en: "User's stated priority — fix FIRST: cognitive clarity / focus. Weight protocol toward cognition-supporting interventions.",
-          cs: "Заявленный приоритет пользователя — исправить В ПЕРВУЮ ОЧЕРЕДЬ: когнитивная ясность / фокус. Сместить акцент протокола на вмешательства, поддерживающие когницию.",
+          cs: "Deklarovaná priorita uživatele — řešit NEJDŘÍV: kognitivní jasnost / soustředění. Vážit protokol směrem k intervencím podporujícím kognici.",
         },
         stress: {
           en: "User's stated priority — fix FIRST: stress regulation. Weight protocol toward HPA axis interventions.",
-          cs: "Заявленный приоритет пользователя — исправить В ПЕРВУЮ ОЧЕРЕДЬ: регуляция стресса. Сместить акцент протокола на вмешательства по оси ГГН.",
+          cs: "Deklarovaná priorita uživatele — řešit NEJDŘÍV: regulace stresu. Vážit protokol směrem k intervencím na ose HPA.",
         },
         mood: {
           en: "User's stated priority — fix FIRST: mood / feeling like themselves. Weight protocol toward mood-supporting nutrition + lifestyle.",
-          cs: "Заявленный приоритет пользователя — исправить В ПЕРВУЮ ОЧЕРЕДЬ: настроение / возвращение к себе. Сместить акцент протокола на питание и образ жизни, поддерживающие настроение.",
+          cs: "Deklarovaná priorita uživatele — řešit NEJDŘÍV: nálada / cítit se zase ve své kůži. Vážit protokol směrem k výživě a životnímu stylu podporujícím náladu.",
         },
       };
       return map[value] ?? null;
@@ -303,15 +303,15 @@ export function describe(
       const map: Record<string, ProfileLine> = {
         female: {
           en: "Biological sex: female. Consider iron status (ferritin), cycle-related symptom variation if reproductive age, perimenopause window if 35+, lower protein dose ceiling (~1.4-1.8 g/kg lean mass), calcium/magnesium ratio differs from male baseline.",
-          cs: "Биологический пол: женский. Учитывать статус железа (ферритин), вариативность симптомов по фазам цикла в репродуктивном возрасте, окно перименопаузы при 35+, более низкий потолок белка (~1.4-1.8 г/кг сухой массы), соотношение кальция/магния отличается от мужского базиса.",
+          cs: "Biologické pohlaví: žena. Zohlednit stav železa (feritin), variabilitu symptomů podle fáze cyklu v reprodukčním věku, okno perimenopauzy při 35+, nižší strop dávky bílkovin (~1.4-1.8 g/kg netukové hmoty), poměr vápník/hořčík se liší od mužské výchozí hodnoty.",
         },
         male: {
           en: "Biological sex: male. Iron deficiency is rare absent obvious cause; consider testosterone status if 35+ with low energy, higher protein dose ceiling (~1.6-2.2 g/kg lean mass).",
-          cs: "Биологический пол: мужской. Дефицит железа редок без явной причины; при 35+ с низкой энергией учитывать статус тестостерона, более высокий потолок белка (~1.6-2.2 г/кг сухой массы).",
+          cs: "Biologické pohlaví: muž. Deficit železa je bez zjevné příčiny vzácný; při 35+ s nízkou energií zvážit stav testosteronu, vyšší strop dávky bílkovin (~1.6-2.2 g/kg netukové hmoty).",
         },
         "prefer-not-say": {
           en: "Biological sex: not specified. Use gender-neutral nutritional baseline; flag sex-specific levers (iron, hormones, dose ranges) as clinician consultation points rather than recommendations.",
-          cs: "Биологический пол: не указан. Использовать гендерно-нейтральный базис питания; пол-специфичные рычаги (железо, гормоны, дозировки) обозначить как точки консультации с клиницистом, а не как рекомендации.",
+          cs: "Biologické pohlaví: neuvedeno. Použít genderově neutrální výživový základ; pohlavně specifické páky (železo, hormony, dávkování) označit jako body ke konzultaci s lékařem, ne jako doporučení.",
         },
       };
       return map[value] ?? null;
@@ -336,7 +336,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Afternoon caffeine + impaired sleep quality: 5-6 hour half-life means measurable amount in system at bedtime, directly fragmenting sleep architecture. The cutoff timing is the leverage point, not the amount.",
-      cs: "Послеобеденный кофеин + сниженное качество сна: период полувыведения 5-6 часов означает, что к моменту сна в системе остаётся измеримое количество, напрямую фрагментирующее архитектуру сна. Рычаг — время отсечки, а не количество.",
+      cs: "Odpolední kofein + zhoršená kvalita spánku: poločas 5-6 hodin znamená měřitelné množství v těle při usínání, které přímo fragmentuje architekturu spánku. Pákou je čas poslední dávky, ne množství.",
     });
   }
   // H2: late + high caffeine + anxiety amplification
@@ -348,7 +348,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Late + high caffeine + anxiety amplification loop: caffeine sits upstream of multiple symptoms. Cutting afternoon caffeine first will often improve 2-3 downstream complaints simultaneously.",
-      cs: "Поздний + высокий кофеин + петля усиления тревоги: кофеин стоит выше нескольких симптомов в цепочке. Убрав сначала послеобеденный кофеин, часто получаешь улучшение по 2-3 нижестоящим жалобам одновременно.",
+      cs: "Pozdní + vysoký kofein + smyčka zesilování úzkosti: kofein stojí v řetězci nad několika symptomy. Vyřazení odpoledního kofeinu jako první krok často zlepší 2-3 navazující potíže současně.",
     });
   }
 
@@ -362,14 +362,14 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Sleeps 8+ hours but wakes unrested — this is a sleep ARCHITECTURE problem, not a duration deficit. Quality over quantity here: suspect fragmented deep sleep, possible airway/cortisol/alcohol involvement.",
-      cs: "Спит 8+ часов, но просыпается невыспавшимся — это проблема АРХИТЕКТУРЫ сна, а не дефицита времени. Здесь важнее качество, а не количество: подозрение на фрагментированный глубокий сон, возможна роль дыхательных путей / кортизола / алкоголя.",
+      cs: "Spí 8+ hodin, ale probouzí se neodpočatě — to je problém ARCHITEKTURY spánku, ne deficit délky. Tady jde o kvalitu, ne kvantitu: podezření na fragmentovaný hluboký spánek, možný podíl dýchacích cest / kortizolu / alkoholu.",
     });
   }
   // H4: short sleep + sedentary
   if (a.sleepDuration === "<6h" && activity.includes("sedentary")) {
     signals.push({
       en: "Short sleep + sedentary lifestyle compounds recovery debt. Sleep extension and gentle daily movement together produce more energy than either alone.",
-      cs: "Короткий сон + сидячий образ жизни накладываются друг на друга по дефициту восстановления. Удлинение сна и мягкое ежедневное движение вместе дают больше энергии, чем каждое по отдельности.",
+      cs: "Krátký spánek + sedavý životní styl sčítají dluh regenerace. Prodloužení spánku a mírný denní pohyb dohromady dají víc energie než každé zvlášť.",
     });
   }
 
@@ -378,7 +378,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   if (a.chronotype === "night-owl" && a.sleepQuality === "interrupted") {
     signals.push({
       en: "Social jet lag pattern — owl chronotype forced into early-bird schedule. Light exposure timing + cortisol curve are misaligned with the body's preferred phase. Morning bright light and consistent (not necessarily early) bedtime are the highest-yield levers.",
-      cs: "Паттерн социального джетлага — хронотип совы, втиснутый в график жаворонка. Тайминг освещения и кортизоловая кривая рассинхронизированы с предпочтительной фазой тела. Самые сильные рычаги — утренний яркий свет и стабильное (не обязательно раннее) время отхода ко сну.",
+      cs: "Vzorec sociálního jetlagu — chronotyp sovy natlačený do skřivaního režimu. Načasování světla a kortizolová křivka jsou rozladěné s preferovanou fází těla. Nejvýnosnější páky: ranní ostré světlo a stabilní (ne nutně časná) doba usínání.",
     });
   }
   // H6: chronotype-energy mismatch
@@ -388,7 +388,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Chronotype-energy mismatch — user's natural pattern contradicts their stated energy peak. May indicate forced schedule, misreporting, or stimulant use masking the true pattern. Treat as ambiguous signal; weight other inputs more heavily.",
-      cs: "Несоответствие хронотипа и энергии — естественный паттерн пользователя противоречит заявленному пику энергии. Может указывать на навязанный график, неточный самоотчёт или маскировку стимуляторами. Рассматривать как неоднозначный сигнал; больше веса другим вводам.",
+      cs: "Nesoulad chronotypu a energie — přirozený vzorec uživatele odporuje uvedenému vrcholu energie. Může jít o vynucený režim, nepřesný sebereport nebo maskování stimulanty. Brát jako nejednoznačný signál; dát víc váhy ostatním vstupům.",
     });
   }
 
@@ -397,7 +397,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   if (effectiveStress.length >= 4) {
     signals.push({
       en: "Multi-system stress overload, classic HPA dysregulation candidate. Foundation interventions (magnesium, sleep, caffeine reduction) before adaptogens.",
-      cs: "Многосистемная перегрузка стрессом, классический кандидат на дисрегуляцию оси ГГН. Базовые вмешательства (магний, сон, снижение кофеина) до адаптогенов.",
+      cs: "Multisystémové přetížení stresem, klasický kandidát na dysregulaci osy HPA. Základní intervence (hořčík, spánek, snížení kofeinu) před adaptogeny.",
     });
   }
   // H8: wired-but-tired indicators
@@ -408,7 +408,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Wired-but-tired phenotype indicators: sympathetic dominance + sleep fragmentation. Magnesium glycinate (300-400mg evening) + L-theanine (200mg paired with caffeine) are the foundational pair with strongest evidence.",
-      cs: "Индикаторы фенотипа «на взводе, но в нуле»: симпатическое доминирование + фрагментация сна. Магний глицинат (300-400 мг вечером) + L-теанин (200 мг в паре с кофеином) — базовая пара с наиболее сильной доказательной базой.",
+      cs: "Indikátory fenotypu Wired-but-tired: sympatická dominance + fragmentace spánku. Hořčík bisglycinát (300-400 mg večer) + L-theanin (200 mg v páru s kofeinem) jsou základní dvojice s nejsilnější evidencí.",
     });
   }
   // H9: cortisol-driven irritability cluster
@@ -419,7 +419,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Cortisol-driven irritability cluster — magnesium (any well-absorbed form) + active B-complex have strongest evidence. Watch for jaw clenching as a marker to track improvement.",
-      cs: "Кортизол-управляемый кластер раздражительности — магний (любая хорошо усваиваемая форма) + активный B-комплекс имеют наиболее сильную доказательную базу. Сжатие челюсти — удобный маркер для отслеживания прогресса.",
+      cs: "Kortizolem řízený cluster podrážděnosti — hořčík (jakákoli dobře vstřebatelná forma) + aktivní B-komplex mají nejsilnější evidenci. Zatínání čelisti sledovat jako marker zlepšení.",
     });
   }
 
@@ -432,7 +432,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Female reproductive age + chronic low energy: ferritin and transferrin saturation are the highest-yield labs. Low iron is the #1 missed fatigue driver in this demographic, including in vegetarians/vegans and those with heavy cycles.",
-      cs: "Женский репродуктивный возраст + хроническая низкая энергия: ферритин и насыщение трансферрина — самые продуктивные анализы. Низкое железо — драйвер усталости №1, который чаще всего пропускают в этой демографии, включая вегетарианок/веганок и женщин с обильными циклами.",
+      cs: "Žena v reprodukčním věku + chronicky nízká energie: feritin a saturace transferinu jsou nejvýnosnější testy. Nízké železo je nejčastěji přehlížený hnací faktor únavy v této demografii, včetně vegetariánek/veganek a žen se silnou menstruací.",
     });
   }
   // H11: perimenopause window indicators
@@ -444,7 +444,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Perimenopause window indicators: track symptoms against cycle phase. B6 (P-5-P form) + magnesium glycinate + ashwagandha have evidence. Clinician consultation for full hormone panel (estradiol, progesterone, FSH, thyroid) warranted before extensive supplementation.",
-      cs: "Индикаторы окна перименопаузы: отслеживать симптомы по фазам цикла. B6 (форма P-5-P) + магний глицинат + ашваганда имеют доказательную базу. Перед расширенным приёмом добавок — консультация клинициста с полной гормональной панелью (эстрадиол, прогестерон, ФСГ, щитовидка).",
+      cs: "Indikátory okna perimenopauzy: sledovat symptomy vůči fázi cyklu. B6 (forma P-5-P) + hořčík bisglycinát + ashwagandha mají evidenci. Před rozsáhlejší suplementací je namístě konzultace s lékařem a kompletní hormonální panel (estradiol, progesteron, FSH, štítná žláza).",
     });
   }
   // H12: mid-life male + flat-low + impaired quality
@@ -456,7 +456,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Mid-life male + flat low energy + impaired sleep quality: testosterone and thyroid bloodwork are the highest-yield diagnostics. Lifestyle optimization has limits when underlying hormonal/metabolic factors are present.",
-      cs: "Мужчина среднего возраста + низкая ровная энергия + сниженное качество сна: тестостерон и анализы щитовидки — самые продуктивные диагностики. Оптимизация образа жизни имеет пределы, когда присутствуют гормональные/метаболические факторы.",
+      cs: "Muž ve středním věku + plochá nízká energie + zhoršená kvalita spánku: krevní testy testosteronu a štítné žlázy jsou nejvýnosnější diagnostika. Optimalizace životního stylu má limity, když jsou přítomné hormonální/metabolické faktory.",
     });
   }
 
@@ -468,7 +468,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "High-stimulus training + multi-symptom stress: recovery debt accumulating. Magnesium higher (350-450mg), watch for overtraining markers (elevated resting HR, declining performance, frequent illness, mood disruption). Add a true rest day.",
-      cs: "Высокостимульные тренировки + многосимптомный стресс: накапливается дефицит восстановления. Магний выше (350-450 мг), отслеживать маркеры перетренированности (повышенный ЧСС покоя, падающие показатели, частые болезни, нарушения настроения). Добавить настоящий день отдыха.",
+      cs: "Vysoce stimulační trénink + vícesymptomový stres: hromadí se dluh regenerace. Hořčík výš (350-450 mg), sledovat markery přetrénování (zvýšený klidový tep, klesající výkon, časté nemoci, výkyvy nálady). Přidat skutečný den volna.",
     });
   }
   // H14: daily-pro + flat-low + impaired sleep → overtraining
@@ -479,7 +479,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Possible overtraining or undereating. Before adding any supplement or training stimulus, verify: protein intake (1.6-2.2 g/kg lean mass), total caloric intake (RMR × activity factor), and consider a deload week as a diagnostic.",
-      cs: "Возможна перетренированность или недоедание. До любых добавок и наращивания тренировочного стимула проверить: потребление белка (1.6-2.2 г/кг сухой массы), суммарную калорийность (RMR × коэффициент активности), и рассмотреть разгрузочную неделю как диагностический инструмент.",
+      cs: "Možné přetrénování nebo nedostatečný energetický příjem. Před přidáním jakéhokoli doplňku nebo tréninkového stimulu ověřit: příjem bílkovin (1.6-2.2 g/kg netukové hmoty), celkový kalorický příjem (RMR × faktor aktivity) a zvážit deload týden jako diagnostiku.",
     });
   }
 
@@ -488,14 +488,14 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   if (a.nutrition === "restricted" && a.energy === "flat-low") {
     signals.push({
       en: "Restrictive protocol (IF/keto/OMAD) + low energy: verify the protocol fits training load and chronotype. The protocol may be the issue, not a missing supplement. Re-feeding window adjustment is the first lever.",
-      cs: "Ограничительный протокол (интервальное голодание/кето/OMAD) + низкая энергия: проверить совместимость протокола с тренировочной нагрузкой и хронотипом. Возможно, проблема в самом протоколе, а не в нехватающей добавке. Первый рычаг — коррекция окна питания.",
+      cs: "Restriktivní protokol (přerušovaný půst/keto/OMAD) + nízká energie: ověřit soulad protokolu s tréninkovou zátěží a chronotypem. Problém může být protokol sám, ne chybějící doplněk. První páka je úprava jídelního okna.",
     });
   }
   // H16: skip-meals + afternoon-crash
   if (a.nutrition === "skip-meals" && a.energy === "afternoon-crash") {
     signals.push({
       en: "Reactive hypoglycemia / glycemic instability pattern. Protein-anchored breakfast within 60 minutes of waking is the single highest-impact intervention, with magnitude that exceeds most supplement effects.",
-      cs: "Паттерн реактивной гипогликемии / нестабильности гликемии. Завтрак, заякоренный белком, в течение 60 минут после пробуждения — единственное вмешательство с наивысшим эффектом, превосходящим большинство добавок.",
+      cs: "Vzorec reaktivní hypoglykemie / glykemické nestability. Snídaně postavená na bílkovinách do 60 minut po probuzení je jediná intervence s nejvyšším dopadem — větším, než má většina doplňků.",
     });
   }
 
@@ -507,14 +507,14 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   ) {
     signals.push({
       en: "Mitochondrial decline begins in this bracket — CoQ10 ubiquinol becomes substantively more valuable. Pair with baseline labs (thyroid, vitamin D, B12, ferritin) before assuming the cause is dietary.",
-      cs: "В этом возрастном диапазоне начинается митохондриальный спад — CoQ10 в форме убихинола становится существенно ценнее. Сочетать с базовыми анализами (щитовидка, витамин D, B12, ферритин) до того, как считать причиной питание.",
+      cs: "V tomto věkovém pásmu začíná mitochondriální pokles — CoQ10 ve formě ubichinolu podstatně nabývá na hodnotě. Spojit se základními testy (štítná žláza, vitamin D, B12, feritin), než se příčina přisoudí stravě.",
     });
   }
   // H18: 55+ + persistent fatigue → bloodwork first
   if (a.age === "55+" && (a.energy === "flat-low" || a.sleepQuality === "tired")) {
     signals.push({
       en: "55+ with persistent fatigue: bloodwork BEFORE supplements (thyroid panel, B12 / methylmalonic acid, ferritin, vitamin D, fasting glucose, lipids). Lifestyle optimization has clear limits when underlying causes may be clinical (hypothyroidism, B12 deficiency, sleep apnea).",
-      cs: "55+ с постоянной усталостью: анализы ДО добавок (панель щитовидки, B12 / метилмалоновая кислота, ферритин, витамин D, глюкоза натощак, липиды). Оптимизация образа жизни имеет чёткие пределы, когда причины могут быть клиническими (гипотиреоз, дефицит B12, апноэ сна).",
+      cs: "55+ s přetrvávající únavou: krevní testy PŘED doplňky (panel štítné žlázy, B12 / kyselina metylmalonová, feritin, vitamin D, glukóza nalačno, lipidy). Optimalizace životního stylu má jasné limity, když příčiny mohou být klinické (hypotyreóza, deficit B12, spánková apnoe).",
     });
   }
 
@@ -522,7 +522,7 @@ export function detectPatterns(a: QuizAnswers): ProfileLine[] {
   if (a.priority) {
     signals.push({
       en: `USER PRIORITY: this user explicitly chose '${a.priority}' as the first thing to fix. Weight the Today's Focus, Week 1 protocol, and supplement startWeek scheduling toward this priority. Do not let other signals dilute the priority weighting — it's the user's explicit value statement.`,
-      cs: `ПРИОРИТЕТ ПОЛЬЗОВАТЕЛЯ: пользователь явно выбрал «${a.priority}» как первое, что нужно исправить. Сместить вес Today's Focus, протокола Недели 1 и расписания startWeek для добавок к этому приоритету. Не позволяй другим сигналам размывать приоритет — это явное ценностное утверждение пользователя.`,
+      cs: `PRIORITA UŽIVATELE: uživatel výslovně zvolil '${a.priority}' jako první věc k řešení. Vážit Today's Focus, protokol Týdne 1 a plánování startWeek u doplňků směrem k této prioritě. Nenech ostatní signály prioritu rozmělnit — je to explicitní hodnotové vyjádření uživatele.`,
     });
   }
 
