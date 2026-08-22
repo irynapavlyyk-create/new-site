@@ -11,15 +11,17 @@ export default function LegalLayout({
   title,
   lastUpdated,
   children,
+  showLanguageSwitcher = true,
 }: {
   title: string;
   lastUpdated?: string;
   children: ReactNode;
+  showLanguageSwitcher?: boolean;
 }) {
   const { lang } = useI18n();
   return (
     <>
-      <Navbar />
+      <Navbar showLanguageSwitcher={showLanguageSwitcher} />
       <main className="pt-28 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-[720px] mx-auto">
           <Link

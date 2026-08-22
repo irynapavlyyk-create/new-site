@@ -1,21 +1,23 @@
 "use client";
 
-import { useI18n } from "@/lib/i18n-context";
+import { FixedLangProvider } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import LegalLayout from "@/components/LegalLayout";
 import { Mail } from "@/components/LegalHelpers";
 
+// Legal pages are English-only until reviewed Czech versions are ready —
+// the whole page (chrome included) is pinned to EN via FixedLangProvider.
 export default function RefundPolicyPage() {
-  const { lang } = useI18n();
-  const lastUpdated = lang === "cs" ? "13 мая 2026" : "May 13, 2026";
-
   return (
-    <LegalLayout
-      title={pick(t.legal.refundTitle, lang)}
-      lastUpdated={lastUpdated}
-    >
-      {lang === "cs" ? <RefundRU /> : <RefundEN />}
-    </LegalLayout>
+    <FixedLangProvider lang="en">
+      <LegalLayout
+        title={pick(t.legal.refundTitle, "en")}
+        lastUpdated="May 13, 2026"
+        showLanguageSwitcher={false}
+      >
+        <RefundEN />
+      </LegalLayout>
+    </FixedLangProvider>
   );
 }
 
@@ -98,95 +100,6 @@ function RefundEN() {
       </p>
 
       <h2>6. Contact</h2>
-      <p>
-        Email: <Mail />
-      </p>
-    </>
-  );
-}
-
-function RefundRU() {
-  return (
-    <>
-      <h2>1. Общие положения</h2>
-      <p>
-        EnergyForge предлагает три тарифа:{" "}
-        <strong>Starter</strong> (бесплатный),{" "}
-        <strong>PRO</strong> (€9.99 разово) и{" "}
-        <strong>Coach</strong> (€24.99/месяц по подписке). Эта Политика
-        возврата средств описывает ваши права на возврат согласно
-        Директиве ЕС о правах потребителей и порядок подачи запроса.
-      </p>
-
-      <h2>2. PRO план (€9.99 разово)</h2>
-      <p>
-        По законодательству ЕС у вас есть{" "}
-        <strong>14 дней на отказ</strong> от цифрового контента. Однако
-        это право утрачивается после того, как цифровая услуга была
-        полностью оказана &mdash; в нашем случае, после того как ваш
-        персональный план сгенерирован и доступен в личном кабинете.
-      </p>
-      <p>
-        <strong>
-          Вы имеете право на полный возврат в течение 14 дней с момента
-          покупки, ЕСЛИ ваш персональный план ещё не был сгенерирован
-        </strong>{" "}
-        (например, из-за технической проблемы).
-      </p>
-      <p>
-        Как только план сгенерирован и виден в вашем личном кабинете,
-        услуга считается оказанной и возврат по стандартной политике не
-        предоставляется.
-      </p>
-      <p>
-        <strong>Исключительные обстоятельства:</strong> Если вы
-        столкнулись с настоящей технической проблемой, случайной повторной
-        оплатой или другой добросовестной ситуацией &mdash; напишите на{" "}
-        <Mail /> в течение 14 дней, и мы рассмотрим ваш случай
-        индивидуально.
-      </p>
-
-      <h2>3. Coach план (€24.99/месяц)</h2>
-      <ul>
-        <li>
-          Вы можете отменить подписку в любой момент в личном кабинете или
-          через поддержку.
-        </li>
-        <li>
-          Отмена вступает в силу в конце текущего расчётного периода
-          &mdash; доступ сохраняется до этого момента.
-        </li>
-        <li>Возврат за текущий расчётный месяц не предоставляется.</li>
-        <li>
-          После отмены вы не будете списаны за последующие месяцы.
-        </li>
-        <li>
-          Возвраты за неполные месяцы обслуживания не предоставляются.
-        </li>
-      </ul>
-
-      <h2>4. Как запросить возврат</h2>
-      <ul>
-        <li>
-          Напишите на <Mail />, указав email вашего аккаунта и детали
-          заказа.
-        </li>
-        <li>Мы ответим в течение 3 рабочих дней.</li>
-        <li>
-          Одобренные возвраты обрабатываются через Stripe на оригинальный
-          способ оплаты в течение 5&ndash;10 рабочих дней.
-        </li>
-      </ul>
-
-      <h2>5. Chargeback&apos;и</h2>
-      <p>
-        Пожалуйста, свяжитесь с нами <strong>до</strong> инициирования
-        chargeback в банке &mdash; мы готовы быстро и справедливо решать
-        проблемы. Мошеннические chargeback&apos;и могут привести к
-        блокировке аккаунта.
-      </p>
-
-      <h2>6. Контакты</h2>
       <p>
         Email: <Mail />
       </p>

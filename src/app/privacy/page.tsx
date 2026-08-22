@@ -1,21 +1,23 @@
 "use client";
 
-import { useI18n } from "@/lib/i18n-context";
+import { FixedLangProvider } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import LegalLayout from "@/components/LegalLayout";
 import { Mail, Ext } from "@/components/LegalHelpers";
 
+// Legal pages are English-only until reviewed Czech versions are ready —
+// the whole page (chrome included) is pinned to EN via FixedLangProvider.
 export default function PrivacyPage() {
-  const { lang } = useI18n();
-  const lastUpdated = lang === "cs" ? "20 апреля 2026" : "April 20, 2026";
-
   return (
-    <LegalLayout
-      title={pick(t.legal.privacyTitle, lang)}
-      lastUpdated={lastUpdated}
-    >
-      {lang === "cs" ? <PrivacyRU /> : <PrivacyEN />}
-    </LegalLayout>
+    <FixedLangProvider lang="en">
+      <LegalLayout
+        title={pick(t.legal.privacyTitle, "en")}
+        lastUpdated="April 20, 2026"
+        showLanguageSwitcher={false}
+      >
+        <PrivacyEN />
+      </LegalLayout>
+    </FixedLangProvider>
   );
 }
 
@@ -220,203 +222,6 @@ function PrivacyEN() {
       <h2>15. Contact Us</h2>
       <p>
         For any questions about this Privacy Policy, contact: <Mail />
-      </p>
-    </>
-  );
-}
-
-function PrivacyRU() {
-  return (
-    <>
-      <h2>1. Введение</h2>
-      <p>
-        Добро пожаловать в EnergyForge (далее — «мы», «наш»). Мы управляем
-        сайтом energyforge.app (далее — «Сервис»). Настоящая Политика
-        конфиденциальности объясняет, как мы собираем, используем и защищаем
-        ваши персональные данные в соответствии с Общим регламентом по защите
-        данных (GDPR) и другими применимыми законами.
-      </p>
-      <p>
-        Используя наш Сервис, вы соглашаетесь со сбором и использованием
-        информации в соответствии с настоящей политикой.
-      </p>
-
-      <h2>2. Контролёр данных</h2>
-      <p>Контролёром ваших персональных данных является:</p>
-      <p>
-        <strong>EnergyForge</strong>
-        <br />
-        Email: <Mail />
-        <br />
-        Сайт: https://energyforge.app
-      </p>
-
-      <h2>3. Какие данные мы собираем</h2>
-      <h3>а) Данные, которые вы предоставляете напрямую:</h3>
-      <ul>
-        <li>
-          Ответы на 10 вопросов энергетической диагностики (сон, образ жизни,
-          питание, стресс и т.д.)
-        </li>
-        <li>Email (при регистрации или подписке)</li>
-        <li>
-          Платёжная информация (обрабатывается через Stripe — мы не храним
-          данные карт)
-        </li>
-        <li>Имя и платёжная информация (для тарифов PRO и Coach)</li>
-      </ul>
-      <h3>б) Данные, собираемые автоматически:</h3>
-      <ul>
-        <li>IP-адрес, тип браузера, информация об устройстве</li>
-        <li>Данные об использовании (посещённые страницы, время, клики)</li>
-        <li>Cookies и аналогичные технологии</li>
-      </ul>
-
-      <h2>4. Как мы используем ваши данные</h2>
-      <p>Мы используем ваши персональные данные для:</p>
-      <ul>
-        <li>
-          Генерации персонализированных 30-дневных планов с помощью ИИ
-          (Anthropic Claude API)
-        </li>
-        <li>Обработки платежей через Stripe</li>
-        <li>Отправки вам плана и связанных сообщений</li>
-        <li>Улучшения Сервиса</li>
-        <li>Соблюдения юридических обязательств</li>
-        <li>Предотвращения мошенничества</li>
-      </ul>
-
-      <h2>5. Правовая основа обработки (GDPR)</h2>
-      <p>Мы обрабатываем ваши данные на основании:</p>
-      <ul>
-        <li>
-          <strong>Согласия</strong> — когда вы отправляете анкету
-        </li>
-        <li>
-          <strong>Исполнения договора</strong> — для предоставления оплаченной
-          услуги
-        </li>
-        <li>
-          <strong>Законного интереса</strong> — для улучшения Сервиса
-        </li>
-        <li>
-          <strong>Юридических обязательств</strong> — для бухгалтерии и
-          соблюдения законов
-        </li>
-      </ul>
-
-      <h2>6. ИИ-обработка данных</h2>
-      <p>
-        Ваши ответы обрабатываются ИИ Anthropic Claude для генерации
-        персональных рекомендаций. Anthropic обрабатывает эти данные согласно
-        своей политике:{" "}
-        <Ext href="https://www.anthropic.com/legal/privacy">
-          https://www.anthropic.com/legal/privacy
-        </Ext>
-      </p>
-      <p>Мы не используем ваши данные для обучения ИИ-моделей.</p>
-
-      <h2>7. Передача данных</h2>
-      <p>Мы передаём ваши данные только:</p>
-      <ul>
-        <li>
-          <strong>Stripe</strong> — для обработки платежей (
-          <Ext href="https://stripe.com/privacy">
-            https://stripe.com/privacy
-          </Ext>
-          )
-        </li>
-        <li>
-          <strong>Anthropic</strong> — для ИИ-рекомендаций
-        </li>
-        <li>
-          <strong>Vercel</strong> — наш хостинг-провайдер (
-          <Ext href="https://vercel.com/legal/privacy-policy">
-            https://vercel.com/legal/privacy-policy
-          </Ext>
-          )
-        </li>
-        <li>
-          <strong>Государственным органам</strong> — если требует закон
-        </li>
-      </ul>
-      <p>
-        Мы <strong>никогда не продаём</strong> ваши данные.
-      </p>
-
-      <h2>8. Срок хранения данных</h2>
-      <ul>
-        <li>Ответы на анкету и планы: до 2 лет</li>
-        <li>
-          Платёжные записи: 7 лет (требование налогового законодательства ЕС)
-        </li>
-        <li>Переписка: до отписки + 2 года</li>
-      </ul>
-
-      <h2>9. Ваши права согласно GDPR</h2>
-      <p>Вы имеете право:</p>
-      <ul>
-        <li>
-          <strong>Доступа</strong> к вашим данным
-        </li>
-        <li>
-          <strong>Исправления</strong> неточных данных
-        </li>
-        <li>
-          <strong>Удаления</strong> данных («право на забвение»)
-        </li>
-        <li>
-          <strong>Ограничения</strong> обработки
-        </li>
-        <li>
-          <strong>Переносимости данных</strong>
-        </li>
-        <li>
-          <strong>Возражения</strong> против обработки
-        </li>
-        <li>
-          <strong>Отзыва согласия</strong> в любое время
-        </li>
-        <li>
-          <strong>Подачи жалобы</strong> в местный орган по защите данных
-        </li>
-      </ul>
-      <p>
-        Чтобы реализовать любое из этих прав, напишите: <Mail />
-      </p>
-
-      <h2>10. Cookies</h2>
-      <p>
-        Мы используем необходимые cookies для работы Сервиса и аналитические
-        cookies. Вы можете управлять cookies через настройки браузера.
-      </p>
-
-      <h2>11. Безопасность данных</h2>
-      <p>
-        Мы применяем стандартные меры безопасности: шифрование (HTTPS),
-        безопасные платежи (Stripe), ограниченный доступ. Однако ни один
-        метод передачи через Интернет не является на 100% безопасным.
-      </p>
-
-      <h2>12. Международные передачи</h2>
-      <p>
-        Ваши данные могут передаваться в страны за пределами ЕС (например,
-        США, где работают Anthropic и Stripe). Мы обеспечиваем защиту через
-        стандартные договорные положения (SCC).
-      </p>
-
-      <h2>13. Конфиденциальность детей</h2>
-      <p>Наш Сервис не предназначен для лиц младше 18 лет.</p>
-
-      <h2>14. Изменения в политике</h2>
-      <p>
-        Мы можем обновлять эту Политику. Актуальная версия всегда находится
-        на этой странице.
-      </p>
-
-      <h2>15. Связаться с нами</h2>
-      <p>
-        Email: <Mail />
       </p>
     </>
   );
