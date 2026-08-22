@@ -52,7 +52,7 @@ export const PHENOTYPES: Record<PhenotypeId, PhenotypeData> = {
         },
       },
     ],
-    peakHours: { en: "8am–11pm", cs: "8:00–23:00" },
+    peakHours: { en: "8am–11pm", cs: "08:00–23:00" },
     crashWindow: { en: "—", cs: "—" },
     secondWind: { en: "—", cs: "—" },
     energyCurve: "M 0,90 Q 100,60 200,60 T 400,70 T 600,80 T 800,150",
@@ -97,7 +97,7 @@ export const PHENOTYPES: Record<PhenotypeId, PhenotypeData> = {
       },
     ],
     peakHours: { en: "6pm–11pm", cs: "18:00–23:00" },
-    crashWindow: { en: "8am–11am", cs: "8:00–11:00" },
+    crashWindow: { en: "8am–11am", cs: "08:00–11:00" },
     secondWind: { en: "—", cs: "—" },
     energyCurve: "M 0,170 Q 100,170 200,150 T 400,120 Q 500,70 600,60 T 800,90",
   },
@@ -133,7 +133,7 @@ export const PHENOTYPES: Record<PhenotypeId, PhenotypeData> = {
       },
       {
         kind: "evening",
-        label: { en: "Crash by 8pm", cs: "V osm večer dojezd" },
+        label: { en: "Crash by 8pm", cs: "Kolem osmé padneš" },
         description: {
           en: "Reserves run out. Sleep comes from exhaustion, not rhythm.",
           cs: "Rezervy dojdou. Spánek přichází z vyčerpání, ne z rytmu.",
@@ -169,7 +169,7 @@ export const PHENOTYPES: Record<PhenotypeId, PhenotypeData> = {
       },
       {
         kind: "afternoon",
-        label: { en: "Steep 2–4pm crash", cs: "Strmý propad 14–16 h" },
+        label: { en: "Steep 2–4pm crash", cs: "Strmý propad ve 14–16" },
         description: {
           en: "Predictable drop. Plan light tasks here.",
           cs: "Předvídatelný sešup. Naplánuj si sem lehké úkoly.",
@@ -232,7 +232,7 @@ export const PHENOTYPES: Record<PhenotypeId, PhenotypeData> = {
         },
       },
     ],
-    peakHours: { en: "10pm–midnight", cs: "22:00–24:00" },
+    peakHours: { en: "10pm–midnight", cs: "22:00–00:00" },
     crashWindow: { en: "2–5pm", cs: "14:00–17:00" },
     secondWind: { en: "—", cs: "—" },
     energyCurve:
