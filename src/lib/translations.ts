@@ -127,6 +127,57 @@ export const t = {
       en: "A real plan, generated for you in 40 seconds.",
       cs: "Skutečný plán, vytvořený pro tebe za 40 sekund.",
     },
+    // Fake-dashboard mockup (DashboardMockup + PlanPreview floating chips).
+    // Illustrative sample content — not a generated plan.
+    mockup: {
+      badges: {
+        ai: { en: "AI-personalized", cs: "Na míru od AI" },
+        days: { en: "30 days", cs: "30 dní" },
+        science: { en: "Science-backed", cs: "Založeno na výzkumu" },
+        forYou: { en: "Just for you", cs: "Jen pro tebe" },
+      },
+      /** Topbar status badge — stays English in both locales. */
+      live: { en: "Live", cs: "Live" },
+      welcome: { en: "Welcome to your plan", cs: "Vítej ve svém plánu" },
+      summary: {
+        en: "Your protocol is built around your specific stress, sleep, and morning patterns. Each habit stacks on the previous one to compound energy gains over 30 days. Every recommendation is shaped by your answers — no generic templates.",
+        cs: "Tvůj protokol je postavený na tvých konkrétních vzorcích stresu, spánku a rána. Každý návyk staví na předchozím, takže se přínos energie během 30 dní sčítá. Každé doporučení vychází z tvých odpovědí — žádné univerzální šablony.",
+      },
+      morningTitle: { en: "Morning Protocol", cs: "Ranní protokol" },
+      sleepTitle: { en: "Sleep Protocol", cs: "Spánkový protokol" },
+      morningBullets: {
+        en: [
+          "Wake 6:30 AM consistently",
+          "10 min direct sunlight on waking",
+          "500 ml water + electrolytes",
+          "25g+ protein within 60 minutes",
+        ],
+        cs: [
+          "Vstávej konzistentně v 6:30",
+          "10 minut přímého slunce hned po probuzení",
+          "500 ml vody + elektrolyty",
+          "25+ g bílkovin do 60 minut",
+        ],
+      },
+      sleepBullets: {
+        en: [
+          "Lights out by 10:30 PM",
+          "No screens after 9:30",
+          "Magnesium glycinate, 400mg",
+          "Bedroom 18°C / 65°F",
+        ],
+        cs: [
+          "Zhasnuto do 22:30",
+          "Po 21:30 žádné obrazovky",
+          "Hořčík bisglycinát, 400 mg",
+          "Ložnice 18 °C",
+        ],
+      },
+      supplements: {
+        en: ["Vitamin D3", "Omega-3", "Magnesium", "Ashwagandha"],
+        cs: ["Vitamin D3", "Omega-3", "Hořčík bisglycinát", "Ashwagandha"],
+      },
+    },
   },
   features: {
     title: { en: "What PRO includes", cs: "Co obsahuje PRO" },

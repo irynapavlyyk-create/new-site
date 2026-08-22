@@ -1,27 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const SUMMARY =
-  "Your protocol is built around your specific stress, sleep, and morning patterns. Each habit stacks on the previous one to compound energy gains over 30 days. Every recommendation is shaped by your answers — no generic templates.";
-
-const morningBullets = [
-  "Wake 6:30 AM consistently",
-  "10 min direct sunlight on waking",
-  "500 ml water + electrolytes",
-  "25g+ protein within 60 minutes",
-];
-const sleepBullets = [
-  "Lights out by 10:30 PM",
-  "No screens after 9:30",
-  "Magnesium glycinate, 400mg",
-  "Bedroom 18°C / 65°F",
-];
-const supplements = ["Vitamin D3", "Omega-3", "Magnesium", "Ashwagandha"];
+import { useI18n } from "@/lib/i18n-context";
+import { t, pick } from "@/lib/translations";
 
 type Phase = "idle" | "typing" | "bullets" | "done";
 
 export default function DashboardMockup() {
+  const { lang } = useI18n();
+  const m = t.preview.mockup;
+  const summary = pick(m.summary, lang);
+  const morningBullets = pick(m.morningBullets, lang);
+  const sleepBullets = pick(m.sleepBullets, lang);
+  const supplements = pick(m.supplements, lang);
   const ref = useRef<HTMLDivElement>(null);
   const resumeTimer = useRef<number | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -47,7 +38,7 @@ export default function DashboardMockup() {
   useEffect(() => {
     if (!ref.current) return;
     if (reduced) {
-      setTyped(SUMMARY);
+      setTyped(summary);
       setPhase("done");
       return;
     }
@@ -61,27 +52,32 @@ export default function DashboardMockup() {
     );
     obs.observe(ref.current);
     return () => obs.disconnect();
-  }, [reduced]);
+  }, [reduced, summary]);
 
   useEffect(() => {
     if (phase !== "typing") return;
     let i = 0;
     const interval = window.setInterval(() => {
       i += 1;
-      setTyped(SUMMARY.slice(0, i));
-      if (i >= SUMMARY.length) {
+      setTyped(summary.slice(0, i));
+      if (i >= summary.length) {
         window.clearInterval(interval);
         window.setTimeout(() => setPhase("bullets"), 280);
       }
     }, 25);
     return () => window.clearInterval(interval);
-  }, [phase]);
+  }, [phase, summary]);
 
   useEffect(() => {
     if (phase !== "bullets") return;
-    const t = window.setTimeout(() => setPhase("done"), 1300);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setPhase("done"), 1300);
+    return () => window.clearTimeout(timer);
   }, [phase]);
+
+  // Language switch after the animation finished: swap the fully-typed text.
+  useEffect(() => {
+    if (phase === "done") setTyped(summary);
+  }, [phase, summary]);
 
   const showBullets = phase === "bullets" || phase === "done";
 
@@ -131,13 +127,13 @@ export default function DashboardMockup() {
           <span className="mockup-dot" style={{ background: "#28C840" }} />
           <div className="mockup-url">energyforge.app/dashboard</div>
           <div className="mockup-live">
-            <span className="mockup-live-dot" /> Live
+            <span className="mockup-live-dot" /> {pick(m.live, lang)}
           </div>
         </div>
 
         <div className="mockup-content">
           <h2 className="h-display text-2xl font-bold mb-3 text-center">
-            <span className="gradient-text">Welcome to your plan</span>
+            <span className="gradient-text">{pick(m.welcome, lang)}</span>
           </h2>
 
           <p className="mockup-summary">
@@ -147,7 +143,7 @@ export default function DashboardMockup() {
 
           <div className="grid sm:grid-cols-2 gap-5 mt-5">
             <div>
-              <h3 className="h-display text-sm font-bold mb-2 text-amber">Morning Protocol</h3>
+              <h3 className="h-display text-sm font-bold mb-2 text-amber">{pick(m.morningTitle, lang)}</h3>
               <ul className={`mockup-bullets ${showBullets ? "active" : ""}`}>
                 {morningBullets.map((b, i) => (
                   <li key={i} style={{ transitionDelay: `${i * 100}ms` }}>
@@ -157,7 +153,7 @@ export default function DashboardMockup() {
               </ul>
             </div>
             <div>
-              <h3 className="h-display text-sm font-bold mb-2 text-violet">Sleep Protocol</h3>
+              <h3 className="h-display text-sm font-bold mb-2 text-violet">{pick(m.sleepTitle, lang)}</h3>
               <ul className={`mockup-bullets ${showBullets ? "active" : ""}`}>
                 {sleepBullets.map((b, i) => (
                   <li key={i} style={{ transitionDelay: `${(i + 4) * 100}ms` }}>

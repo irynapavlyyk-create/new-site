@@ -19,10 +19,10 @@ export default function PlanPreview() {
         </p>
       </FadeUp>
       <div className="mockup-stage">
-        <FloatingChip emoji="✨" text="AI-personalized" className="chip-tl" delay={0} />
-        <FloatingChip emoji="⏱" text="30 days" className="chip-tr" delay={1} />
-        <FloatingChip emoji="🧬" text="Science-backed" className="chip-bl" delay={2} />
-        <FloatingChip emoji="🎯" text="Just for you" className="chip-br" delay={3} />
+        <FloatingChip emoji="✨" text={pick(t.preview.mockup.badges.ai, lang)} className="chip-tl" delay={0} />
+        <FloatingChip emoji="⏱" text={pick(t.preview.mockup.badges.days, lang)} className="chip-tr" delay={1} />
+        <FloatingChip emoji="🧬" text={pick(t.preview.mockup.badges.science, lang)} className="chip-bl" delay={2} />
+        <FloatingChip emoji="🎯" text={pick(t.preview.mockup.badges.forYou, lang)} className="chip-br" delay={3} />
         <DashboardMockup />
       </div>
     </section>
