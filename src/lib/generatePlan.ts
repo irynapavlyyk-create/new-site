@@ -8,6 +8,7 @@ import { describe, detectPatterns, type ProfileLine } from "@/lib/signals";
 import { inferPhenotype } from "@/lib/inferPhenotype";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { getPhenotype, PHENOTYPES } from "@/lib/phenotypes";
+import { SUPPLEMENT_CATALOG, resolveSupplement } from "@/lib/supplement-recommendations";
 
 export type GenerateTier = "pro" | "coach";
 
@@ -122,8 +123,8 @@ const PRO_SCHEMA_V2 = `{
   ]
 }`;
 
-// Profile language follows langName. Restore the cs branch when plan output switches to Czech.
-function buildUserProfile(answers: QuizAnswers): string {
+// Profile language follows langName so the prompt stays monolingual.
+function buildUserProfile(answers: QuizAnswers, lang: Lang): string {
   const keys: (keyof QuizAnswers)[] = [
     "chronotype",
     "age",
@@ -140,18 +141,21 @@ function buildUserProfile(answers: QuizAnswers): string {
   const lines = keys
     .map((k) => describe(k, answers[k]))
     .filter((x): x is ProfileLine => x !== null)
-    .map((p) => p.en);
+    .map((p) => (lang === "cs" ? p.cs : p.en));
 
   const signals = detectPatterns(answers);
 
-  const header = "USER PROFILE";
-  const signalsHeader = "Pattern signals:";
-  const closing = "Generate the protocol based on this specific profile.";
+  const header = lang === "cs" ? "PROFIL UŽIVATELE" : "USER PROFILE";
+  const signalsHeader = lang === "cs" ? "Signály vzorců:" : "Pattern signals:";
+  const closing =
+    lang === "cs"
+      ? "Vygeneruj protokol přesně na základě tohoto profilu."
+      : "Generate the protocol based on this specific profile.";
 
   const parts: string[] = [header, "", ...lines];
   if (signals.length > 0) {
     parts.push("", signalsHeader);
-    for (const s of signals) parts.push(`- ${s.en}`);
+    for (const s of signals) parts.push(`- ${lang === "cs" ? s.cs : s.en}`);
   }
   parts.push("", closing);
   return parts.join("\n");
@@ -293,8 +297,7 @@ export async function generatePlan(params: {
     return { ok: false, status: 500, error: "anthropic not configured" };
   }
 
-  // TODO: switch to Czech once native review confirms quality.
-  const langName = "English";
+  const langName = lang === "cs" ? "Czech (čeština)" : "English";
   const system = PRO_SYSTEM;
   const schema = PRO_SCHEMA_V2;
   const validator = ProPlanV2Schema;
@@ -325,9 +328,27 @@ Write focus, nutritionFocus, stressPractices, and keyActions for each week, pers
 `
       : "";
 
-  const userPrompt = `${buildUserProfile(answers)}
-${pinnedPhenotypeBlock}
-Write your final output in ${langName}.
+  // Constrained supplement vocabulary (cs only): the UI matches the model's
+  // free-text supplement names against catalog aliases to attach product cards
+  // and buy links. Pinning the exact Czech names prevents near-miss spellings
+  // ("hořčík glycinát") from silently dropping the cards.
+  const supplementVocabBlock =
+    lang === "cs"
+      ? `
+ALLOWED SUPPLEMENT NAMES — when recommending any supplement from this catalog, use its name EXACTLY as written below (these names drive product-card matching in the UI). A supplement outside this list may be included under its standard Czech name.
+${Object.values(SUPPLEMENT_CATALOG)
+  .map((e) => `- ${e.name.cs}`)
+  .join("\n")}
+`
+      : "";
+
+  const userPrompt = `${buildUserProfile(answers, lang)}
+${pinnedPhenotypeBlock}${supplementVocabBlock}
+Write your final output in ${langName}.${
+    lang === "cs"
+      ? ' Address the user informally using tykání (Czech informal "ty" forms throughout — never vykání), consistent with the rest of the product.'
+      : ""
+  }
 
 Begin with a <thinking> block analyzing this user's phenotype, root causes, and supplement selection (in English is fine). Then, on a new line after the closing </thinking> tag, output a JSON object that exactly matches this shape:
 ${schema}
@@ -466,6 +487,11 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
       if (weekTitles[i]) week.title = weekTitles[i];
     });
   }
+
+  // Server-side visibility for supplement matching: resolveSupplement warns on
+  // unmatched names, and running it here (Node) lands those warnings in Vercel
+  // logs — the UI-side resolution only logs to the visitor's browser console.
+  for (const s of validation.data.supplements) resolveSupplement(s.name);
 
   return { ok: true, data: validation.data };
 }

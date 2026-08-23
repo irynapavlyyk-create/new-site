@@ -516,5 +516,8 @@ export function resolveSupplement(name: string): SupplementEntry | null {
       return entry;
     }
   }
+  // Unmatched → the card renders without buy links. Warn so the miss is
+  // visible (Vercel logs when called server-side, browser console in the UI).
+  console.warn(`[resolveSupplement] no catalog match for supplement name: "${name}"`);
   return null;
 }
