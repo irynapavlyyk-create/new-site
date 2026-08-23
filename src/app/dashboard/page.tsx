@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import DashboardClient from "./DashboardClient";
 import PhenotypeDashboard from "./PhenotypeDashboard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FixedLangProvider } from "@/lib/i18n-context";
+import { t, pick } from "@/lib/translations";
 import type { Lang, ProPlan, ProPlanV2 } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -79,7 +79,14 @@ export default async function DashboardPage({
 
   // TODO(phase-2): merge into the new dashboard's error state.
   if (isErrorMarker) {
-    return <GenerationErrorCard />;
+    // Same language-pinning as the happy path: the buyer purchased in
+    // plan.language, so the error screen must speak it too.
+    const errorLang = (plan?.language as Lang | null) ?? "en";
+    return (
+      <FixedLangProvider lang={errorLang}>
+        <GenerationErrorCard lang={errorLang} />
+      </FixedLangProvider>
+    );
   }
 
   // Legacy plan (or no plan at all) — fall through to the existing UI.
@@ -122,22 +129,28 @@ function V2Placeholder() {
 }
 
 // TODO(phase-2): delete or merge with new dashboard error states.
-function GenerationErrorCard() {
+// Retaking the quiz can't regenerate a paid plan (only the purchase webhook
+// generates), so the CTA points the buyer at support until a real
+// regeneration endpoint exists.
+function GenerationErrorCard({ lang }: { lang: Lang }) {
   return (
     <>
-      <Navbar />
+      <Navbar showLanguageSwitcher={false} />
       <main className="min-h-screen flex items-center justify-center pt-28 pb-20 px-6">
         <div className="glass p-10 max-w-lg text-center">
           <div className="text-6xl mb-6">⚠️</div>
           <h1 className="h-display text-2xl sm:text-3xl mb-4">
-            <span className="gradient-text">Something went wrong</span>
+            <span className="gradient-text">{pick(t.errors.serverError.heading, lang)}</span>
           </h1>
-          <p className="text-muted leading-relaxed mb-6">
-            Your plan didn&apos;t generate correctly. Retake the quiz to try again.
+          <p className="text-muted leading-relaxed mb-3">
+            {pick(t.dashboard.genError, lang)}
           </p>
-          <Link href="/quiz" className="btn-primary">
-            Retake quiz
-          </Link>
+          <p className="text-muted leading-relaxed mb-6">
+            {pick(t.welcome.errorSub, lang)}
+          </p>
+          <a href="mailto:support@energyforge.app" className="btn-primary">
+            {pick(t.errors.serverError.contactSupport, lang)}
+          </a>
         </div>
       </main>
       <Footer />
