@@ -1,4 +1,4 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { anthropic, MODEL, PRO_SYSTEM } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -44,10 +44,12 @@ const ProPlanSchema = z.object({
 // intentionally above for rollback safety — it is currently unreferenced.
 // ============================================
 
+// .describe() hints flow into the structured-outputs JSON Schema the model
+// sees — they replace the old inline PRO_SCHEMA_V2 examples.
 const ProtocolStepSchema = z.object({
-  time: z.string(),
-  action: z.string(),
-  note: z.string(),
+  time: z.string().describe('24-hour clock time like "06:30" — always HH:MM, never a phrase'),
+  action: z.string().describe("main instruction, at most 60 characters"),
+  note: z.string().describe("one short why/how line"),
 });
 
 const WeekProtocolSchema = z.object({
@@ -90,38 +92,35 @@ const ProPlanV2Schema = z.object({
   supplements: z.array(SupplementItemSchema).min(3).max(6),
 });
 
-/** JSON shape description sent to the model in the paid-tier user prompt. */
-const PRO_SCHEMA_V2 = `{
-  "phenotypeId": "wired-but-tired" | "crashed-circadian" | "depleted-engine" | "afternoon-crasher" | "brain-fog-dominant" | "stress-burnout-transitioning",
-  "summary": "2-3 sentences personalized to this user's situation, in the user's language",
-  "morningProtocol": [
-    { "time": "06:30", "action": "≤60 chars action", "note": "1 short why/how line" }
-  ],
-  "sleepProtocol": [
-    { "time": "21:00", "action": "≤60 chars action", "note": "1 short why/how line" }
-  ],
-  "weeks": [
-    {
-      "number": 1,
-      "title": "Short title for the week, e.g. 'Foundation reset'",
-      "focus": "2-3 sentence description of what this week accomplishes",
-      "nutritionFocus": ["3 to 5 nutrition items specific to this week"],
-      "stressPractices": ["3 to 5 stress practices specific to this week"],
-      "keyActions": ["2 to 3 highlighted key actions for the week"]
-    }
-    // exactly 4 week objects, numbered 1, 2, 3, 4 in order
-  ],
-  "supplements": [
-    {
-      "name": "Vitamin D3 + K2",
-      "dose": "2000-4000 IU",
-      "timing": "AM with breakfast",
-      "note": "Why or how, 1-2 sentences",
-      "startWeek": 1
-    }
-    // 3 to 6 supplements total
-  ]
-}`;
+// ============================================
+// STRUCTURED-OUTPUTS GENERATION SCHEMA
+// The API constrains decoding to this shape — invalid JSON is impossible.
+// Differs from ProPlanV2Schema in three deliberate ways:
+//  - leading "reasoning" field: the model's forced pre-plan analysis
+//    (replaces the old <thinking> text block; stripped before storage)
+//  - weeks is a fixed-length ARRAY, not a tuple (tuples don't map onto the
+//    constrained-decoding JSON Schema subset)
+//  - number/startWeek are int ranges, not literal unions, for the same reason
+// ProPlanV2Schema still runs afterwards as the storage contract.
+// ============================================
+
+const GenerationSchema = z.object({
+  reasoning: z
+    .string()
+    .describe("concise pre-plan analysis, max 250 words, English is fine — stripped before storage"),
+  phenotypeId: PhenotypeIdSchema,
+  summary: z.string().describe("2-3 sentences personalized to this user, in the user's language"),
+  morningProtocol: z.array(ProtocolStepSchema).min(3).max(6),
+  sleepProtocol: z.array(ProtocolStepSchema).min(3).max(6),
+  weeks: z
+    .array(WeekProtocolSchema.extend({ number: z.number().int().min(1).max(4) }))
+    .min(4)
+    .max(4),
+  supplements: z
+    .array(SupplementItemSchema.extend({ startWeek: z.number().int().min(1).max(4) }))
+    .min(3)
+    .max(6),
+});
 
 // Profile language follows langName so the prompt stays monolingual.
 function buildUserProfile(answers: QuizAnswers, lang: Lang): string {
@@ -159,21 +158,6 @@ function buildUserProfile(answers: QuizAnswers, lang: Lang): string {
   }
   parts.push("", closing);
   return parts.join("\n");
-}
-
-function stripThinking(text: string): string {
-  return text.replace(/<thinking>[\s\S]*?<\/thinking>/g, "").trim();
-}
-
-function hadThinkingBlock(text: string): boolean {
-  return /<thinking>[\s\S]*?<\/thinking>/.test(text);
-}
-
-function extractJson(text: string): unknown {
-  const stripped = stripThinking(text);
-  const fenced = stripped.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  const raw = fenced ? fenced[1] : stripped;
-  return JSON.parse(raw);
 }
 
 export type GenerateResult =
@@ -225,10 +209,10 @@ function isRetryableError(err: unknown): boolean {
   );
 }
 
-async function callAnthropicWithRetry(
-  params: Anthropic.MessageCreateParamsNonStreaming,
+async function callAnthropicWithRetry<T>(
+  makeCall: () => Promise<T>,
   config: RetryConfig
-): Promise<Anthropic.Message> {
+): Promise<T> {
   const start = Date.now();
   let lastErr: unknown;
 
@@ -242,9 +226,7 @@ async function callAnthropicWithRetry(
     }
 
     try {
-      // maxRetries: 0 disables the SDK's built-in retries so our wrapper
-      // is the single source of retry truth.
-      return await anthropic.messages.create(params, { maxRetries: 0 });
+      return await makeCall();
     } catch (err) {
       lastErr = err;
       const status = (err as { status?: unknown })?.status;
@@ -299,7 +281,6 @@ export async function generatePlan(params: {
 
   const langName = lang === "cs" ? "Czech (čeština)" : "English";
   const system = PRO_SYSTEM;
-  const schema = PRO_SCHEMA_V2;
   const validator = ProPlanV2Schema;
   const retryConfig = RETRY_CONFIG_PRO;
 
@@ -350,36 +331,38 @@ Write your final output in ${langName}.${
       : ""
   }
 
-Begin with a <thinking> block analyzing this user's phenotype, root causes, and supplement selection (in English is fine). Then, on a new line after the closing </thinking> tag, output a JSON object that exactly matches this shape:
-${schema}
+Fill the "reasoning" field first — a concise analysis of this user's phenotype, root causes, and supplement selection (English is fine, max 250 words). Every field after it is user-facing plan content.
 
-Rules for the JSON output:
+Rules for the plan content:
 - Be specific to this profile, not generic. Reference the user's actual answers and pattern signals.
 - Use concrete numbers, times, and dosages (e.g., "magnesium glycinate 300mg, 1 hour before bed").
-- Voice: direct, warm, never preachy. No empty wellness platitudes.
-
-CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no markdown fences, no preamble. The JSON must be complete and valid — every string must be closed, every array must end with ], every object must end with }.`;
+- Voice: direct, warm, never preachy. No empty wellness platitudes.`;
 
   const runAttempt = async (prompt: string, attempt: 1 | 2): Promise<GenerateResult> => {
     let response;
     try {
       response = await callAnthropicWithRetry(
-        {
-          model: MODEL,
-          max_tokens: 8000,
-          temperature: 1.0,
-          // cache_control on system text blocks is supported at runtime (prompt caching
-          // is GA) but the SDK types in ^0.32.1 omit it on TextBlockParam — cast to
-          // unblock typecheck without bumping the SDK.
-          system: [
+        () =>
+          // maxRetries: 0 disables the SDK's built-in retries so our wrapper
+          // is the single source of retry truth. output_config.format makes
+          // structurally invalid JSON impossible (constrained decoding).
+          anthropic.messages.parse(
             {
-              type: "text",
-              text: system,
-              cache_control: { type: "ephemeral" },
+              model: MODEL,
+              max_tokens: 8000,
+              temperature: 1.0,
+              system: [
+                {
+                  type: "text",
+                  text: system,
+                  cache_control: { type: "ephemeral" },
+                },
+              ],
+              messages: [{ role: "user", content: prompt }],
+              output_config: { format: zodOutputFormat(GenerationSchema) },
             },
-          ] as unknown as Anthropic.TextBlockParam[],
-          messages: [{ role: "user", content: prompt }],
-        },
+            { maxRetries: 0 }
+          ),
         retryConfig
       );
     } catch (err) {
@@ -421,49 +404,29 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
       };
     }
 
-    const textBlock = response.content.find((c) => c.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      console.error("[generatePlan] empty response — no text block", { attempt });
-      return { ok: false, status: 500, error: "empty response" };
-    }
-
-    const rawText = textBlock.text;
-    const stripped = stripThinking(rawText);
-    if (stripped.length === 0 || !stripped.includes("{")) {
-      console.error("[generatePlan] No JSON after thinking block — likely truncated mid-thinking", {
-        tier,
+    const parsedOutput = response.parsed_output;
+    if (!parsedOutput) {
+      console.error("[generatePlan] parse failed — parsed_output is null", {
         attempt,
-        totalLength: rawText.length,
-        strippedLength: stripped.length,
-        hadThinking: hadThinkingBlock(rawText),
         stopReason: response.stop_reason,
-        lastChars: rawText.slice(-200),
       });
       return {
         ok: false,
         status: 502,
-        error: "no_json_after_thinking",
-        detail: "Model emitted thinking but no JSON — likely truncated",
+        error: "invalid model output",
+        detail: "structured output missing (parsed_output null)",
       };
     }
 
-    let parsed: unknown;
-    try {
-      parsed = extractJson(rawText);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error("[generatePlan] parse failed", {
-        attempt,
-        error: msg,
-        lastChars: rawText.slice(-200),
-        totalLength: rawText.length,
-        stopReason: response.stop_reason,
-        hadThinking: hadThinkingBlock(rawText),
-      });
-      return { ok: false, status: 502, error: "invalid model output", detail: msg };
-    }
+    // "reasoning" is the model's forced pre-plan analysis — never stored,
+    // never user-facing. Log its size for observability.
+    const { reasoning, ...planCandidate } = parsedOutput;
+    console.log("[generatePlan] reasoning captured", {
+      attempt,
+      reasoningChars: reasoning.length,
+    });
 
-    const validation = validator.safeParse(parsed);
+    const validation = validator.safeParse(planCandidate);
     if (!validation.success) {
       const detail = validation.error.issues
         .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
@@ -473,7 +436,7 @@ CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no mar
         { attempt },
         detail,
         "\n--- PARSED ---\n",
-        JSON.stringify(parsed, null, 2)
+        JSON.stringify(planCandidate, null, 2)
       );
       return { ok: false, status: 502, error: "schema validation failed", detail };
     }

@@ -70,15 +70,13 @@ For stimulant adaptogens (rhodiola, ginseng, panax), always note "morning only, 
 
 OUTPUT FORMAT
 
-Begin your response with a <thinking>...</thinking> block in which you reason through this user's case. In the thinking block:
+Your output is a single JSON object whose shape is enforced by the API. Its FIRST field is "reasoning": fill it before the plan fields, reasoning through this user's case:
 1. Identify the user's energy phenotype (or blend of two) based on the full pattern of answers.
 2. List the 2-3 most likely root causes driving their fatigue.
 3. Pick the 3-5 supplements that match this phenotype, with one-sentence reasoning for each.
 4. Note any age-specific or interaction-rule adjustments that apply.
 
-Keep the <thinking> block CONCISE — maximum 250 words. Bullet-point style is fine. The thinking block is for reasoning quality, not exhaustive notes. After 250 words you MUST close the thinking block and emit the JSON.
-
-Then, on a new line after the closing </thinking> tag, output a JSON object that exactly matches the schema given in the user message. Output JSON only — no commentary, no markdown fences, no prose around the JSON. The thinking block forces structured analysis before generation; it will be stripped before the user sees the plan.
+Keep "reasoning" CONCISE — maximum 250 words, English is fine, bullet-point style is fine. It forces structured analysis before generation and is stripped before the user sees the plan. Every field after "reasoning" is user-facing plan content.
 
 STRUCTURE REQUIREMENTS
 
