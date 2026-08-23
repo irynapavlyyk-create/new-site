@@ -360,140 +360,170 @@ Rules for the JSON output:
 
 CRITICAL: After </thinking>, output ONLY the JSON object. No explanation, no markdown fences, no preamble. The JSON must be complete and valid — every string must be closed, every array must end with ], every object must end with }.`;
 
-  let response;
-  try {
-    response = await callAnthropicWithRetry(
-      {
-        model: MODEL,
-        max_tokens: 8000,
-        temperature: 1.0,
-        // cache_control on system text blocks is supported at runtime (prompt caching
-        // is GA) but the SDK types in ^0.32.1 omit it on TextBlockParam — cast to
-        // unblock typecheck without bumping the SDK.
-        system: [
-          {
-            type: "text",
-            text: system,
-            cache_control: { type: "ephemeral" },
-          },
-        ] as unknown as Anthropic.TextBlockParam[],
-        messages: [{ role: "user", content: userPrompt }],
-      },
-      retryConfig
-    );
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[generatePlan] anthropic call failed:", msg, err);
-    return { ok: false, status: 502, error: "anthropic failed", detail: msg };
-  }
+  const runAttempt = async (prompt: string, attempt: 1 | 2): Promise<GenerateResult> => {
+    let response;
+    try {
+      response = await callAnthropicWithRetry(
+        {
+          model: MODEL,
+          max_tokens: 8000,
+          temperature: 1.0,
+          // cache_control on system text blocks is supported at runtime (prompt caching
+          // is GA) but the SDK types in ^0.32.1 omit it on TextBlockParam — cast to
+          // unblock typecheck without bumping the SDK.
+          system: [
+            {
+              type: "text",
+              text: system,
+              cache_control: { type: "ephemeral" },
+            },
+          ] as unknown as Anthropic.TextBlockParam[],
+          messages: [{ role: "user", content: prompt }],
+        },
+        retryConfig
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[generatePlan] anthropic call failed:", msg, { attempt }, err);
+      return { ok: false, status: 502, error: "anthropic failed", detail: msg };
+    }
 
-  const usage = response.usage as
-    | {
-        input_tokens?: number;
-        output_tokens?: number;
-        cache_creation_input_tokens?: number;
-        cache_read_input_tokens?: number;
-      }
-    | undefined;
-  console.log("[generatePlan] usage", {
-    tier,
-    input_tokens: usage?.input_tokens,
-    output_tokens: usage?.output_tokens,
-    cache_creation_input_tokens: usage?.cache_creation_input_tokens,
-    cache_read_input_tokens: usage?.cache_read_input_tokens,
-    stop_reason: response.stop_reason,
-  });
-
-  if (response.stop_reason === "max_tokens") {
-    console.warn("[generatePlan] response truncated by max_tokens cap", {
+    const usage = response.usage as
+      | {
+          input_tokens?: number;
+          output_tokens?: number;
+          cache_creation_input_tokens?: number;
+          cache_read_input_tokens?: number;
+        }
+      | undefined;
+    console.log("[generatePlan] usage", {
       tier,
-      max_tokens: 8000,
+      attempt,
+      input_tokens: usage?.input_tokens,
       output_tokens: usage?.output_tokens,
+      cache_creation_input_tokens: usage?.cache_creation_input_tokens,
+      cache_read_input_tokens: usage?.cache_read_input_tokens,
+      stop_reason: response.stop_reason,
     });
-    return {
-      ok: false,
-      status: 500,
-      error: "generation_truncated",
-      detail: "Plan generation exceeded token budget",
-    };
-  }
 
-  const textBlock = response.content.find((c) => c.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    console.error("[generatePlan] empty response — no text block");
-    return { ok: false, status: 500, error: "empty response" };
-  }
+    if (response.stop_reason === "max_tokens") {
+      console.warn("[generatePlan] response truncated by max_tokens cap", {
+        tier,
+        attempt,
+        max_tokens: 8000,
+        output_tokens: usage?.output_tokens,
+      });
+      return {
+        ok: false,
+        status: 500,
+        error: "generation_truncated",
+        detail: "Plan generation exceeded token budget",
+      };
+    }
 
-  const rawText = textBlock.text;
-  const stripped = stripThinking(rawText);
-  if (stripped.length === 0 || !stripped.includes("{")) {
-    console.error("[generatePlan] No JSON after thinking block — likely truncated mid-thinking", {
+    const textBlock = response.content.find((c) => c.type === "text");
+    if (!textBlock || textBlock.type !== "text") {
+      console.error("[generatePlan] empty response — no text block", { attempt });
+      return { ok: false, status: 500, error: "empty response" };
+    }
+
+    const rawText = textBlock.text;
+    const stripped = stripThinking(rawText);
+    if (stripped.length === 0 || !stripped.includes("{")) {
+      console.error("[generatePlan] No JSON after thinking block — likely truncated mid-thinking", {
+        tier,
+        attempt,
+        totalLength: rawText.length,
+        strippedLength: stripped.length,
+        hadThinking: hadThinkingBlock(rawText),
+        stopReason: response.stop_reason,
+        lastChars: rawText.slice(-200),
+      });
+      return {
+        ok: false,
+        status: 502,
+        error: "no_json_after_thinking",
+        detail: "Model emitted thinking but no JSON — likely truncated",
+      };
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = extractJson(rawText);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[generatePlan] parse failed", {
+        attempt,
+        error: msg,
+        lastChars: rawText.slice(-200),
+        totalLength: rawText.length,
+        stopReason: response.stop_reason,
+        hadThinking: hadThinkingBlock(rawText),
+      });
+      return { ok: false, status: 502, error: "invalid model output", detail: msg };
+    }
+
+    const validation = validator.safeParse(parsed);
+    if (!validation.success) {
+      const detail = validation.error.issues
+        .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
+        .join("; ");
+      console.error(
+        "[generatePlan] schema validation failed:",
+        { attempt },
+        detail,
+        "\n--- PARSED ---\n",
+        JSON.stringify(parsed, null, 2)
+      );
+      return { ok: false, status: 502, error: "schema validation failed", detail };
+    }
+
+    // Defense-in-depth (paid only): force the phenotype id + the 4 week titles to
+    // the deterministic values, regardless of what the model echoed. This makes
+    // the paid dashboard's identity (hero/chart/name) and week themes provably
+    // equal to the free preview. The prompt aligns the CONTENT; this guarantees
+    // the IDENTITY.
+    if (phenotypeId && weekTitles) {
+      const plan = validation.data as {
+        phenotypeId: PhenotypeId;
+        weeks: { title: string }[];
+      };
+      plan.phenotypeId = phenotypeId;
+      plan.weeks.forEach((week, i) => {
+        if (weekTitles[i]) week.title = weekTitles[i];
+      });
+    }
+
+    // Server-side visibility for supplement matching: resolveSupplement warns on
+    // unmatched names, and running it here (Node) lands those warnings in Vercel
+    // logs — the UI-side resolution only logs to the visitor's browser console.
+    for (const s of validation.data.supplements) resolveSupplement(s.name);
+
+    return { ok: true, data: validation.data };
+  };
+
+  // Content-level retry: one bad character (unescaped quote, malformed field)
+  // used to destroy a paid ~2-minute generation. Transport errors are retried
+  // inside callAnthropicWithRetry; here we retry ONCE on content errors —
+  // JSON parse failure or Zod validation failure — with an added instruction
+  // targeting the observed failure mode. Doubles Anthropic spend when it fires.
+  const CONTENT_RETRYABLE = new Set(["invalid model output", "schema validation failed"]);
+  let result = await runAttempt(userPrompt, 1);
+  if (!result.ok && CONTENT_RETRYABLE.has(result.error)) {
+    console.warn("[generatePlan] content error on attempt 1 — retrying once", {
       tier,
-      totalLength: rawText.length,
-      strippedLength: stripped.length,
-      hadThinking: hadThinkingBlock(rawText),
-      stopReason: response.stop_reason,
-      lastChars: rawText.slice(-200),
+      error: result.error,
+      detail: result.detail?.slice(0, 300),
     });
-    return {
-      ok: false,
-      status: 502,
-      error: "no_json_after_thinking",
-      detail: "Model emitted thinking but no JSON — likely truncated",
-    };
+    const retryPrompt = `${userPrompt}
+
+RETRY NOTE: your previous attempt produced structurally invalid JSON. Inside JSON string values, escape every double quote as \\" — or better, avoid quotation marks in prose entirely (rephrase instead of quoting). Every string must be closed and the JSON must parse.`;
+    result = await runAttempt(retryPrompt, 2);
+    if (result.ok) {
+      console.log("[generatePlan] content retry succeeded", { tier });
+    }
   }
-
-  let parsed: unknown;
-  try {
-    parsed = extractJson(rawText);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[generatePlan] parse failed", {
-      error: msg,
-      lastChars: rawText.slice(-200),
-      totalLength: rawText.length,
-      stopReason: response.stop_reason,
-      hadThinking: hadThinkingBlock(rawText),
-    });
-    return { ok: false, status: 502, error: "invalid model output", detail: msg };
-  }
-
-  const validation = validator.safeParse(parsed);
-  if (!validation.success) {
-    const detail = validation.error.issues
-      .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
-      .join("; ");
-    console.error(
-      "[generatePlan] schema validation failed:",
-      detail,
-      "\n--- PARSED ---\n",
-      JSON.stringify(parsed, null, 2)
-    );
-    return { ok: false, status: 502, error: "schema validation failed", detail };
-  }
-
-  // Defense-in-depth (paid only): force the phenotype id + the 4 week titles to
-  // the deterministic values, regardless of what the model echoed. This makes
-  // the paid dashboard's identity (hero/chart/name) and week themes provably
-  // equal to the free preview. The prompt aligns the CONTENT; this guarantees
-  // the IDENTITY.
-  if (phenotypeId && weekTitles) {
-    const plan = validation.data as {
-      phenotypeId: PhenotypeId;
-      weeks: { title: string }[];
-    };
-    plan.phenotypeId = phenotypeId;
-    plan.weeks.forEach((week, i) => {
-      if (weekTitles[i]) week.title = weekTitles[i];
-    });
-  }
-
-  // Server-side visibility for supplement matching: resolveSupplement warns on
-  // unmatched names, and running it here (Node) lands those warnings in Vercel
-  // logs — the UI-side resolution only logs to the visitor's browser console.
-  for (const s of validation.data.supplements) resolveSupplement(s.name);
-
-  return { ok: true, data: validation.data };
+  return result;
 }
 
 function extractSummary(planData: unknown, lang: Lang): string {
