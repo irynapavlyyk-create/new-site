@@ -98,11 +98,22 @@ const ProPlanV2Schema = z.object({
 // Differs from ProPlanV2Schema in three deliberate ways:
 //  - leading "reasoning" field: the model's forced pre-plan analysis
 //    (replaces the old <thinking> text block; stripped before storage)
-//  - weeks is a fixed-length ARRAY, not a tuple (tuples don't map onto the
+//  - weeks is an ARRAY, not a tuple (tuples don't map onto the
 //    constrained-decoding JSON Schema subset)
-//  - number/startWeek are int ranges, not literal unions, for the same reason
-// ProPlanV2Schema still runs afterwards as the storage contract.
+//  - NO maximum counts: the decoding grammar enforces structure and types but
+//    not array maximums, and the SDK validates this schema INSIDE parse() —
+//    a max here would throw away a paid run the model overshot. Overshoot is
+//    coerced (truncated, logged) before ProPlanV2Schema, which still enforces
+//    the real maximums as the storage contract. Minimums stay: too few items
+//    is a genuine quality failure and must fail into the content retry.
 // ============================================
+
+const WeekGenSchema = WeekProtocolSchema.extend({
+  number: z.number().int().min(1),
+  nutritionFocus: z.array(z.string()).min(3),
+  stressPractices: z.array(z.string()).min(3),
+  keyActions: z.array(z.string()).min(2),
+});
 
 const GenerationSchema = z.object({
   reasoning: z
@@ -110,17 +121,25 @@ const GenerationSchema = z.object({
     .describe("concise pre-plan analysis, max 250 words, English is fine — stripped before storage"),
   phenotypeId: PhenotypeIdSchema,
   summary: z.string().describe("2-3 sentences personalized to this user, in the user's language"),
-  morningProtocol: z.array(ProtocolStepSchema).min(3).max(6),
-  sleepProtocol: z.array(ProtocolStepSchema).min(3).max(6),
-  weeks: z
-    .array(WeekProtocolSchema.extend({ number: z.number().int().min(1).max(4) }))
-    .min(4)
-    .max(4),
+  morningProtocol: z.array(ProtocolStepSchema).min(3),
+  sleepProtocol: z.array(ProtocolStepSchema).min(3),
+  weeks: z.array(WeekGenSchema).min(4).describe("exactly 4 weeks, numbered 1-4 in order"),
   supplements: z
-    .array(SupplementItemSchema.extend({ startWeek: z.number().int().min(1).max(4) }))
+    .array(SupplementItemSchema.extend({ startWeek: z.number().int().min(1) }))
     .min(3)
-    .max(6),
+    .describe("3 to 6 supplements"),
 });
+
+/** Truncate an over-generated array to its storage maximum, logging the miss. */
+function truncateTo<T>(arr: T[], max: number, field: string): T[] {
+  if (arr.length <= max) return arr;
+  console.warn("[generatePlan] coerced over-generation", {
+    field,
+    original: arr.length,
+    max,
+  });
+  return arr.slice(0, max);
+}
 
 // Profile language follows langName so the prompt stays monolingual.
 function buildUserProfile(answers: QuizAnswers, lang: Lang): string {
@@ -426,7 +445,39 @@ Rules for the plan content:
       reasoningChars: reasoning.length,
     });
 
-    const validation = validator.safeParse(planCandidate);
+    // Coerce over-generation instead of failing a paid ~2-minute run: truncate
+    // every array to its storage maximum and clamp week numbers / startWeek
+    // into 1-4. Every coercion is logged so overshoot frequency is visible.
+    // Under-generation is NOT coerced — schema minimums fail into the retry.
+    const coerced = {
+      ...planCandidate,
+      morningProtocol: truncateTo(planCandidate.morningProtocol, 6, "morningProtocol"),
+      sleepProtocol: truncateTo(planCandidate.sleepProtocol, 6, "sleepProtocol"),
+      supplements: truncateTo(planCandidate.supplements, 6, "supplements").map((s, i) => {
+        if (s.startWeek <= 4) return s;
+        console.warn("[generatePlan] coerced supplement startWeek", {
+          index: i,
+          original: s.startWeek,
+        });
+        return { ...s, startWeek: 4 };
+      }),
+      weeks: truncateTo(planCandidate.weeks, 4, "weeks").map((w, i) => {
+        const patched = { ...w };
+        if (w.number !== i + 1) {
+          console.warn("[generatePlan] coerced week number", {
+            index: i,
+            original: w.number,
+          });
+          patched.number = i + 1;
+        }
+        patched.nutritionFocus = truncateTo(w.nutritionFocus, 5, `weeks[${i + 1}].nutritionFocus`);
+        patched.stressPractices = truncateTo(w.stressPractices, 5, `weeks[${i + 1}].stressPractices`);
+        patched.keyActions = truncateTo(w.keyActions, 3, `weeks[${i + 1}].keyActions`);
+        return patched;
+      }),
+    };
+
+    const validation = validator.safeParse(coerced);
     if (!validation.success) {
       const detail = validation.error.issues
         .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
@@ -436,7 +487,7 @@ Rules for the plan content:
         { attempt },
         detail,
         "\n--- PARSED ---\n",
-        JSON.stringify(planCandidate, null, 2)
+        JSON.stringify(coerced, null, 2)
       );
       return { ok: false, status: 502, error: "schema validation failed", detail };
     }
