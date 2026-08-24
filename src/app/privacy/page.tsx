@@ -60,7 +60,7 @@ function PrivacyEN() {
           Payment information (processed securely via Stripe — we never store
           your card details)
         </li>
-        <li>Name and billing information (for PRO and Coach plans)</li>
+        <li>Name and billing information (for the PRO plan)</li>
       </ul>
       <h3>b) Information collected automatically:</h3>
       <ul>
