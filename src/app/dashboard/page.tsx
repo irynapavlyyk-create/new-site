@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import DashboardClient from "./DashboardClient";
 import PhenotypeDashboard from "./PhenotypeDashboard";
+import RegenerateButton from "./RegenerateButton";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FixedLangProvider } from "@/lib/i18n-context";
@@ -84,7 +85,10 @@ export default async function DashboardPage({
     const errorLang = (plan?.language as Lang | null) ?? "en";
     return (
       <FixedLangProvider lang={errorLang}>
-        <GenerationErrorCard lang={errorLang} />
+        <GenerationErrorCard
+          lang={errorLang}
+          sessionId={(plan?.stripe_session_id as string | null) ?? sessionId}
+        />
       </FixedLangProvider>
     );
   }
@@ -129,10 +133,9 @@ function V2Placeholder() {
 }
 
 // TODO(phase-2): delete or merge with new dashboard error states.
-// Retaking the quiz can't regenerate a paid plan (only the purchase webhook
-// generates), so the CTA points the buyer at support until a real
-// regeneration endpoint exists.
-function GenerationErrorCard({ lang }: { lang: Lang }) {
+// Primary CTA re-runs generation in place via POST /api/plan/regenerate (no
+// new purchase); support link stays as the fallback.
+function GenerationErrorCard({ lang, sessionId }: { lang: Lang; sessionId: string | null }) {
   return (
     <>
       <Navbar showLanguageSwitcher={false} />
@@ -148,7 +151,8 @@ function GenerationErrorCard({ lang }: { lang: Lang }) {
           <p className="text-muted leading-relaxed mb-6">
             {pick(t.welcome.errorSub, lang)}
           </p>
-          <a href="mailto:support@energyforge.app" className="btn-primary">
+          <RegenerateButton lang={lang} sessionId={sessionId} />
+          <a href="mailto:support@energyforge.app" className="inline-block mt-4 text-sm text-muted underline">
             {pick(t.errors.serverError.contactSupport, lang)}
           </a>
         </div>

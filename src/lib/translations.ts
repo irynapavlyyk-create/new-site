@@ -697,6 +697,10 @@ export const t = {
       cs: "Plán se nepodařilo vytvořit. Zkus to znovu.",
     },
     retryGen: { en: "Try again", cs: "Zkusit znovu" },
+    regenFailed: {
+      en: "Couldn't restart generation. Please contact support.",
+      cs: "Generování se nepodařilo spustit znovu. Napiš prosím podpoře.",
+    },
     forging: {
       en: "Forging your personal plan...",
       cs: "Kujeme tvůj osobní plán...",
