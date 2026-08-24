@@ -1,10 +1,13 @@
 -- ============================================================================
 -- 20260824180000_drop_public_service_role_policies.sql
 --
--- The three "Service role can …" policies were created without a TO clause,
+-- The four "Service role can …" policies were created without a TO clause,
 -- so they apply to `public` — every role, including anon and authenticated.
 -- Effect in production before this migration: any holder of the publishable
--- key could INSERT into plans/profiles and UPDATE any row in plans.
+-- key could INSERT into plans/profiles, UPDATE any row in plans, and
+-- INSERT/UPDATE/DELETE any row in subscriptions.
+--
+-- Applied to production 2026-08-24 by Iryna (SQL editor).
 --
 -- The service key bypasses RLS regardless of policies, and every write to
 -- plans / profiles / subscriptions in the app goes through the service key
