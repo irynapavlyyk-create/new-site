@@ -6,6 +6,7 @@ import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { generateAndSavePlan } from "@/lib/generatePlan";
 import { classifyPlanData, isPendingStale } from "@/lib/planState";
+import { alertPaidPathFailure } from "@/lib/alerts";
 import { sendPurchaseConfirmation } from "@/lib/emails/send";
 import { captureServerEvent } from "@/lib/posthog-server";
 import type { Lang, QuizAnswers } from "@/types";
@@ -241,9 +242,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         .upsert(profileUpdate, { onConflict: "id" });
       if (upsertErr) {
         console.error("[webhook] profile upsert failed:", upsertErr);
+        await alertPaidPathFailure({
+          stage: "profile_upsert_failed",
+          sessionId,
+          userId,
+          error: upsertErr.message,
+          detail: { upsertErr, profileUpdate },
+        });
       }
     } catch (err) {
       console.error("[webhook] profile upsert threw:", err);
+      await alertPaidPathFailure({
+        stage: "profile_upsert_failed",
+        sessionId,
+        userId,
+        error: err instanceof Error ? err.message : String(err),
+        detail: err,
+      });
     }
   }
 

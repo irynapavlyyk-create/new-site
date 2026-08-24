@@ -4,6 +4,7 @@ import { anthropic, MODEL, PRO_SYSTEM } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { sendPlanReady } from "@/lib/emails/send";
 import { makePendingMarker } from "@/lib/planState";
+import { alertPaidPathFailure } from "@/lib/alerts";
 import type { Lang, PhenotypeId, QuizAnswers } from "@/types";
 import { describe, detectPatterns, type ProfileLine } from "@/lib/signals";
 import { inferPhenotype } from "@/lib/inferPhenotype";
@@ -662,6 +663,13 @@ export async function generateAndSavePlan(params: {
       error: result.error,
       detail: result.detail,
     });
+    await alertPaidPathFailure({
+      stage: "generation_failed",
+      sessionId,
+      userId,
+      error: result.error,
+      detail: result.detail,
+    });
   }
 
   // 3. Persist the outcome onto the reserved row; if there is no reserved
@@ -674,6 +682,13 @@ export async function generateAndSavePlan(params: {
       .eq("id", planId);
     if (updateErr) {
       console.error("[generateAndSavePlan] plans update failed:", updateErr, { planId });
+      await alertPaidPathFailure({
+        stage: "plan_update_failed",
+        sessionId,
+        userId,
+        error: updateErr.message,
+        detail: { planId, generationOk: result.ok, updateErr },
+      });
     } else {
       saved = true;
     }
@@ -686,6 +701,16 @@ export async function generateAndSavePlan(params: {
       .single();
     if (insertErr) {
       console.error("[generateAndSavePlan] plans insert failed:", insertErr);
+      // Worst case in the paid path: a generated plan (or error marker) that
+      // never reached the DB. The answers are still in Stripe metadata, so
+      // support can replay the event — but only if someone is told.
+      await alertPaidPathFailure({
+        stage: "plan_insert_failed",
+        sessionId,
+        userId,
+        error: insertErr.message,
+        detail: { generationOk: result.ok, insertErr },
+      });
       return;
     }
     planId = (insertedPlan?.id as string | undefined) ?? planId;
