@@ -70,3 +70,4 @@ Facts confirmed against production:
 | Migration | Applied to prod | By |
 |---|---|---|
 | `20260824000000_initial_schema.sql` | baseline — already present | — |
+| `20260824180000_drop_public_service_role_policies.sql` | not yet applied | — |
