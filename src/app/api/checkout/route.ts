@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { isPromoActive } from "@/lib/promo";
+import { COACH_ENABLED } from "@/lib/flags";
 import type { Lang, QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
@@ -16,6 +17,19 @@ export async function POST(req: NextRequest) {
       posthogDistinctId?: string | null;
     };
     const { tier, lang, userId, answers, posthogDistinctId } = body;
+
+    // Coach is off sale: refuse, don't downgrade. A silent downgrade would
+    // charge the PRO price for a Coach request and leave no trace.
+    if (tier === "coach" && !COACH_ENABLED) {
+      console.warn("[checkout] rejected coach checkout — COACH_ENABLED is off", {
+        userId: userId ?? null,
+        lang,
+      });
+      return NextResponse.json({ error: "Coach is not available" }, { status: 400 });
+    }
+    if (tier !== "pro" && tier !== "coach") {
+      return NextResponse.json({ error: "Invalid tier" }, { status: 400 });
+    }
 
     const isDev = process.env.NODE_ENV !== "production";
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";

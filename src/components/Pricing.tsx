@@ -6,11 +6,13 @@ import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import { track } from "@/lib/analytics";
 import { isPromoActive, PROMO_PRICES, PROMO_LABEL } from "@/lib/promo";
+import { COACH_ENABLED } from "@/lib/flags";
 import FadeUp from "./FadeUp";
 
 export default function Pricing() {
   const { lang } = useI18n();
-  const plans = pick(t.pricing.plans, lang);
+  // Coach is off sale unless the flag is on; the checkout routes refuse it too.
+  const plans = pick(t.pricing.plans, lang).filter((p) => COACH_ENABLED || p.name !== "Coach");
   const ctaHref = (name: string) =>
     name === "Starter" ? "/quiz" : name === "PRO" ? "/quiz?goto=pro" : "/quiz?goto=coach";
 
@@ -49,7 +51,7 @@ export default function Pricing() {
         </h2>
         <p className="text-center text-muted mb-14">{pick(t.pricing.subtitle, lang)}</p>
       </FadeUp>
-      <div className="pricing-grid-3">
+      <div className={plans.length === 3 ? "pricing-grid-3" : "pricing-grid-2"}>
         {plans.map((p, i) => {
           const isPro = p.name === "PRO";
           const pt = promo ? promoTier(p.name) : null;

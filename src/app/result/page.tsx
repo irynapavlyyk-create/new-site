@@ -18,6 +18,7 @@ import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { detectPatterns } from "@/lib/signals";
 import { track, getDistinctId } from "@/lib/analytics";
 import { isPromoActive, PROMO_PRICES, PROMO_LABEL } from "@/lib/promo";
+import { COACH_ENABLED } from "@/lib/flags";
 import LockedProtocol from "./LockedProtocol";
 import UpsellModal from "./UpsellModal";
 
@@ -215,7 +216,7 @@ function ResultPageInner() {
                 <p className="text-muted text-sm">{pick(t.result.choose.subtitle, lang)}</p>
               </div>
 
-              <div className="pricing-grid-2 items-stretch">
+              <div className={`${COACH_ENABLED ? "pricing-grid-2" : "max-w-md mx-auto"} items-stretch`}>
                 <PricingCard
                   accent="amber"
                   badge={pick(t.result.choose.pro.badge, lang)}
@@ -230,6 +231,7 @@ function ResultPageInner() {
                   disabled={loadingTier !== null}
                   onClick={() => unlock("pro")}
                 />
+                {COACH_ENABLED && (
                 <PricingCard
                   accent="violet"
                   highlighted
@@ -245,11 +247,14 @@ function ResultPageInner() {
                   disabled={loadingTier !== null}
                   onClick={() => unlock("coach")}
                 />
+                )}
               </div>
 
-              <p className="text-center text-xs text-muted mt-5">
-                {pick(t.result.choose.upgradeNote, lang)}
-              </p>
+              {COACH_ENABLED && (
+                <p className="text-center text-xs text-muted mt-5">
+                  {pick(t.result.choose.upgradeNote, lang)}
+                </p>
+              )}
             </div>
           </FadeUp>
         </div>

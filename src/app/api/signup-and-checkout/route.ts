@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
 import { isPromoActive } from "@/lib/promo";
+import { COACH_ENABLED } from "@/lib/flags";
 import type { Lang, QuizAnswers } from "@/types";
 
 export const runtime = "nodejs";
@@ -30,6 +31,15 @@ export async function POST(req: NextRequest) {
     }
     if (password.length < 8) {
       return NextResponse.json({ error: "Password too short" }, { status: 400 });
+    }
+    // Coach is off sale: refuse BEFORE creating the auth user, and never
+    // downgrade silently (that would charge PRO for a Coach request).
+    if (tier === "coach" && !COACH_ENABLED) {
+      console.warn("[signup-and-checkout] rejected coach checkout — COACH_ENABLED is off", {
+        email,
+        lang,
+      });
+      return NextResponse.json({ error: "Coach is not available" }, { status: 400 });
     }
     const resolvedTier: "pro" | "coach" = tier === "coach" ? "coach" : "pro";
     const resolvedLang: Lang = lang === "cs" ? "cs" : "en";
