@@ -8,9 +8,6 @@
 -- pg_constraint / pg_policies / pg_indexes run in the SQL editor (see
 -- supabase/README.md). Constraint and index NAMES match production exactly.
 --
--- Two CHECK lists were truncated in that output and are marked "-- VERIFY"
--- below; the values shown are the ones that were visible.
---
 -- This file is a RECORD of what already exists in production. Do NOT run it
 -- against production. It is idempotent so it can be applied to an empty
 -- (local / staging) project to recreate the same schema.
@@ -66,8 +63,6 @@ create table if not exists public.plans (
   constraint plans_stripe_session_id_key unique (stripe_session_id),
   constraint plans_language_check
     check (language = any (array['en'::text, 'cs'::text])),
-  -- VERIFY: list truncated in pg_constraint output after 'coach'; confirm with
-  -- the full-definition query in supabase/README.md.
   constraint plans_tier_check
     check (tier = any (array['starter'::text, 'pro'::text, 'coach'::text]))
 );
@@ -96,10 +91,8 @@ create table if not exists public.subscriptions (
   constraint subscriptions_stripe_subscription_id_key unique (stripe_subscription_id),
   constraint subscriptions_tier_check
     check (tier = any (array['pro'::text, 'coach'::text])),
-  -- VERIFY: list truncated in pg_constraint output after 'cance…'; confirm
-  -- with the full-definition query in supabase/README.md.
   constraint subscriptions_status_check
-    check (status = any (array['active'::text, 'past_due'::text, 'canceled'::text]))
+    check (status = any (array['active'::text, 'past_due'::text, 'canceled'::text, 'incomplete'::text, 'trialing'::text]))
 );
 
 create index if not exists idx_subscriptions_user_id         on public.subscriptions (user_id);

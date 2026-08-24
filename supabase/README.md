@@ -47,9 +47,7 @@ order by 1, 2;
 ```
 
 The SQL editor truncates long `pg_get_constraintdef` values. To read a CHECK
-list in full (needed for `plans_tier_check` and `subscriptions_status_check`,
-marked `-- VERIFY` in the baseline), split the definition into one row per
-allowed value:
+list in full, split the definition into one row per allowed value:
 
 ```sql
 select conname, unnest(regexp_matches(pg_get_constraintdef(oid), '''([^'']+)''::text', 'g')) as allowed_value
@@ -64,6 +62,8 @@ Facts confirmed against production:
 - `plans.stripe_session_id` is **UNIQUE** (`plans_stripe_session_id_key`), so
   the webhook's idempotency lookup is backed by a real constraint.
 - `profiles.email` and `profiles.stripe_customer_id` are UNIQUE.
+- `plans.tier` ∈ `('starter','pro','coach')`; `subscriptions.status` ∈
+  `('active','past_due','canceled','incomplete','trialing')`.
 
 ## Applied log
 
