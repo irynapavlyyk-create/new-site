@@ -24,10 +24,10 @@ already there. Use it only to recreate the schema on an empty project.
 
 ## Verifying the baseline against production
 
-PostgREST exposes columns and defaults but not CHECK/FK/RLS definitions, so
-those parts of the baseline were written from the design, not read back.
-Run this once in the SQL editor and reconcile any difference into the
-baseline file (fix the file, not the database):
+The baseline was reconciled on 2026-08-24 against the live `pg_constraint`,
+`pg_policies` and `pg_indexes` output — constraint, index and policy names
+match production. Re-run these after any by-hand change to make sure the
+folder still matches the database (fix the file, not the database):
 
 ```sql
 select conrelid::regclass as "table", conname, pg_get_constraintdef(oid) as definition
@@ -46,13 +46,24 @@ where schemaname = 'public'
 order by 1, 2;
 ```
 
-Points to confirm specifically:
+The SQL editor truncates long `pg_get_constraintdef` values. To read a CHECK
+list in full (needed for `plans_tier_check` and `subscriptions_status_check`,
+marked `-- VERIFY` in the baseline), split the definition into one row per
+allowed value:
 
-- `plans.language` and `profiles.preferred_language` CHECK constraints are
-  `in ('en', 'cs')` — the Czech launch changed these from the older en/ru set.
-- `plans.stripe_session_id` has **no** unique constraint in the baseline. The
-  webhook is idempotent by lookup, not by constraint; adding
-  `unique (stripe_session_id)` would be a reasonable follow-up migration.
+```sql
+select conname, unnest(regexp_matches(pg_get_constraintdef(oid), '''([^'']+)''::text', 'g')) as allowed_value
+from pg_constraint
+where conname in ('plans_tier_check', 'subscriptions_status_check')
+order by 1, 2;
+```
+
+Facts confirmed against production:
+
+- `plans.language` and `profiles.preferred_language` CHECKs are `('en','cs')`.
+- `plans.stripe_session_id` is **UNIQUE** (`plans_stripe_session_id_key`), so
+  the webhook's idempotency lookup is backed by a real constraint.
+- `profiles.email` and `profiles.stripe_customer_id` are UNIQUE.
 
 ## Applied log
 
