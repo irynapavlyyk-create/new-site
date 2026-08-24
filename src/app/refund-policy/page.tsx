@@ -26,10 +26,9 @@ function RefundEN() {
     <>
       <h2>1. Overview</h2>
       <p>
-        EnergyForge offers three plans:{" "}
-        <strong>Starter</strong> (free),{" "}
-        <strong>PRO</strong> (€9.99 one-time), and{" "}
-        <strong>Coach</strong> (€24.99/month subscription). This Refund
+        EnergyForge offers two plans:{" "}
+        <strong>Starter</strong> (free) and{" "}
+        <strong>PRO</strong> (€9.99 one-time). This Refund
         Policy explains your refund rights under the EU Consumer Rights
         Directive and how to request a refund.
       </p>
@@ -61,25 +60,7 @@ function RefundEN() {
         we will review your case individually.
       </p>
 
-      <h2>3. Coach Plan (€24.99/month)</h2>
-      <ul>
-        <li>
-          You can cancel your subscription at any time from your dashboard
-          or by contacting support.
-        </li>
-        <li>
-          Cancellation takes effect at the end of the current billing
-          period — you retain access until then.
-        </li>
-        <li>We do not provide refunds for the current billing month.</li>
-        <li>
-          You will not be charged for any subsequent months after
-          cancellation.
-        </li>
-        <li>No refunds for partial months of service.</li>
-      </ul>
-
-      <h2>4. How to Request a Refund</h2>
+      <h2>3. How to Request a Refund</h2>
       <ul>
         <li>
           Email <Mail /> with your account email and order details.
@@ -91,7 +72,7 @@ function RefundEN() {
         </li>
       </ul>
 
-      <h2>5. Chargebacks</h2>
+      <h2>4. Chargebacks</h2>
       <p>
         Please contact us <strong>before</strong> initiating a chargeback
         with your bank &mdash; we are committed to resolving issues quickly
@@ -99,7 +80,7 @@ function RefundEN() {
         termination.
       </p>
 
-      <h2>6. Contact</h2>
+      <h2>5. Contact</h2>
       <p>
         Email: <Mail />
       </p>

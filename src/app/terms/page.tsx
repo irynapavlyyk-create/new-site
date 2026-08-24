@@ -120,7 +120,7 @@ function TermsEN() {
 
       <h2>5. Pricing and Payments</h2>
       <p>
-        <strong>Subscription plans:</strong>
+        <strong>Plans:</strong>
       </p>
       <ul>
         <li>
@@ -129,9 +129,6 @@ function TermsEN() {
         <li>
           <strong>PRO</strong> — €9.99 one-time payment
         </li>
-        <li>
-          <strong>Coach</strong> — €24.99/month (recurring subscription)
-        </li>
       </ul>
       <p>
         <strong>Payment terms:</strong>
@@ -139,11 +136,7 @@ function TermsEN() {
       <ul>
         <li>All payments are processed securely through Stripe</li>
         <li>Prices are in Euros (€) and include applicable VAT</li>
-        <li>Subscriptions (Coach) auto-renew monthly until cancelled</li>
-        <li>
-          You can cancel your subscription at any time through your account
-          settings
-        </li>
+        <li>PRO is a one-time payment — nothing renews and nothing to cancel</li>
       </ul>
 
       <h2>6. Refund Policy</h2>
@@ -165,10 +158,6 @@ function TermsEN() {
           </strong>{" "}
           (as per EU law Article 16(m) — digital content delivered
           immediately after purchase, with your explicit consent).
-        </li>
-        <li>
-          For Coach subscriptions, cancellation stops future charges but does
-          not refund the current billing period.
         </li>
       </ul>
       <p>
