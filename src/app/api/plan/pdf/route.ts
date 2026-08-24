@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import { createClient } from "@/utils/supabase/server";
 import { getPhenotype } from "@/lib/phenotypes";
+import { classifyPlanData } from "@/lib/planState";
 import { registerFonts } from "@/lib/pdf/fonts";
 import { PlanDocument } from "@/lib/pdf/PlanDocument";
 import type { Lang, ProPlanV2 } from "@/types";
@@ -32,12 +33,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     .maybeSingle();
 
   const planData = plan?.plan_data;
-  const isV2 =
-    planData !== null &&
-    typeof planData === "object" &&
-    "phenotypeId" in (planData as Record<string, unknown>);
-
-  if (!isV2) {
+  if (classifyPlanData(planData) !== "v2") {
     return NextResponse.json({ error: "no plan" }, { status: 404 });
   }
 

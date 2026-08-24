@@ -5,6 +5,7 @@ import PhenotypeDashboard from "./PhenotypeDashboard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FixedLangProvider } from "@/lib/i18n-context";
+import { classifyPlanData } from "@/lib/planState";
 import { t, pick } from "@/lib/translations";
 import type { Lang, ProPlan, ProPlanV2 } from "@/types";
 
@@ -50,13 +51,12 @@ export default async function DashboardPage({
   }
 
   const planData = plan?.plan_data;
-  const isObjectShape = planData !== null && typeof planData === "object";
-  const isV2Plan =
-    isObjectShape && "phenotypeId" in (planData as Record<string, unknown>);
-  const isErrorMarker =
-    isObjectShape &&
-    "error" in (planData as Record<string, unknown>) &&
-    !("summary" in (planData as Record<string, unknown>));
+  const kind = classifyPlanData(planData);
+  const isV2Plan = kind === "v2";
+  const isErrorMarker = kind === "error";
+  // A pending row (reserved before generation) must render as "no plan yet"
+  // so DashboardClient shows the forging screen, not a broken legacy plan.
+  const isPending = kind === "pending";
 
   // TODO(phase-2): remove this branch when the new V2 dashboard UI ships.
   if (isV2Plan) {
@@ -91,7 +91,7 @@ export default async function DashboardPage({
 
   // Legacy plan (or no plan at all) — fall through to the existing UI.
   // DashboardClient handles the no-plan and fromStripe forging states.
-  const initialPlan = (planData as ProPlan | null) ?? null;
+  const initialPlan = isPending ? null : ((planData as ProPlan | null) ?? null);
   const initialPlanTier = (plan?.tier as string | null) ?? null;
 
   return (

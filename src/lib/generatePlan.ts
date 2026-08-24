@@ -3,6 +3,7 @@ import { z } from "zod";
 import { anthropic, MODEL, PRO_SYSTEM } from "@/lib/claude";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { sendPlanReady } from "@/lib/emails/send";
+import { makePendingMarker } from "@/lib/planState";
 import type { Lang, PhenotypeId, QuizAnswers } from "@/types";
 import { describe, detectPatterns, type ProfileLine } from "@/lib/signals";
 import { inferPhenotype } from "@/lib/inferPhenotype";
@@ -582,27 +583,35 @@ function extractSummary(planData: unknown, lang: Lang): string {
 
 // Background-job entry point. Wrapped by waitUntil() in the webhook so plan
 // generation runs after the webhook has already returned 200 to Stripe.
-// Always writes a row to plans — on success with plan_data, on failure with
-// { error, detail } so the dashboard polling can surface a clear error state
-// instead of polling forever.
+//
+// Write order matters: the row is INSERTED with a pending marker BEFORE the
+// Anthropic call, then UPDATED with the plan (or an { error, detail } marker)
+// after. A paid generation can therefore never be discarded by a failed write
+// (the row already exists; worst case we fall back to a plain insert), and an
+// instance that dies mid-generation leaves a visible pending row instead of
+// nothing. Readers classify pending as "still forging" (see planState.ts).
+//
+// `existingPlanId` lets the webhook re-claim a stale pending row left by a
+// dead instance instead of inserting a duplicate for the same session.
 export async function generateAndSavePlan(params: {
   userId: string;
   sessionId: string;
   answers: QuizAnswers;
   lang: Lang;
   tier: GenerateTier;
+  existingPlanId?: string | null;
 }): Promise<void> {
   const { userId, sessionId, answers, lang, tier } = params;
   console.log("[generateAndSavePlan] background plan generation started", {
     sessionId,
     userId,
     tier,
+    reclaimedPlanId: params.existingPlanId ?? null,
   });
 
   const admin = createAdminClient();
-  const result = await generatePlan({ answers, lang, tier });
 
-  const planRow: Record<string, unknown> = {
+  const baseRow: Record<string, unknown> = {
     user_id: userId,
     tier,
     answers,
@@ -610,25 +619,76 @@ export async function generateAndSavePlan(params: {
     stripe_session_id: sessionId,
   };
 
-  if (result.ok) {
-    planRow.plan_data = result.data;
-  } else {
+  // 1. Reserve the row (or re-stamp a stale pending one) before the slow call.
+  let planId: string | null = params.existingPlanId ?? null;
+  const pendingMarker = makePendingMarker();
+  try {
+    if (planId) {
+      const { error: restampErr } = await admin
+        .from("plans")
+        .update({ ...baseRow, plan_data: pendingMarker })
+        .eq("id", planId);
+      if (restampErr) {
+        console.error("[generateAndSavePlan] pending re-stamp failed:", restampErr, { planId });
+      }
+    } else {
+      const { data: pendingRow, error: pendingErr } = await admin
+        .from("plans")
+        .insert({ ...baseRow, plan_data: pendingMarker })
+        .select("id")
+        .single();
+      if (pendingErr) {
+        // Not fatal: we still generate and fall back to a plain insert below,
+        // so the paid run is never thrown away because of this write.
+        console.error("[generateAndSavePlan] pending insert failed:", pendingErr);
+      } else {
+        planId = (pendingRow?.id as string | undefined) ?? null;
+        console.log("[generateAndSavePlan] pending row reserved", { sessionId, planId });
+      }
+    }
+  } catch (err) {
+    console.error("[generateAndSavePlan] pending write threw:", err);
+  }
+
+  // 2. Generate.
+  const result = await generatePlan({ answers, lang, tier });
+
+  const finalPlanData: unknown = result.ok
+    ? result.data
+    : { error: result.error, detail: result.detail ?? null };
+  if (!result.ok) {
     console.error("[generateAndSavePlan] generation failed — saving error marker", {
       sessionId,
       error: result.error,
       detail: result.detail,
     });
-    planRow.plan_data = { error: result.error, detail: result.detail ?? null };
   }
 
-  const { data: insertedPlan, error: insertErr } = await admin
-    .from("plans")
-    .insert(planRow)
-    .select("id")
-    .single();
-  if (insertErr) {
-    console.error("[generateAndSavePlan] plans insert failed:", insertErr);
-    return;
+  // 3. Persist the outcome onto the reserved row; if there is no reserved
+  //    row (reservation failed) or the update fails, insert a complete row.
+  let saved = false;
+  if (planId) {
+    const { error: updateErr } = await admin
+      .from("plans")
+      .update({ plan_data: finalPlanData })
+      .eq("id", planId);
+    if (updateErr) {
+      console.error("[generateAndSavePlan] plans update failed:", updateErr, { planId });
+    } else {
+      saved = true;
+    }
+  }
+  if (!saved) {
+    const { data: insertedPlan, error: insertErr } = await admin
+      .from("plans")
+      .insert({ ...baseRow, plan_data: finalPlanData })
+      .select("id")
+      .single();
+    if (insertErr) {
+      console.error("[generateAndSavePlan] plans insert failed:", insertErr);
+      return;
+    }
+    planId = (insertedPlan?.id as string | undefined) ?? planId;
   }
 
   if (result.ok) {
@@ -641,7 +701,6 @@ export async function generateAndSavePlan(params: {
   // Best-effort: never blocks; logs success/failure.
   if (!result.ok) return;
 
-  const planId = insertedPlan?.id as string | undefined;
   if (!planId) {
     console.warn("[generateAndSavePlan] missing plan id after insert — skipping plan-ready email");
     return;

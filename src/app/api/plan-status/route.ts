@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { classifyPlanData } from "@/lib/planState";
 
 export const runtime = "nodejs";
 // Plan-status reads live DB on every poll — never cache.
@@ -46,23 +47,12 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "db error" }, { status: 500 });
   }
 
-  const planData = plan?.plan_data;
-  const isObjectShape = planData !== null && typeof planData === "object";
-
-  if (!isObjectShape) {
-    const body: PlanStatus = { ready: false, kind: "none" };
-    return NextResponse.json(body);
-  }
-
-  const obj = planData as Record<string, unknown>;
-  if ("phenotypeId" in obj) {
-    const body: PlanStatus = { ready: true, kind: "v2" };
-    return NextResponse.json(body);
-  }
-  if ("error" in obj && !("summary" in obj)) {
-    const body: PlanStatus = { ready: true, kind: "error" };
-    return NextResponse.json(body);
-  }
-  const body: PlanStatus = { ready: true, kind: "v1" };
+  // A pending row (reserved before the Anthropic call) reads as "none" so the
+  // forging screen keeps polling; only a real plan or error marker is ready.
+  const kind = classifyPlanData(plan?.plan_data);
+  const body: PlanStatus =
+    kind === "none" || kind === "pending"
+      ? { ready: false, kind: "none" }
+      : { ready: true, kind };
   return NextResponse.json(body);
 }

@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { generateAndSavePlan } from "@/lib/generatePlan";
+import { classifyPlanData, isPendingStale } from "@/lib/planState";
 import { sendPurchaseConfirmation } from "@/lib/emails/send";
 import { captureServerEvent } from "@/lib/posthog-server";
 import type { Lang, QuizAnswers } from "@/types";
@@ -140,12 +141,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const admin = createAdminClient();
 
   // Idempotency: reuse user_id from prior insert if we already processed this session.
-  const { data: existingPlan } = await admin
+  // Since the row is reserved (pending marker) BEFORE generation, a duplicate
+  // Stripe event arriving mid-generation finds it and skips — no double spend.
+  // A pending row older than PENDING_STALE_MS means the instance died; a retry
+  // re-claims that row and regenerates into it rather than inserting a second.
+  const { data: existingPlan, error: existingErr } = await admin
     .from("plans")
-    .select("id, user_id")
+    .select("id, user_id, plan_data")
     .eq("stripe_session_id", sessionId)
     .maybeSingle();
-  console.log("[webhook] plan exists for session?", !!existingPlan);
+  if (existingErr) {
+    console.error("[webhook] existing-plan lookup failed:", existingErr);
+  }
+  const stalePending = !!existingPlan && isPendingStale(existingPlan.plan_data);
+  console.log("[webhook] plan exists for session?", !!existingPlan, {
+    kind: existingPlan ? classifyPlanData(existingPlan.plan_data) : null,
+    stalePending,
+  });
 
   // Always resolve user — needed both for plan work and for magic link on retry.
   let userId: string | null = (existingPlan?.user_id as string | null) ?? null;
@@ -267,7 +279,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Plan generation: 50-80s. Runs after the magic link is queued so the user
   // already has the email by the time their plan finishes generating.
-  if (!existingPlan) {
+  if (!existingPlan || stalePending) {
     const answers = parseAnswersFromMetadata(metadata);
     if (answers) {
       await generateAndSavePlan({
@@ -276,7 +288,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         answers,
         lang: language,
         tier,
+        existingPlanId: stalePending ? (existingPlan?.id as string) : null,
       });
+    } else if (existingPlan) {
+      console.warn("[webhook] stale pending row but no answers in metadata — leaving it", sessionId);
     } else {
       console.warn(
         "[webhook] no answers in metadata — inserting empty plan row for idempotency",
