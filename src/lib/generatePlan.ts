@@ -386,6 +386,17 @@ Rules for the plan content:
       );
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      // The SDK helper validates GenerationSchema INSIDE messages.parse() and
+      // throws on violation. That's a content failure (schema minimums, wrong
+      // shapes), not a transport failure — surface it as "schema validation
+      // failed" so CONTENT_RETRYABLE fires the retry instead of giving up.
+      if (msg.includes("Failed to parse structured output")) {
+        console.error("[generatePlan] structured-output validation failed inside SDK", {
+          attempt,
+          detail: msg.slice(0, 400),
+        });
+        return { ok: false, status: 502, error: "schema validation failed", detail: msg };
+      }
       console.error("[generatePlan] anthropic call failed:", msg, { attempt }, err);
       return { ok: false, status: 502, error: "anthropic failed", detail: msg };
     }
@@ -531,7 +542,10 @@ Rules for the plan content:
     });
     const retryPrompt = `${userPrompt}
 
-RETRY NOTE: your previous attempt produced structurally invalid JSON. Inside JSON string values, escape every double quote as \\" — or better, avoid quotation marks in prose entirely (rephrase instead of quoting). Every string must be closed and the JSON must parse.`;
+RETRY NOTE: your previous attempt violated the required output schema and was rejected. Violations:
+${String(result.detail ?? result.error).slice(0, 600)}
+
+Fix these exactly: respect every required field and every minimum count. Weeks must be exactly the 4 given, in order, numbered 1-4.`;
     result = await runAttempt(retryPrompt, 2);
     if (result.ok) {
       console.log("[generatePlan] content retry succeeded", { tier });
