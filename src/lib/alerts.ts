@@ -6,7 +6,8 @@ export type PaidPathStage =
   | "generation_failed"
   | "plan_insert_failed"
   | "plan_update_failed"
-  | "profile_upsert_failed";
+  | "profile_upsert_failed"
+  | "tier_unresolved";
 
 export type PaidPathAlert = {
   stage: PaidPathStage;

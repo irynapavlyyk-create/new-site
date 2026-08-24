@@ -29,7 +29,10 @@ function tierFromAmount(amount: number | null | undefined): Tier | null {
   if (amount === 999 || amount === 499) return "pro"; // €9.99 / €4.99
   if (amount === 2499 || amount === 1249) return "coach"; // €24.99 / €12.49
   if (amount <= 1500) return "pro";
-  return "coach";
+  // Unknown amount above the PRO band: do NOT guess "coach". Coach is off
+  // sale and a wrong guess would write a subscription-tier plan for a
+  // one-off payment. null → caller logs, alerts support, and stops.
+  return null;
 }
 
 function parseAnswersFromMetadata(
@@ -131,7 +134,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   if (!tier) {
-    console.error("[webhook] could not determine tier", sessionId);
+    // Payment succeeded but we can't tell what was bought — no plan will be
+    // generated, so support must hear about it.
+    console.error("[webhook] could not determine tier", sessionId, {
+      amount: session.amount_total,
+      metadataTier: metadata.tier ?? null,
+    });
+    await alertPaidPathFailure({
+      stage: "tier_unresolved",
+      sessionId,
+      userId: metadataUserId !== "anonymous" ? metadataUserId : null,
+      error: "could not determine tier",
+      detail: { amount: session.amount_total, currency: session.currency, metadata },
+    });
     return;
   }
   if (!email) {
