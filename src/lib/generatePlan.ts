@@ -60,7 +60,7 @@ const WeekProtocolSchema = z.object({
   focus: z.string(),
   nutritionFocus: z.array(z.string()).min(3).max(5),
   stressPractices: z.array(z.string()).min(3).max(5),
-  keyActions: z.array(z.string()).min(2).max(3),
+  keyActions: z.array(z.string()).min(2).max(4),
 });
 
 const SupplementItemSchema = z.object({
@@ -485,7 +485,7 @@ Rules for the plan content:
         }
         patched.nutritionFocus = truncateTo(w.nutritionFocus, 5, `weeks[${i + 1}].nutritionFocus`);
         patched.stressPractices = truncateTo(w.stressPractices, 5, `weeks[${i + 1}].stressPractices`);
-        patched.keyActions = truncateTo(w.keyActions, 3, `weeks[${i + 1}].keyActions`);
+        patched.keyActions = truncateTo(w.keyActions, 4, `weeks[${i + 1}].keyActions`);
         return patched;
       }),
     };
