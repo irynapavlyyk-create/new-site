@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { COMPANY } from "@/lib/company";
 
 const SUPPORT_EMAIL = "support@energyforge.app";
 
@@ -10,7 +11,7 @@ export default function Footer() {
   const { lang } = useI18n();
   return (
     <footer className="mt-12" style={{ borderTop: "1px solid var(--border)" }}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="flex items-center gap-2 flex-wrap">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber to-orange flex items-center justify-center flex-shrink-0">
             <span className="font-bold text-xs" style={{ color: "#0A0A0F" }}>{"⚡︎"}</span>
@@ -37,6 +38,12 @@ export default function Footer() {
             {SUPPORT_EMAIL}
           </a>
         </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-xs text-muted">
+        {COMPANY.name} · IČO: {COMPANY.ico} · DIČ: {COMPANY.dic}
+        <span className="hidden sm:inline"> · </span>
+        <br className="sm:hidden" />
+        {COMPANY.addressEn}
       </div>
     </footer>
   );

@@ -4,6 +4,7 @@ import { FixedLangProvider } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import LegalLayout from "@/components/LegalLayout";
 import { Mail, Ext } from "@/components/LegalHelpers";
+import { COMPANY } from "@/lib/company";
 
 // Legal pages are English-only until reviewed Czech versions are ready —
 // the whole page (chrome included) is pinned to EN via FixedLangProvider.
@@ -12,7 +13,7 @@ export default function PrivacyPage() {
     <FixedLangProvider lang="en">
       <LegalLayout
         title={pick(t.legal.privacyTitle, "en")}
-        lastUpdated="April 20, 2026"
+        lastUpdated="August 27, 2026"
         showLanguageSwitcher={false}
       >
         <PrivacyEN />
@@ -40,7 +41,11 @@ function PrivacyEN() {
       <h2>2. Data Controller</h2>
       <p>The data controller responsible for your personal data is:</p>
       <p>
-        <strong>EnergyForge</strong>
+        <strong>{COMPANY.name}</strong> (trading as EnergyForge)
+        <br />
+        ID No. {COMPANY.ico}
+        <br />
+        {COMPANY.addressEn}
         <br />
         Email: <Mail />
         <br />

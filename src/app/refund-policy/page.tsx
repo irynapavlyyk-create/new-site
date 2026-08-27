@@ -4,6 +4,7 @@ import { FixedLangProvider } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import LegalLayout from "@/components/LegalLayout";
 import { Mail } from "@/components/LegalHelpers";
+import { COMPANY } from "@/lib/company";
 
 // Legal pages are English-only until reviewed Czech versions are ready —
 // the whole page (chrome included) is pinned to EN via FixedLangProvider.
@@ -12,7 +13,7 @@ export default function RefundPolicyPage() {
     <FixedLangProvider lang="en">
       <LegalLayout
         title={pick(t.legal.refundTitle, "en")}
-        lastUpdated="May 13, 2026"
+        lastUpdated="August 27, 2026"
         showLanguageSwitcher={false}
       >
         <RefundEN />
@@ -83,6 +84,10 @@ function RefundEN() {
       <h2>5. Contact</h2>
       <p>
         Email: <Mail />
+      </p>
+      <p>
+        Seller: <strong>{COMPANY.name}</strong>, ID No. (IČO) {COMPANY.ico},{" "}
+        {COMPANY.addressEn}
       </p>
     </>
   );
