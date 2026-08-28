@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import AuroraBackground from "@/components/AuroraBackground";
 import AuthHashHandler from "@/components/AuthHashHandler";
 import CookieBanner from "@/components/CookieBanner";
+import MetaPixel from "@/components/MetaPixel";
 import PinterestTag from "@/components/PinterestTag";
 import PostHogProvider from "@/components/PostHogProvider";
 import { Analytics } from "@vercel/analytics/react";
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </PostHogProvider>
         <Analytics />
         <PinterestTag />
+        <MetaPixel />
       </body>
     </html>
   );
