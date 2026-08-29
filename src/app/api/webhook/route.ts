@@ -167,7 +167,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .eq("stripe_session_id", sessionId)
     .maybeSingle();
   if (existingErr) {
-    console.error("[webhook] existing-plan lookup failed:", existingErr);
+    // Without this answer we cannot tell whether the session was already
+    // processed; continuing would risk a second paid generation. POST() has
+    // already refused the event with 500 in this case so Stripe retries —
+    // this branch only guards the race where the DB failed between the two
+    // lookups. Bail out and let the retry handle it.
+    console.error("[webhook] existing-plan lookup failed — aborting, Stripe will retry:", existingErr);
+    return;
   }
   const stalePending = !!existingPlan && isPendingStale(existingPlan.plan_data);
   console.log("[webhook] plan exists for session?", !!existingPlan, {
@@ -424,6 +430,28 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[webhook] verification failed", err);
     return NextResponse.json({ error: "invalid signature" }, { status: 400 });
+  }
+
+  // Idempotency gate must be answered BEFORE we acknowledge: once we return
+  // 200 Stripe never retries, and the handler runs under waitUntil where a
+  // failed existing-plan lookup would otherwise fall through to a second
+  // paid generation. A 500 here makes Stripe redeliver the event.
+  if (event.type === "checkout.session.completed") {
+    const sessionId = (event.data.object as Stripe.Checkout.Session).id;
+    try {
+      const { error } = await createAdminClient()
+        .from("plans")
+        .select("id")
+        .eq("stripe_session_id", sessionId)
+        .maybeSingle();
+      if (error) {
+        console.error("[webhook] pre-check plans lookup failed — returning 500 for Stripe retry:", error, { sessionId });
+        return NextResponse.json({ error: "db unavailable" }, { status: 500 });
+      }
+    } catch (err) {
+      console.error("[webhook] pre-check threw — returning 500 for Stripe retry:", err, { sessionId });
+      return NextResponse.json({ error: "db unavailable" }, { status: 500 });
+    }
   }
 
   waitUntil(processEventAsync(event));

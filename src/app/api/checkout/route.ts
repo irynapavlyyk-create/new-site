@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
 import { isPromoActive } from "@/lib/promo";
 import { COACH_ENABLED } from "@/lib/flags";
 import type { Lang, QuizAnswers } from "@/types";
@@ -12,17 +12,35 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as {
       tier: "pro" | "coach";
       lang: Lang;
-      userId?: string | null;
       answers?: QuizAnswers;
       posthogDistinctId?: string | null;
     };
-    const { tier, lang, userId, answers, posthogDistinctId } = body;
+    const { tier, lang, answers, posthogDistinctId } = body;
+
+    // The buyer is whoever holds the cookie session — never a client-supplied
+    // id. A body userId used to be looked up through the admin client, which
+    // let any caller attach a purchase (and prefill customer_email) to an
+    // arbitrary account. Anonymous checkout stays supported (userId = null).
+    let userId: string | null = null;
+    let customerEmail: string | undefined;
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        userId = user.id;
+        customerEmail = user.email ?? undefined;
+      }
+    } catch (err) {
+      console.warn("[checkout] could not read auth session:", err);
+    }
 
     // Coach is off sale: refuse, don't downgrade. A silent downgrade would
     // charge the PRO price for a Coach request and leave no trace.
     if (tier === "coach" && !COACH_ENABLED) {
       console.warn("[checkout] rejected coach checkout — COACH_ENABLED is off", {
-        userId: userId ?? null,
+        userId,
         lang,
       });
       return NextResponse.json({ error: "Coach is not available" }, { status: 400 });
@@ -32,7 +50,9 @@ export async function POST(req: NextRequest) {
     }
 
     const isDev = process.env.NODE_ENV !== "production";
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    // Same default as signup-and-checkout: a missing env var must never send a
+    // paying customer to localhost after Stripe.
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://energyforge.app";
 
     // Launch promo: use the discounted price id during the window. Defensive
     // fallback — if the PROMO env var is missing/empty, use the original so a
@@ -69,19 +89,6 @@ export async function POST(req: NextRequest) {
         },
         { status: 500 }
       );
-    }
-
-    let customerEmail: string | undefined;
-    if (userId) {
-      try {
-        const admin = createAdminClient();
-        const { data, error } = await admin.auth.admin.getUserById(userId);
-        if (!error && data?.user?.email) {
-          customerEmail = data.user.email;
-        }
-      } catch (err) {
-        console.warn("[checkout] could not look up user email:", err);
-      }
     }
 
     const metadata: Record<string, string> = {
@@ -121,7 +128,7 @@ export async function POST(req: NextRequest) {
       metadataLanguage: metadata.language,
       metadataLang: metadata.lang,
       hasAnswers: Boolean(answers),
-      userId: userId || null,
+      userId,
     });
 
     const session = await stripe.checkout.sessions.create({

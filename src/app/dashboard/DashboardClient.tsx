@@ -9,10 +9,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
+import RegenerateButton from "./RegenerateButton";
 import { fbqPurchaseOnce } from "@/lib/analytics";
 
 const POLL_INTERVAL_MS = 3000;
-const SAFETY_CAP_MS = 180_000; // 3 min hard ceiling on polling
+const SAFETY_CAP_MS = 330_000; // hard ceiling on polling — generation deadline is 270 s + function kill at 300 s (see planState.PENDING_STALE_MS)
 const READY_HOLD_MS = 400;     // brief 100% hold before reload
 
 export default function DashboardClient({
@@ -258,7 +259,12 @@ function PlanForgingScreen({
           {givenUp ? (
             <>
               <div className="text-6xl mb-6">⚡</div>
-              <p className="text-muted text-base">{pick(t.dashboard.forgingTimeout, lang)}</p>
+              <p className="text-muted text-base mb-6">{pick(t.dashboard.forgingTimeout, lang)}</p>
+              {timedOut ? (
+                // Past SAFETY_CAP_MS the pending row is stale (PENDING_STALE_MS),
+                // so /api/plan/regenerate will re-claim it instead of 409.
+                <RegenerateButton lang={lang} sessionId={sessionId} />
+              ) : null}
             </>
           ) : (
             <>

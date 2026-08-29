@@ -13,8 +13,11 @@ export type PlanDataKind = "none" | "pending" | "v2" | "v1" | "error";
 export const PENDING_MARKER_KEY = "pending" as const;
 
 /** Pending rows older than this are considered orphaned by a dead instance
- *  (webhook maxDuration is 300s) and may be re-claimed by a Stripe retry. */
-export const PENDING_STALE_MS = 10 * 60 * 1000;
+ *  and may be re-claimed by a Stripe retry or the dashboard retry button.
+ *  generatePlan resolves within 270 s and the function is killed at 300 s, so
+ *  anything still pending after 330 s is definitely dead. Keep in sync with
+ *  SAFETY_CAP_MS in DashboardClient.tsx so the timeout screen's retry works. */
+export const PENDING_STALE_MS = 330_000;
 
 export function makePendingMarker(startedAt = new Date()): Record<string, unknown> {
   return { [PENDING_MARKER_KEY]: true, started_at: startedAt.toISOString() };

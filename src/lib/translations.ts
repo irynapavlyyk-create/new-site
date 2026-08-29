@@ -706,8 +706,8 @@ export const t = {
       cs: "Kujeme tvůj osobní plán...",
     },
     forgingSub: {
-      en: "This usually takes 1-2 minutes. Don't close this page.",
-      cs: "Obvykle to trvá 1–2 minuty. Nezavírej tuhle stránku.",
+      en: "This can take up to 2-3 minutes. Don't close this page.",
+      cs: "Může to trvat až 2–3 minuty. Nezavírej tuhle stránku.",
     },
     forgingTimeout: {
       en: "Generation is taking longer than usual. Please refresh or contact support@energyforge.app",

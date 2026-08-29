@@ -210,6 +210,23 @@ const RETRY_CONFIG_PRO: RetryConfig = {
   label: "pro",
 };
 
+// Whole-generation deadline. Both the webhook and /api/plan/regenerate run
+// under maxDuration = 300 s; everything generatePlan does (transport retries
+// AND the single content retry) must finish inside it with margin, otherwise
+// the instance dies mid-call and the pending row is never resolved.
+const GENERATION_DEADLINE_MS = 270_000;
+// No new Anthropic call is started unless at least this much of the deadline
+// is left — matches the client timeout in claude.ts, so a call that starts
+// always has room to time out and be recorded before the function is killed.
+const MIN_TIME_FOR_ATTEMPT_MS = 120_000;
+
+class GenerationDeadlineError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GenerationDeadlineError";
+  }
+}
+
 function isRetryableError(err: unknown): boolean {
   if (!err || typeof err !== "object") return false;
   const status = (err as { status?: unknown }).status;
@@ -232,7 +249,8 @@ function isRetryableError(err: unknown): boolean {
 
 async function callAnthropicWithRetry<T>(
   makeCall: () => Promise<T>,
-  config: RetryConfig
+  config: RetryConfig,
+  deadlineAt: number
 ): Promise<T> {
   const start = Date.now();
   let lastErr: unknown;
@@ -244,6 +262,13 @@ async function callAnthropicWithRetry<T>(
         `[generatePlan:${config.label}] retry budget ${config.budgetMs}ms exhausted at ${elapsed}ms — giving up`
       );
       break;
+    }
+    const remaining = deadlineAt - Date.now();
+    if (remaining < MIN_TIME_FOR_ATTEMPT_MS) {
+      console.warn(
+        `[generatePlan:${config.label}] only ${remaining}ms left before the generation deadline — not starting attempt ${attempt + 1}`
+      );
+      throw lastErr ?? new GenerationDeadlineError(`deadline reached before attempt ${attempt + 1}`);
     }
 
     try {
@@ -271,9 +296,10 @@ async function callAnthropicWithRetry<T>(
       const delay = baseDelay + jitter;
 
       const elapsedAfter = Date.now() - start;
-      if (elapsedAfter + delay > config.budgetMs) {
+      const leftAfterBackoff = deadlineAt - Date.now() - delay;
+      if (elapsedAfter + delay > config.budgetMs || leftAfterBackoff < MIN_TIME_FOR_ATTEMPT_MS) {
         console.warn(
-          `[generatePlan:${config.label}] backoff ${delay}ms after attempt ${attempt + 1} would exceed budget (elapsed=${elapsedAfter}ms) — giving up`
+          `[generatePlan:${config.label}] backoff ${delay}ms after attempt ${attempt + 1} would exceed budget/deadline (elapsed=${elapsedAfter}ms, leftAfter=${leftAfterBackoff}ms) — giving up`
         );
         throw err;
       }
@@ -294,6 +320,8 @@ export async function generatePlan(params: {
   tier: GenerateTier;
 }): Promise<GenerateResult> {
   const { answers, lang, tier } = params;
+  const startedAt = Date.now();
+  const deadlineAt = startedAt + GENERATION_DEADLINE_MS;
 
   if (!process.env.ANTHROPIC_API_KEY) {
     console.error("[generatePlan] ANTHROPIC_API_KEY is not set");
@@ -364,8 +392,8 @@ Rules for the plan content:
     try {
       response = await callAnthropicWithRetry(
         () =>
-          // maxRetries: 0 disables the SDK's built-in retries so our wrapper
-          // is the single source of retry truth. output_config.format makes
+          // Client (claude.ts) carries timeout 120 s + one SDK retry; the wrapper
+          // adds deadline-aware retries on top. output_config.format makes
           // structurally invalid JSON impossible (constrained decoding).
           anthropic.messages.parse(
             {
@@ -381,10 +409,10 @@ Rules for the plan content:
               ],
               messages: [{ role: "user", content: prompt }],
               output_config: { format: zodOutputFormat(GenerationSchema) },
-            },
-            { maxRetries: 0 }
+            }
           ),
-        retryConfig
+        retryConfig,
+        deadlineAt
       );
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -398,6 +426,10 @@ Rules for the plan content:
           detail: msg.slice(0, 400),
         });
         return { ok: false, status: 502, error: "schema validation failed", detail: msg };
+      }
+      if (err instanceof GenerationDeadlineError) {
+        console.error("[generatePlan] generation deadline exceeded", { attempt, detail: msg });
+        return { ok: false, status: 504, error: "generation_deadline", detail: msg };
       }
       console.error("[generatePlan] anthropic call failed:", msg, { attempt }, err);
       return { ok: false, status: 502, error: "anthropic failed", detail: msg };
@@ -537,6 +569,20 @@ Rules for the plan content:
   const CONTENT_RETRYABLE = new Set(["invalid model output", "schema validation failed"]);
   let result = await runAttempt(userPrompt, 1);
   if (!result.ok && CONTENT_RETRYABLE.has(result.error)) {
+    const remaining = deadlineAt - Date.now();
+    if (remaining < MIN_TIME_FOR_ATTEMPT_MS) {
+      console.error("[generatePlan] content error on attempt 1 but no time left for a retry", {
+        tier,
+        remainingMs: remaining,
+        error: result.error,
+      });
+      return {
+        ok: false,
+        status: 504,
+        error: "generation_deadline",
+        detail: `no time left for content retry after: ${result.error} — ${String(result.detail ?? "").slice(0, 300)}`,
+      };
+    }
     console.warn("[generatePlan] content error on attempt 1 — retrying once", {
       tier,
       error: result.error,

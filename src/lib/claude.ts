@@ -1,7 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 
+// timeout: the SDK default is 10 minutes, longer than the 300 s maxDuration of
+// the webhook/regenerate functions — a hung request used to outlive the
+// function and die silently. 120 s comfortably covers a real generation
+// (en ≈ 85 s, cs ≈ 105 s measured) and leaves room for one retry inside the
+// deadline enforced in generatePlan.ts.
+// maxRetries: 1 — the SDK retries a single transport failure itself; every
+// further retry is governed by the deadline-aware wrapper in generatePlan.ts.
 export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 120_000,
+  maxRetries: 1,
 });
 
 export const MODEL = "claude-sonnet-4-6";
