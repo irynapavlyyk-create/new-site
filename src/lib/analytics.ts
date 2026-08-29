@@ -60,7 +60,7 @@ export function fbqTrack(
  * many times; Stripe Checkout also lands the buyer here after every visit
  * to the same success_url).
  */
-export function fbqPurchaseOnce(sessionId: string, value: number, currency = "EUR"): void {
+export function fbqPurchaseOnce(sessionId: string, value: number, currency: string): void {
   const key = `ef_fb_purchase_${sessionId}`;
   try {
     if (window.localStorage.getItem(key)) return;

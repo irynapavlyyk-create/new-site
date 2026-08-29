@@ -11,6 +11,7 @@ import FadeUp from "@/components/FadeUp";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
 import RegenerateButton from "./RegenerateButton";
 import { fbqPurchaseOnce } from "@/lib/analytics";
+import { PRO_PRICE_EUR, PRICE_CURRENCY } from "@/lib/pricing";
 
 const POLL_INTERVAL_MS = 3000;
 const SAFETY_CAP_MS = 330_000; // hard ceiling on polling — generation deadline is 270 s + function kill at 300 s (see planState.PENDING_STALE_MS)
@@ -37,7 +38,7 @@ export default function DashboardClient({
   // Meta Pixel Purchase — payment is complete whenever Stripe sends us here
   // with a session_id; deduped per session in localStorage.
   useEffect(() => {
-    if (sessionId) fbqPurchaseOnce(sessionId, 9.99);
+    if (sessionId) fbqPurchaseOnce(sessionId, PRO_PRICE_EUR, PRICE_CURRENCY);
   }, [sessionId]);
 
   // Supabase returns auth errors (e.g. expired magic link) via URL hash

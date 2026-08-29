@@ -17,6 +17,7 @@ import { getPhenotype } from "@/lib/phenotypes";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { detectPatterns } from "@/lib/signals";
 import { track, getDistinctId, fbqTrack } from "@/lib/analytics";
+import { PRO_PRICE_EUR, PRICE_CURRENCY } from "@/lib/pricing";
 import { isPromoActive, PROMO_PRICES, PROMO_LABEL } from "@/lib/promo";
 import { COACH_ENABLED } from "@/lib/flags";
 import LockedProtocol from "./LockedProtocol";
@@ -66,7 +67,7 @@ function ResultPageInner() {
     // server-side purchase_completed event (fired from the Stripe webhook) can
     // be attributed to the same person.
     track("checkout_started", { plan: tier === "coach" ? "Coach" : "PRO" });
-    fbqTrack("InitiateCheckout", { content_name: "PRO plan", value: 9.99, currency: "EUR" });
+    fbqTrack("InitiateCheckout", { content_name: "PRO plan", value: PRO_PRICE_EUR, currency: PRICE_CURRENCY });
     const posthogDistinctId = getDistinctId();
 
     try {

@@ -216,8 +216,10 @@ const RETRY_CONFIG_PRO: RetryConfig = {
 // the instance dies mid-call and the pending row is never resolved.
 const GENERATION_DEADLINE_MS = 270_000;
 // No new Anthropic call is started unless at least this much of the deadline
-// is left — matches the client timeout in claude.ts, so a call that starts
-// always has room to time out and be recorded before the function is killed.
+// is left. Equals the client timeout in claude.ts, which with maxRetries: 0
+// bounds one call to ≤ 120 s — so the latest possible call starts at 150 s
+// and is over by 270 s, before the 300 s function kill. Worst case:
+// attempt 1 (≤120 s) + backoff + attempt 2 (≤120 s) ≤ 270 s.
 const MIN_TIME_FOR_ATTEMPT_MS = 120_000;
 
 class GenerationDeadlineError extends Error {
@@ -268,7 +270,10 @@ async function callAnthropicWithRetry<T>(
       console.warn(
         `[generatePlan:${config.label}] only ${remaining}ms left before the generation deadline — not starting attempt ${attempt + 1}`
       );
-      throw lastErr ?? new GenerationDeadlineError(`deadline reached before attempt ${attempt + 1}`);
+      const last = lastErr instanceof Error ? `${lastErr.name}: ${lastErr.message}` : lastErr ? String(lastErr) : "none";
+      throw new GenerationDeadlineError(
+        `deadline reached before attempt ${attempt + 1} (${remaining}ms left); last error: ${last}`
+      );
     }
 
     try {
