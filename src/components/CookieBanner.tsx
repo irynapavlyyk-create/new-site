@@ -4,38 +4,23 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-
-const STORAGE_KEY = "energyforge_cookie_consent";
+import { readConsent, writeConsent } from "@/lib/consent";
 
 export default function CookieBanner() {
   const { lang } = useI18n();
   // Start hidden so SSR markup matches the first client render; the effect
-  // below flips it to visible only when no consent is stored.
+  // below flips it to visible only while no decision (accept/decline) is stored.
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored !== "accepted") setVisible(true);
-    } catch {
-      // localStorage may be unavailable (private mode); fall back to showing
-      // the banner — better to over-inform than to silently hide it.
-      setVisible(true);
-    }
+    // readConsent() returns null both for "no decision yet" and for an
+    // unavailable localStorage (private mode) — in both cases show the
+    // banner: better to over-inform than to silently hide it.
+    if (readConsent() === null) setVisible(true);
   }, []);
 
-  const accept = () => {
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem(STORAGE_KEY, "accepted");
-      } catch {
-        // ignore: user will see the banner again next session
-      }
-      // Broadcast acceptance so consent-gated tags (e.g. PinterestTag) can
-      // load immediately this session, without waiting for a reload.
-      window.dispatchEvent(new Event("ef-cookie-consent"));
-    }
+  const decide = (value: "accepted" | "declined") => {
+    writeConsent(value);
     setVisible(false);
   };
 
@@ -65,13 +50,22 @@ export default function CookieBanner() {
               {pick(t.cookieBanner.messageAfterLink, lang)}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={accept}
-            className="btn-primary text-sm py-2 px-5 flex-shrink-0 self-stretch sm:self-auto justify-center"
-          >
-            {pick(t.cookieBanner.dismiss, lang)}
-          </button>
+          <div className="flex gap-2 flex-shrink-0 self-stretch sm:self-auto">
+            <button
+              type="button"
+              onClick={() => decide("declined")}
+              className="btn-ghost text-sm py-2 px-5 flex-1 sm:flex-none justify-center"
+            >
+              {pick(t.cookieBanner.decline, lang)}
+            </button>
+            <button
+              type="button"
+              onClick={() => decide("accepted")}
+              className="btn-primary text-sm py-2 px-5 flex-1 sm:flex-none justify-center"
+            >
+              {pick(t.cookieBanner.accept, lang)}
+            </button>
+          </div>
         </div>
       </div>
     </div>

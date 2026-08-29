@@ -139,6 +139,11 @@ function PrivacyEN() {
           )
         </li>
         <li>
+          <strong>Meta, Pinterest, PostHog, Sentry</strong> — analytics, advertising
+          and error monitoring, as detailed in Section 10 (the first three only
+          with your cookie consent)
+        </li>
+        <li>
           <strong>Legal authorities</strong> — when required by law
         </li>
       </ul>
@@ -189,11 +194,67 @@ function PrivacyEN() {
         To exercise any of these rights, contact us at: <Mail />
       </p>
 
-      <h2>10. Cookies</h2>
+      <h2>10. Cookies, Analytics and Advertising Tools</h2>
       <p>
-        We use essential cookies to operate the Service and analytics cookies
-        to understand usage. You can control cookies through your browser
-        settings.
+        <strong>Essential cookies</strong> (session/login, payment) are needed to
+        run the Service and are always on. Everything below is{" "}
+        <strong>optional</strong>: none of these tools is loaded, and no cookie
+        is set by them, until you click &quot;Accept&quot; in the cookie banner.
+        If you click &quot;Decline&quot; they stay off. You can change your
+        choice at any time by clearing this site&apos;s data in your browser,
+        which brings the banner back.
+      </p>
+      <ul>
+        <li>
+          <strong>Meta Pixel</strong> (Meta Platforms Ireland Ltd.) — advertising:
+          measures whether our Facebook/Instagram ads lead to quiz completions and
+          purchases and helps us reach similar audiences. Sets the{" "}
+          <code>_fbp</code> cookie (3 months) and may read <code>_fbc</code>.
+          Data recipient: Meta, EU/US (EU–US Data Privacy Framework). Meta may
+          use this data for its own purposes as described in{" "}
+          <Ext href="https://www.facebook.com/privacy/policy">
+            https://www.facebook.com/privacy/policy
+          </Ext>
+          .
+        </li>
+        <li>
+          <strong>Pinterest Tag</strong> (Pinterest Europe Ltd.) — advertising:
+          measures Pinterest ad performance. Cookie <code>_pin_unauth</code> (1
+          year). Recipient: Pinterest, EU/US.{" "}
+          <Ext href="https://policy.pinterest.com/privacy-policy">
+            https://policy.pinterest.com/privacy-policy
+          </Ext>
+        </li>
+        <li>
+          <strong>PostHog</strong> (PostHog Inc., EU cloud hosted in Frankfurt) —
+          product analytics: which pages and quiz steps are used, where people
+          drop off, whether a purchase completed. Cookie <code>ph_*_posthog</code>{" "}
+          (1 year). We do not record session replays. Recipient: PostHog, EU.{" "}
+          <Ext href="https://posthog.com/privacy">https://posthog.com/privacy</Ext>
+        </li>
+        <li>
+          <strong>Vercel Analytics</strong> (Vercel Inc.) — anonymous page-view
+          statistics from our hosting provider. Sets no cookies and stores no
+          personal data; visitors are counted via a daily-rotating hash.
+          Retention: aggregated statistics only.{" "}
+          <Ext href="https://vercel.com/docs/analytics/privacy-policy">
+            https://vercel.com/docs/analytics/privacy-policy
+          </Ext>
+        </li>
+        <li>
+          <strong>Sentry</strong> (Functional Software Inc.) — error monitoring:
+          when something breaks we receive a technical report (page, browser,
+          stack trace, truncated IP). Sets no cookies; this is a legitimate
+          interest in keeping the Service working (Art. 6(1)(f) GDPR) and is not
+          subject to the banner. Reports are kept for 90 days. Recipient:
+          Sentry, EU/US.{" "}
+          <Ext href="https://sentry.io/privacy/">https://sentry.io/privacy/</Ext>
+        </li>
+      </ul>
+      <p>
+        Legal basis for Meta Pixel, Pinterest Tag and PostHog is your consent
+        (Art. 6(1)(a) GDPR, § 89(3) of Czech Act No. 127/2005 Coll.). Withdrawing
+        consent does not affect processing that happened before withdrawal.
       </p>
 
       <h2>11. Data Security</h2>

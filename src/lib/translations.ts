@@ -795,15 +795,16 @@ export const t = {
   cookieBanner: {
     title: { en: "Cookies", cs: "Cookies" },
     messageBeforeLink: {
-      en: "We only use essential cookies for site functionality and payment processing. Learn more in our ",
-      cs: "Používáme jen nezbytné cookies pro chod webu a zpracování plateb. Víc najdeš v našich ",
+      en: "Besides the essential cookies that run the site and payments, we use analytics (PostHog) and advertising cookies (Meta Pixel, Pinterest) to understand usage and measure our ads. They are switched on only if you accept. Details in our ",
+      cs: "Kromě nezbytných cookies pro chod webu a plateb používáme analytické (PostHog) a reklamní cookies (Meta Pixel, Pinterest), abychom rozuměli návštěvnosti a měřili reklamu. Zapnou se jen s tvým souhlasem. Podrobnosti v našich ",
     },
     privacyLinkText: {
       en: "Privacy Policy",
       cs: "Zásadách ochrany osobních údajů",
     },
     messageAfterLink: { en: ".", cs: "." },
-    dismiss: { en: "Got it", cs: "Rozumím" },
+    accept: { en: "Accept", cs: "Přijmout" },
+    decline: { en: "Decline", cs: "Odmítnout" },
   },
   errors: {
     notFound: {

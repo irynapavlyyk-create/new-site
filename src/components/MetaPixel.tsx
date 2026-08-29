@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef } from "react";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useCookieConsent } from "@/lib/consent";
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
 
@@ -36,11 +37,14 @@ function PageViewTracker() {
 }
 
 /**
- * Meta (Facebook) Pixel. Renders nothing when NEXT_PUBLIC_FACEBOOK_PIXEL_ID
- * is not set. Standard base snippet + SPA route-change PageView tracking.
+ * Meta (Facebook) Pixel, gated behind cookie consent: renders nothing — and
+ * so loads no Meta script — until consent is "accepted" (see lib/consent.ts).
+ * Also renders nothing when NEXT_PUBLIC_FACEBOOK_PIXEL_ID is unset. No
+ * <noscript> image fallback: it would fire without consent.
  */
 export default function MetaPixel() {
-  if (!PIXEL_ID) return null;
+  const consent = useCookieConsent();
+  if (!PIXEL_ID || consent !== "accepted") return null;
 
   return (
     <>
@@ -56,16 +60,6 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '${PIXEL_ID}');
 fbq('track', 'PageView');`}
       </Script>
-      <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          height="1"
-          width="1"
-          style={{ display: "none" }}
-          alt=""
-          src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`}
-        />
-      </noscript>
       <Suspense fallback={null}>
         <PageViewTracker />
       </Suspense>
