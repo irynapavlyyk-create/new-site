@@ -41,6 +41,11 @@ export const metadata: Metadata = {
   other: {
     "p:domain_verify": "bcb0cfaa679c655a6b45b83e6f7c901b",
   },
+  verification: {
+    other: {
+      "facebook-domain-verification": "gcfjer4nfqbe5oy3xnhio40owv4216",
+    },
+  },
 };
 
 const themeInitScript = `
