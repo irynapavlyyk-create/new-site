@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
 import MedicalDisclaimer from "@/components/MedicalDisclaimer";
+import { fbqPurchaseOnce } from "@/lib/analytics";
 
 const POLL_INTERVAL_MS = 3000;
 const SAFETY_CAP_MS = 180_000; // 3 min hard ceiling on polling
@@ -31,6 +32,12 @@ export default function DashboardClient({
 
   // Arrived from a fresh purchase (Stripe success_url carries session_id).
   const fromStripe = Boolean(sessionId);
+
+  // Meta Pixel Purchase — payment is complete whenever Stripe sends us here
+  // with a session_id; deduped per session in localStorage.
+  useEffect(() => {
+    if (sessionId) fbqPurchaseOnce(sessionId, 9.99);
+  }, [sessionId]);
 
   // Supabase returns auth errors (e.g. expired magic link) via URL hash
   // because it uses the implicit flow. Server code can't see the hash,

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
-import { track } from "@/lib/analytics";
+import { track, fbqTrack } from "@/lib/analytics";
 import { quizSteps } from "@/lib/quiz-data";
 import type { QuizAnswers } from "@/types";
 import Navbar from "@/components/Navbar";
@@ -80,6 +80,7 @@ export default function QuizPage() {
   // Funnel: user begins the quiz. Fires once on mount.
   useEffect(() => {
     track("quiz_started");
+    fbqTrack("ViewContent", { content_name: "quiz" });
   }, []);
 
   const current = quizSteps[step];

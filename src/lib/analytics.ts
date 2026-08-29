@@ -37,3 +37,36 @@ export function getDistinctId(): string | null {
     return null;
   }
 }
+
+/**
+ * Fire a Meta Pixel standard event. No-ops when the pixel isn't loaded
+ * (NEXT_PUBLIC_FACEBOOK_PIXEL_ID unset, script blocked, SSR).
+ */
+export function fbqTrack(
+  event: "ViewContent" | "Lead" | "InitiateCheckout" | "Purchase",
+  params?: Record<string, unknown>,
+  options?: { eventID?: string },
+): void {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
+  try {
+    window.fbq("track", event, params, options);
+  } catch {
+    // Never let analytics break a user flow.
+  }
+}
+
+/**
+ * Fire Purchase at most once per Stripe session (dashboard can be reloaded
+ * many times; Stripe Checkout also lands the buyer here after every visit
+ * to the same success_url).
+ */
+export function fbqPurchaseOnce(sessionId: string, value: number, currency = "EUR"): void {
+  const key = `ef_fb_purchase_${sessionId}`;
+  try {
+    if (window.localStorage.getItem(key)) return;
+    window.localStorage.setItem(key, "1");
+  } catch {
+    // storage unavailable — fire anyway, dedupe is best-effort
+  }
+  fbqTrack("Purchase", { value, currency, content_name: "PRO plan" }, { eventID: sessionId });
+}

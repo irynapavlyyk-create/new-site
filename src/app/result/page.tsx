@@ -16,7 +16,7 @@ import { inferPhenotype } from "@/lib/inferPhenotype";
 import { getPhenotype } from "@/lib/phenotypes";
 import { getPhenotypePreview } from "@/lib/phenotypePreviews";
 import { detectPatterns } from "@/lib/signals";
-import { track, getDistinctId } from "@/lib/analytics";
+import { track, getDistinctId, fbqTrack } from "@/lib/analytics";
 import { isPromoActive, PROMO_PRICES, PROMO_LABEL } from "@/lib/promo";
 import { COACH_ENABLED } from "@/lib/flags";
 import LockedProtocol from "./LockedProtocol";
@@ -56,6 +56,7 @@ function ResultPageInner() {
     if (!answers) return;
     track("quiz_completed", { phenotype: inferPhenotype(answers) });
     track("pricing_viewed", { location: "result" });
+    fbqTrack("Lead", { content_name: "quiz_completed", content_category: inferPhenotype(answers) });
   }, [answers]);
 
   const unlock = async (tier: "pro" | "coach") => {
@@ -65,6 +66,7 @@ function ResultPageInner() {
     // server-side purchase_completed event (fired from the Stripe webhook) can
     // be attributed to the same person.
     track("checkout_started", { plan: tier === "coach" ? "Coach" : "PRO" });
+    fbqTrack("InitiateCheckout", { content_name: "PRO plan", value: 9.99, currency: "EUR" });
     const posthogDistinctId = getDistinctId();
 
     try {
