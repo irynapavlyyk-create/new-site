@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { localizedPath } from "@/lib/locale-paths";
 
 export default function MedicalDisclaimer() {
   const { lang } = useI18n();
@@ -16,7 +17,7 @@ export default function MedicalDisclaimer() {
       <p className="text-xs sm:text-sm text-muted leading-relaxed">
         {pick(t.dashboard.medicalDisclaimer.text, lang)}{" "}
         <Link
-          href="/terms#medical-disclaimer"
+          href={`${localizedPath(lang, "/terms")}#medical-disclaimer`}
           className="text-amber hover:text-orange transition-colors font-semibold underline underline-offset-2"
         >
           {pick(t.dashboard.medicalDisclaimer.learnMore, lang)}

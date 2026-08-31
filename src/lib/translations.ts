@@ -1,6 +1,41 @@
 import type { Lang } from "@/types";
 
 export const t = {
+  // <title> / meta description for the pages with per-language URLs.
+  meta: {
+    homeTitle: {
+      en: "EnergyForge — Discover your energy phenotype",
+      cs: "EnergyForge — Objev svůj energetický fenotyp",
+    },
+    homeDescription: {
+      en: "Six energy types. One is yours. AI-powered diagnostic finds why you're tired and builds your personalized 30-day protocol. Take the 10-question quiz in 3 minutes.",
+      cs: "Šest energetických typů. Jeden je tvůj. AI diagnostika zjistí, proč ti dochází energie, a sestaví ti osobní 30denní protokol. Vyplň kvíz o 10 otázkách za 3 minuty.",
+    },
+    termsTitle: {
+      en: "Terms of Service — EnergyForge",
+      cs: "Obchodní podmínky — EnergyForge",
+    },
+    termsDescription: {
+      en: "Terms of Service for EnergyForge: pricing, refunds, medical disclaimer, and your rights when using our AI-powered energy diagnostic.",
+      cs: "Obchodní podmínky služby EnergyForge: ceny, vracení peněz, zdravotní upozornění a tvá práva při používání AI diagnostiky energie.",
+    },
+    privacyTitle: {
+      en: "Privacy Policy — EnergyForge",
+      cs: "Zásady ochrany osobních údajů — EnergyForge",
+    },
+    privacyDescription: {
+      en: "How EnergyForge collects, uses, and protects your personal data under GDPR.",
+      cs: "Jak EnergyForge shromažďuje, používá a chrání tvé osobní údaje podle GDPR.",
+    },
+    refundTitle: {
+      en: "Refund Policy — EnergyForge",
+      cs: "Podmínky vrácení peněz — EnergyForge",
+    },
+    refundDescription: {
+      en: "Your refund rights under the EU Consumer Rights Directive and how to request a refund for EnergyForge PRO.",
+      cs: "Tvá práva na vrácení peněz podle směrnice EU o právech spotřebitelů a jak požádat o vrácení platby za EnergyForge PRO.",
+    },
+  },
   nav: {
     how: { en: "How it works", cs: "Jak to funguje" },
     pricing: { en: "Pricing", cs: "Ceník" },

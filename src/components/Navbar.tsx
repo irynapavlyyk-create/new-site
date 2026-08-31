@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { localizedPath } from "@/lib/locale-paths";
 import { createClient } from "@/utils/supabase/client";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
@@ -109,7 +110,7 @@ export default function Navbar({
             className="nav-bg rounded-2xl flex items-center justify-between gap-3 px-3 sm:px-5 py-3 flex-nowrap"
             style={{ border: "1px solid var(--border)" }}
           >
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">
+            <Link href={localizedPath(lang, "/")} className="flex items-center gap-2 flex-shrink-0 min-w-0">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber to-orange flex items-center justify-center shadow-glow flex-shrink-0">
                 <span
                   className="font-display font-bold text-sm"
@@ -361,13 +362,14 @@ function MobileMenu({
   onClose: () => void;
   onSignOut: () => void;
 }) {
+  const { lang } = useI18n();
   return (
     <div className="fixed inset-0 z-50 mobile-bg flex flex-col lg:hidden animate-fade-up overflow-y-auto">
       <div
         className="flex items-center justify-between px-4 sm:px-6 py-4 flex-shrink-0"
         style={{ borderBottom: "1px solid var(--border)" }}
       >
-        <Link href="/" onClick={onClose} className="flex items-center gap-2">
+        <Link href={localizedPath(lang, "/")} onClick={onClose} className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber to-orange flex items-center justify-center shadow-glow">
             <span
               className="font-display font-bold text-sm"

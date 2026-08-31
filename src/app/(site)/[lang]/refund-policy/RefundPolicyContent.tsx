@@ -1,24 +1,21 @@
 "use client";
 
-import { FixedLangProvider } from "@/lib/i18n-context";
+import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
 import LegalLayout from "@/components/LegalLayout";
 import { Mail } from "@/components/LegalHelpers";
 import { COMPANY } from "@/lib/company";
 
-// Legal pages are English-only until reviewed Czech versions are ready —
-// the whole page (chrome included) is pinned to EN via FixedLangProvider.
-export default function RefundPolicyPage() {
+// Chrome (navbar, title, footer) follows the URL language via
+// RouteLangProvider in the [lang] layout. The document BODY stays English on
+// both variants until the reviewed Czech legal text is ready (native review
+// pending) — swap <RefundEN /> for a lang switch here when it lands.
+export default function RefundPolicyContent() {
+  const { lang } = useI18n();
   return (
-    <FixedLangProvider lang="en">
-      <LegalLayout
-        title={pick(t.legal.refundTitle, "en")}
-        lastUpdated="August 27, 2026"
-        showLanguageSwitcher={false}
-      >
-        <RefundEN />
-      </LegalLayout>
-    </FixedLangProvider>
+    <LegalLayout title={pick(t.legal.refundTitle, lang)} lastUpdated="August 27, 2026">
+      <RefundEN />
+    </LegalLayout>
   );
 }
 

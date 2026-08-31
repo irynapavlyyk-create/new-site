@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n-context";
 import { ThemeProvider } from "@/lib/theme-provider";
@@ -9,44 +8,11 @@ import MetaPixel from "@/components/MetaPixel";
 import PinterestTag from "@/components/PinterestTag";
 import PostHogProvider from "@/components/PostHogProvider";
 import { Analytics } from "@vercel/analytics/react";
+import type { Lang } from "@/types";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
 const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-display", display: "swap", weight: ["500", "600", "700", "800"] });
-
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NODE_ENV === "production"
-      ? "https://www.energyforge.app"
-      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  ),
-  title: "EnergyForge — Discover your energy phenotype",
-  description:
-    "Six energy types. One is yours. AI-powered diagnostic finds why you're tired and builds your personalized 30-day protocol. Take the 10-question quiz in 3 minutes.",
-  openGraph: {
-    title: "Discover your energy phenotype",
-    description:
-      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol. Free 3-minute quiz — no signup to see your result.",
-    url: "https://www.energyforge.app",
-    siteName: "EnergyForge",
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Discover your energy phenotype",
-    description:
-      "Six energy types. One is yours. AI builds your personalized 30-day energy protocol. Free 3-minute quiz — no signup to see your result.",
-  },
-  other: {
-    "p:domain_verify": "bcb0cfaa679c655a6b45b83e6f7c901b",
-  },
-  verification: {
-    other: {
-      "facebook-domain-verification": "gcfjer4nfqbe5oy3xnhio40owv4216",
-    },
-  },
-};
 
 const themeInitScript = `
 (function(){try{
@@ -57,9 +23,20 @@ const themeInitScript = `
 }catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 `;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+/**
+ * The <html>/<body> shell shared by BOTH root layouts. The app has two route
+ * groups with their own root layouts so that <html lang> can come from the
+ * URL for the localized pages without headers() (which would force the whole
+ * app dynamic):
+ *   (site)/[lang]/layout.tsx — /, /cs, legal pages; lang from the segment,
+ *                              statically prerendered per language
+ *   (app)/layout.tsx         — everything else; lang="en", context-driven text
+ * Navigating between the groups is a full document load (Next behavior with
+ * multiple root layouts) — acceptable at the marketing → app boundary.
+ */
+export default function AppShell({ lang, children }: { lang: Lang; children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${manrope.variable}`}>
+    <html lang={lang} suppressHydrationWarning className={`${inter.variable} ${manrope.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>

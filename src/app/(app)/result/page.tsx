@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FadeUp from "@/components/FadeUp";
 import PhenotypeHero from "@/components/PhenotypeHero";
-import EnergyChart from "@/app/dashboard/EnergyChart";
+import EnergyChart from "@/app/(app)/dashboard/EnergyChart";
 import { safeLoad } from "@/lib/storage";
 import { createClient } from "@/utils/supabase/client";
 import type { QuizAnswers } from "@/types";

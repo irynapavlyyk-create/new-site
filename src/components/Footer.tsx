@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { localizedPath } from "@/lib/locale-paths";
 import { COMPANY } from "@/lib/company";
 
 const SUPPORT_EMAIL = "support@energyforge.app";
@@ -22,13 +23,13 @@ export default function Footer() {
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
-          <Link href="/privacy" className="hover:text-ink transition-colors">
+          <Link href={localizedPath(lang, "/privacy")} className="hover:text-ink transition-colors">
             {pick(t.footer.privacy, lang)}
           </Link>
-          <Link href="/terms" className="hover:text-ink transition-colors">
+          <Link href={localizedPath(lang, "/terms")} className="hover:text-ink transition-colors">
             {pick(t.footer.terms, lang)}
           </Link>
-          <Link href="/refund-policy" className="hover:text-ink transition-colors">
+          <Link href={localizedPath(lang, "/refund-policy")} className="hover:text-ink transition-colors">
             {pick(t.footer.refund, lang)}
           </Link>
           <a

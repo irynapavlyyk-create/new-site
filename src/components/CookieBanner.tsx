@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-context";
 import { t, pick } from "@/lib/translations";
+import { localizedPath } from "@/lib/locale-paths";
 import { readConsent, writeConsent } from "@/lib/consent";
 
 export default function CookieBanner() {
@@ -42,7 +43,7 @@ export default function CookieBanner() {
             <p className="text-sm text-ink leading-relaxed">
               {pick(t.cookieBanner.messageBeforeLink, lang)}
               <Link
-                href="/privacy"
+                href={localizedPath(lang, "/privacy")}
                 className="text-amber hover:text-orange transition-colors font-semibold underline underline-offset-2"
               >
                 {pick(t.cookieBanner.privacyLinkText, lang)}
