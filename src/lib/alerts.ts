@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { getEmailFrom, getResendClient } from "@/lib/emails/client";
 
 export const ALERT_TO = process.env.ALERT_EMAIL_TO ?? "support@energyforge.app";
@@ -57,6 +58,28 @@ export async function alertPaidPathFailure(alert: PaidPathAlert): Promise<void> 
     userId: alert.userId,
     error: alert.error,
   });
+
+  // Second, independent leg: the email channel dies with RESEND_API_KEY or a
+  // Resend outage, so every alert is duplicated into Sentry. Session id goes
+  // into tags/extra, NOT the message — the message must stay stable so Sentry
+  // groups one issue per stage instead of one per purchase.
+  try {
+    Sentry.captureMessage(`paid path failure: ${alert.stage}`, {
+      level: "error",
+      tags: { paid_path_stage: alert.stage },
+      extra: {
+        sessionId: alert.sessionId,
+        userId: alert.userId,
+        error: alert.error,
+        detail,
+      },
+    });
+  } catch (err) {
+    console.error(
+      "[alert] Sentry capture failed:",
+      err instanceof Error ? err.message : String(err)
+    );
+  }
 
   try {
     const resend = getResendClient(); // throws if RESEND_API_KEY missing — caught below
