@@ -388,6 +388,22 @@ export const t = {
       en: "Check your email for a password reset link.",
       cs: "Zkontroluj e-mail — odkaz pro obnovu hesla je na cestě.",
     },
+    resetTitle: { en: "Set a new password", cs: "Nastav si nové heslo" },
+    resetSubtitle: {
+      en: "Choose a new password for your account.",
+      cs: "Zvol si nové heslo ke svému účtu.",
+    },
+    newPasswordLabel: { en: "New password", cs: "Nové heslo" },
+    setNewPassword: { en: "Set new password", cs: "Nastavit nové heslo" },
+    resetLinkExpired: {
+      en: "This reset link has expired or was already used. Request a new one below.",
+      cs: "Platnost odkazu pro obnovu vypršela, nebo už byl použit. Níže si vyžádej nový.",
+    },
+    requestNewLink: { en: "Request a new link", cs: "Vyžádat nový odkaz" },
+    samePassword: {
+      en: "The new password must be different from your current one.",
+      cs: "Nové heslo se musí lišit od toho současného.",
+    },
     working: { en: "…", cs: "…" },
     linkExpired: {
       en: "Your login link has expired. Please request a new one below.",

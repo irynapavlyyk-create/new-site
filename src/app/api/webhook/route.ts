@@ -286,11 +286,19 @@ async function handleCheckoutCompleted(
     .maybeSingle();
   if (existingErr) {
     // Without this answer we cannot tell whether the session was already
-    // processed; continuing would risk a second paid generation. POST() has
-    // already refused the event with 500 in this case so Stripe retries —
-    // this branch only guards the race where the DB failed between the two
-    // lookups. Bail out and let the retry handle it.
-    console.error("[webhook] existing-plan lookup failed — aborting, Stripe will retry:", existingErr);
+    // processed; continuing would risk a second paid generation. This branch
+    // only fires when the DB failed between POST()'s pre-check and this
+    // lookup — and by now POST() has already acknowledged with 200, so
+    // Stripe will NOT retry this delivery. The alert is the only signal
+    // anyone gets that a paid session was dropped.
+    console.error("[webhook] existing-plan lookup failed — aborting:", existingErr);
+    await alertPaidPathFailure({
+      stage: "plan_lookup_failed",
+      sessionId,
+      userId: resolved.userId,
+      error: existingErr.message,
+      detail: existingErr,
+    });
     return;
   }
   const stalePending = !!existingPlan && isPendingStale(existingPlan.plan_data);

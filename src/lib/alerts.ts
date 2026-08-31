@@ -11,6 +11,7 @@ export type PaidPathStage =
   | "tier_unresolved"
   | "user_resolve_failed"
   | "answers_missing"
+  | "plan_lookup_failed"
   | "payment_failed_after_delivery";
 
 export type PaidPathAlert = {
