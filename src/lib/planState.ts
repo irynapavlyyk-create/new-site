@@ -29,7 +29,12 @@ export function classifyPlanData(planData: unknown): PlanDataKind {
   if (obj[PENDING_MARKER_KEY] === true && !("summary" in obj)) return "pending";
   if ("phenotypeId" in obj) return "v2";
   if ("error" in obj && !("summary" in obj)) return "error";
-  return "v1";
+  // Only rows that actually carry legacy content count as v1. An empty object
+  // (or any unknown shape without `summary`) is a plan that never generated —
+  // it must read as absent, or the dashboard shows "ready", the status poll
+  // agrees, and regenerate refuses with 409 has_plan: a loop with no exit.
+  if ("summary" in obj) return "v1";
+  return "none";
 }
 
 export function isPendingStale(planData: unknown, now = Date.now()): boolean {

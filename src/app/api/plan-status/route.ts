@@ -19,8 +19,8 @@ type PlanStatus =
  * src/app/dashboard/page.tsx exactly:
  *  - phenotypeId field        → v2
  *  - error field, no summary  → error
- *  - object but neither above → v1 (legacy)
- *  - null / missing row       → none (still generating)
+ *  - summary field            → v1 (legacy)
+ *  - anything else (incl. {}) → none (still generating / never generated)
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const sessionId = new URL(request.url).searchParams.get("session_id");

@@ -100,8 +100,105 @@ async function sendMagicLinkEmail(email: string) {
   }
 }
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const email = session.customer_details?.email || session.customer_email || null;
+type ResolvedUser = { userId: string | null; isNewUser: boolean };
+
+// Emails are case-insensitive in practice and GoTrue stores them lowercased.
+// Normalize once so every comparison and write (profiles, auth, Resend) agrees.
+function normalizeEmail(raw: string | null | undefined): string | null {
+  const email = (raw ?? "").trim().toLowerCase();
+  return email || null;
+}
+
+// Escape LIKE wildcards so an address like "a_b@x.com" can't match
+// "aXb@x.com" through .ilike().
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, (m) => `\\${m}`);
+}
+
+// Find an existing auth user by email. GoTrue paginates listUsers (50 per
+// page by default) — the old unpaginated call went blind past the first page,
+// so an existing customer buying anonymously got a duplicate createUser that
+// died on "already registered". supabase-js v2 admin API has no direct
+// email lookup, so page explicitly. Throws on API error so POST() answers
+// 500 and Stripe redelivers.
+//
+// TEMPORARY: this runs synchronously in POST() before the ack, and Stripe
+// treats a delivery as failed after ~10 s without a response. A full scan at
+// 1000/page is fast today, but as the user base grows it will eat that budget.
+// Replace it then with a direct email lookup against auth.users via the
+// service-role client (e.g. an RPC / view over auth.users filtered by
+// lower(email)) instead of paging the admin API.
+async function findUserIdByEmail(
+  admin: ReturnType<typeof createAdminClient>,
+  email: string
+): Promise<string | null> {
+  const perPage = 1000;
+  // Hard cap so a misbehaving API can't loop forever (200 pages = 200k users).
+  for (let page = 1; page <= 200; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
+    if (error) throw new Error(`listUsers page ${page} failed: ${error.message}`);
+    const users = data?.users ?? [];
+    const found = users.find((u) => (u.email ?? "").toLowerCase() === email);
+    if (found) return found.id;
+    if (users.length < perPage) return null;
+  }
+  return null;
+}
+
+// Runs synchronously in POST(), BEFORE the 200 ack: any throw here becomes a
+// 500 and Stripe redelivers the event. Previously this lived inside the
+// waitUntil handler, where a lookup/create failure silently dropped a paid
+// session — no plan, no magic link, no alert.
+async function resolveUser(
+  session: Stripe.Checkout.Session,
+  existingUserId: string | null
+): Promise<ResolvedUser> {
+  if (existingUserId) return { userId: existingUserId, isNewUser: false };
+
+  const metadataUserId = session.metadata?.user_id;
+  if (metadataUserId && metadataUserId !== "anonymous") {
+    return { userId: metadataUserId, isNewUser: false };
+  }
+
+  const email = normalizeEmail(
+    session.customer_details?.email || session.customer_email
+  );
+  // No email at all → nothing to resolve against; the handler alerts support.
+  if (!email) return { userId: null, isNewUser: false };
+
+  const admin = createAdminClient();
+
+  // profiles first (one indexed query). ilike is case-insensitive on both
+  // sides — .eq was case-sensitive and missed rows stored with different case.
+  const { data: profileRow, error: profileErr } = await admin
+    .from("profiles")
+    .select("id")
+    .ilike("email", escapeLikePattern(email))
+    .limit(1)
+    .maybeSingle();
+  if (profileErr) throw new Error(`profiles lookup failed: ${profileErr.message}`);
+  if (profileRow?.id) return { userId: profileRow.id as string, isNewUser: false };
+
+  const foundId = await findUserIdByEmail(admin, email);
+  if (foundId) return { userId: foundId, isNewUser: false };
+
+  const { data: created, error: createErr } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+  });
+  if (createErr || !created?.user) {
+    throw new Error(`createUser failed: ${createErr?.message ?? "no user returned"}`);
+  }
+  return { userId: created.user.id, isNewUser: true };
+}
+
+async function handleCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+  resolved: ResolvedUser
+) {
+  const email = normalizeEmail(
+    session.customer_details?.email || session.customer_email
+  );
   const metadata = session.metadata || {};
   const metadataUserId = metadata.user_id || "anonymous";
   // Normalize whitespace/case before comparing — defensive against any
@@ -131,7 +228,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     metadataLanguage: metadata.language ?? null,
     metadataLang: metadata.lang ?? null,
     resolvedLanguage: language,
+    paymentStatus: session.payment_status,
   });
+
+  // POST() only forwards paid sessions, but keep the invariant local too:
+  // nothing is ever delivered for a session whose money hasn't arrived.
+  if (session.payment_status !== "paid") {
+    console.warn(
+      "[webhook] session not paid — skipping delivery",
+      sessionId,
+      session.payment_status
+    );
+    return;
+  }
 
   if (!tier) {
     // Payment succeeded but we can't tell what was bought — no plan will be
@@ -150,7 +259,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
   if (!email) {
+    // Paid session we cannot deliver to — support must hear about it instead
+    // of the old silent return.
     console.error("[webhook] no email in session", sessionId);
+    await alertPaidPathFailure({
+      stage: "user_resolve_failed",
+      sessionId,
+      userId: metadataUserId !== "anonymous" ? metadataUserId : null,
+      error: "no email in checkout session",
+      detail: { metadata },
+    });
     return;
   }
 
@@ -181,51 +299,22 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     stalePending,
   });
 
-  // Always resolve user — needed both for plan work and for magic link on retry.
-  let userId: string | null = (existingPlan?.user_id as string | null) ?? null;
-  let isNewUser = false;
-
-  if (!userId) {
-    if (metadataUserId && metadataUserId !== "anonymous") {
-      userId = metadataUserId;
-    } else {
-      const { data: profileRow } = await admin
-        .from("profiles")
-        .select("id")
-        .eq("email", email)
-        .maybeSingle();
-      if (profileRow?.id) {
-        userId = profileRow.id as string;
-      } else {
-        try {
-          const { data: listed } = await admin.auth.admin.listUsers();
-          const found = listed?.users?.find(
-            (u) => (u.email || "").toLowerCase() === email.toLowerCase()
-          );
-          if (found) userId = found.id;
-        } catch (err) {
-          console.warn("[webhook] listUsers failed, will attempt create:", err);
-        }
-      }
-
-      if (!userId) {
-        const { data: created, error: createErr } =
-          await admin.auth.admin.createUser({
-            email,
-            email_confirm: true,
-          });
-        if (createErr || !created?.user) {
-          console.error("[webhook] createUser failed:", createErr);
-          return;
-        }
-        userId = created.user.id;
-        isNewUser = true;
-      }
-    }
-  }
+  // User was resolved synchronously in POST() (existing row → metadata →
+  // profiles → paged listUsers → createUser); a failure there already
+  // answered 500, so Stripe retries instead of this handler dropping the sale.
+  const userId: string | null =
+    (existingPlan?.user_id as string | null) ?? resolved.userId;
+  const isNewUser = resolved.isNewUser;
 
   if (!userId) {
     console.error("[webhook] could not resolve userId for", email);
+    await alertPaidPathFailure({
+      stage: "user_resolve_failed",
+      sessionId,
+      userId: null,
+      error: "no user could be resolved for a paid session",
+      detail: { email, metadataUserId },
+    });
     return;
   }
 
@@ -326,34 +415,123 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         tier,
         existingPlanId: stalePending ? (existingPlan?.id as string) : null,
       });
-    } else if (existingPlan) {
-      console.warn("[webhook] stale pending row but no answers in metadata — leaving it", sessionId);
     } else {
-      console.warn(
-        "[webhook] no answers in metadata — inserting empty plan row for idempotency",
-        sessionId
-      );
-      try {
-        const { error: planErr } = await admin.from("plans").insert({
-          user_id: userId,
-          tier,
-          answers: {},
-          plan_data: {},
-          language,
-          stripe_session_id: sessionId,
-        });
-        if (planErr) {
-          console.error("[webhook] plans insert failed:", planErr);
+      // Paid session with no quiz answers anywhere — generation is impossible.
+      // Write an explicit error marker, never {}: an empty object used to
+      // classify as a ready v1 plan, trapping the buyer in a reload loop
+      // while regenerate answered 409 has_plan. The error marker renders the
+      // error screen and regenerate accepts the row (it will answer 422
+      // no_answers, which is the truth — support has to resolve this one).
+      const marker = {
+        error: "answers_missing",
+        detail: "no quiz answers in Stripe metadata",
+        failed_at: new Date().toISOString(),
+      };
+      if (existingPlan) {
+        console.error(
+          "[webhook] stale pending row but no answers in metadata — marking as error",
+          sessionId
+        );
+        const { error: updErr } = await admin
+          .from("plans")
+          .update({ plan_data: marker })
+          .eq("id", existingPlan.id);
+        if (updErr) {
+          console.error("[webhook] error-marker update failed:", updErr);
         }
-      } catch (err) {
-        console.error("[webhook] plans insert threw:", err);
+      } else {
+        console.error(
+          "[webhook] no answers in metadata — inserting error-marker row",
+          sessionId
+        );
+        try {
+          const { error: planErr } = await admin.from("plans").insert({
+            user_id: userId,
+            tier,
+            answers: {},
+            plan_data: marker,
+            language,
+            stripe_session_id: sessionId,
+          });
+          if (planErr) {
+            if (planErr.code === "23505") {
+              // plans_stripe_session_id_key: a concurrent delivery of the
+              // same session already inserted the row — benign, nothing lost.
+              console.log("[webhook] error-marker row already exists (concurrent delivery)", sessionId);
+            } else {
+              console.error("[webhook] plans insert failed:", planErr);
+            }
+          }
+        } catch (err) {
+          console.error("[webhook] plans insert threw:", err);
+        }
       }
+      await alertPaidPathFailure({
+        stage: "answers_missing",
+        sessionId,
+        userId,
+        error: "paid session has no quiz answers in metadata",
+        detail: { metadataKeys: Object.keys(metadata) },
+      });
     }
   } else {
     console.log("[webhook] plan already exists — skipping generation");
   }
 
   console.log("[webhook] done processing session", sessionId);
+}
+
+// A delayed-notification payment ultimately failed: the money never arrived.
+// Nothing was delivered (the paid gate saw payment_status "unpaid"), so this
+// only makes sure any row for the session can't read as pending or ready.
+async function handleAsyncPaymentFailed(session: Stripe.Checkout.Session) {
+  const sessionId = session.id;
+  const admin = createAdminClient();
+
+  const { data: row, error } = await admin
+    .from("plans")
+    .select("id, plan_data")
+    .eq("stripe_session_id", sessionId)
+    .maybeSingle();
+  if (error) {
+    console.error("[webhook] async_payment_failed lookup failed:", error, { sessionId });
+    return;
+  }
+  if (!row) {
+    console.log("[webhook] async_payment_failed — no plan row, nothing to mark", sessionId);
+    return;
+  }
+
+  const kind = classifyPlanData(row.plan_data);
+  if (kind === "v1" || kind === "v2") {
+    // Should be impossible with the paid gate: a real plan was delivered for
+    // money that never arrived. Support needs to see this one.
+    console.error("[webhook] async_payment_failed but a plan already exists", sessionId);
+    await alertPaidPathFailure({
+      stage: "payment_failed_after_delivery",
+      sessionId,
+      userId: null,
+      error: "async payment failed but a plan was already delivered",
+      detail: { kind },
+    });
+    return;
+  }
+
+  const { error: updErr } = await admin
+    .from("plans")
+    .update({
+      plan_data: {
+        error: "payment_failed",
+        detail: "checkout.session.async_payment_failed",
+        failed_at: new Date().toISOString(),
+      },
+    })
+    .eq("id", row.id);
+  if (updErr) {
+    console.error("[webhook] payment-failed marker update failed:", updErr, { sessionId });
+  } else {
+    console.log("[webhook] marked session as unpaid", sessionId);
+  }
 }
 
 async function handleSubscriptionEvent(sub: Stripe.Subscription) {
@@ -393,12 +571,23 @@ async function handleSubscriptionEvent(sub: Stripe.Subscription) {
   }
 }
 
-async function processEventAsync(event: Stripe.Event) {
+async function processEventAsync(event: Stripe.Event, resolved?: ResolvedUser) {
   console.log("[webhook] processing event:", event.type, event.id);
   try {
     switch (event.type) {
+      // Both deliver the plan: `completed` for instant methods (cards),
+      // `async_payment_succeeded` for delayed ones (bank transfer & co) whose
+      // `completed` arrived earlier with payment_status "unpaid" and was
+      // acknowledged without processing.
       case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded":
         await handleCheckoutCompleted(
+          event.data.object as Stripe.Checkout.Session,
+          resolved ?? { userId: null, isNewUser: false }
+        );
+        break;
+      case "checkout.session.async_payment_failed":
+        await handleAsyncPaymentFailed(
           event.data.object as Stripe.Checkout.Session
         );
         break;
@@ -432,29 +621,69 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid signature" }, { status: 400 });
   }
 
-  // Idempotency gate must be answered BEFORE we acknowledge: once we return
-  // 200 Stripe never retries, and the handler runs under waitUntil where a
-  // failed existing-plan lookup would otherwise fall through to a second
-  // paid generation. A 500 here makes Stripe redeliver the event.
-  if (event.type === "checkout.session.completed") {
-    const sessionId = (event.data.object as Stripe.Checkout.Session).id;
+  const isCheckoutDelivery =
+    event.type === "checkout.session.completed" ||
+    event.type === "checkout.session.async_payment_succeeded";
+
+  let resolvedUser: ResolvedUser | undefined;
+  if (isCheckoutDelivery) {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const sessionId = session.id;
+
+    // Deliver only once the money has actually arrived. Delayed-notification
+    // methods fire `completed` with payment_status "unpaid" — acknowledge and
+    // drop it; the plan work happens when (if) async_payment_succeeded lands,
+    // and async_payment_failed marks the row instead.
+    if (session.payment_status !== "paid") {
+      console.log(
+        "[webhook] checkout event ignored — payment_status:",
+        session.payment_status,
+        sessionId
+      );
+      return NextResponse.json({ received: true });
+    }
+
+    // Idempotency gate must be answered BEFORE we acknowledge: once we return
+    // 200 Stripe never retries, and the handler runs under waitUntil where a
+    // failed existing-plan lookup would otherwise fall through to a second
+    // paid generation. A 500 here makes Stripe redeliver the event.
+    let existingUserId: string | null = null;
     try {
-      const { error } = await createAdminClient()
+      const { data: existing, error } = await createAdminClient()
         .from("plans")
-        .select("id")
+        .select("id, user_id")
         .eq("stripe_session_id", sessionId)
         .maybeSingle();
       if (error) {
         console.error("[webhook] pre-check plans lookup failed — returning 500 for Stripe retry:", error, { sessionId });
         return NextResponse.json({ error: "db unavailable" }, { status: 500 });
       }
+      existingUserId = (existing?.user_id as string | null) ?? null;
     } catch (err) {
       console.error("[webhook] pre-check threw — returning 500 for Stripe retry:", err, { sessionId });
       return NextResponse.json({ error: "db unavailable" }, { status: 500 });
     }
+
+    // User resolution also runs before the ack, for the same reason: a
+    // failure here (listUsers down, a createUser "already registered" race)
+    // must 500 → Stripe redelivers — not silently drop a paid session.
+    try {
+      resolvedUser = await resolveUser(session, existingUserId);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[webhook] user resolution failed — returning 500 for Stripe retry:", err, { sessionId });
+      await alertPaidPathFailure({
+        stage: "user_resolve_failed",
+        sessionId,
+        userId: null,
+        error: msg,
+        detail: err,
+      });
+      return NextResponse.json({ error: "user resolution failed" }, { status: 500 });
+    }
   }
 
-  waitUntil(processEventAsync(event));
+  waitUntil(processEventAsync(event, resolvedUser));
 
   return NextResponse.json({ received: true });
 }

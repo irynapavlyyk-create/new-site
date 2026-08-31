@@ -55,9 +55,6 @@ export default async function DashboardPage({
   const kind = classifyPlanData(planData);
   const isV2Plan = kind === "v2";
   const isErrorMarker = kind === "error";
-  // A pending row (reserved before generation) must render as "no plan yet"
-  // so DashboardClient shows the forging screen, not a broken legacy plan.
-  const isPending = kind === "pending";
 
   // TODO(phase-2): remove this branch when the new V2 dashboard UI ships.
   if (isV2Plan) {
@@ -95,7 +92,9 @@ export default async function DashboardPage({
 
   // Legacy plan (or no plan at all) — fall through to the existing UI.
   // DashboardClient handles the no-plan and fromStripe forging states.
-  const initialPlan = isPending ? null : ((planData as ProPlan | null) ?? null);
+  // Only a real v1 plan is passed through; "none" (incl. a row holding {})
+  // and "pending" must render as no-plan, not as a broken legacy plan.
+  const initialPlan = kind === "v1" ? (planData as ProPlan) : null;
   const initialPlanTier = (plan?.tier as string | null) ?? null;
 
   return (

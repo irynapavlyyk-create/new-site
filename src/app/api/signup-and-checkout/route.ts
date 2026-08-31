@@ -70,6 +70,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // With email confirmation enabled, signUp on a taken address does NOT
+    // error: Supabase returns an obfuscated user with a fresh UUID and an
+    // empty identities array (anti-enumeration). That UUID must never reach
+    // Stripe metadata — the webhook would trust it, and the plan insert would
+    // die on the FK, leaving a paid customer with no plan at all. Refuse
+    // BEFORE creating the checkout session and send them to sign in.
+    if (authData.user.identities?.length === 0) {
+      console.warn("[signup-and-checkout] rejected signup for already-registered email");
+      return NextResponse.json(
+        { error: "Email already in use. Please sign in instead." },
+        { status: 409 }
+      );
+    }
+
     // Launch promo: discounted price id during the window; defensive fallback to
     // the original if the PROMO env var is missing/empty (never break checkout).
     const originalPriceId =

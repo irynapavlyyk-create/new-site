@@ -690,6 +690,18 @@ export async function generateAndSavePlan(params: {
         .select("id")
         .single();
       if (pendingErr) {
+        // 23505 = unique violation on plans_stripe_session_id_key: a
+        // concurrent delivery of the same session won the race and reserved
+        // the row first. That handler owns generation and the plan-ready
+        // email — stop HERE, before the Anthropic call, so one payment can
+        // never produce two plans, two emails, or double generation spend.
+        if (pendingErr.code === "23505") {
+          console.log(
+            "[generateAndSavePlan] row already reserved by a concurrent delivery — aborting duplicate",
+            { sessionId }
+          );
+          return;
+        }
         // Not fatal: we still generate and fall back to a plain insert below,
         // so the paid run is never thrown away because of this write.
         console.error("[generateAndSavePlan] pending insert failed:", pendingErr);

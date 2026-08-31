@@ -18,6 +18,8 @@ export default function SignupForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Taken-email error gets a sign-in link rendered next to the message.
+  const [emailTaken, setEmailTaken] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Quiz context guard: logged-out users hitting /signup without `from=quiz`
@@ -36,6 +38,7 @@ export default function SignupForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setEmailTaken(false);
 
     if (password.length < 8) {
       setError(pick(t.signup.passwordTooShort, lang));
@@ -83,8 +86,9 @@ export default function SignupForm() {
       });
       const body = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) {
-        if (body.error?.toLowerCase().includes("already")) {
+        if (res.status === 409 || body.error?.toLowerCase().includes("already")) {
           setError(pick(t.signup.emailInUse, lang));
+          setEmailTaken(true);
         } else {
           setError(body.error || pick(t.signup.genericError, lang));
         }
@@ -109,7 +113,19 @@ export default function SignupForm() {
       title={pick(t.signup.title, lang)}
       subtitle={pick(t.signup.subtitle, lang)}
     >
-      {error && <div className="auth-error mb-4">{error}</div>}
+      {error && (
+        <div className="auth-error mb-4">
+          {error}
+          {emailTaken && (
+            <>
+              {" "}
+              <Link href="/login" className="underline font-semibold">
+                {pick(t.signup.signInLink, lang)}
+              </Link>
+            </>
+          )}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
