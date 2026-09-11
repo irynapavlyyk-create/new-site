@@ -41,37 +41,19 @@ export default function Footer() {
           </a>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 flex items-center justify-between gap-4 text-xs text-muted">
-        <div>
-          {COMPANY.name} · IČO: {COMPANY.ico} · DIČ: {COMPANY.dic}
-          <span className="hidden sm:inline"> · </span>
-          <br className="sm:hidden" />
-          {COMPANY.addressEn}
-        </div>
-        {/* Icon-only social link. Padding gives a 44x44 hit area; negative margin keeps the row height unchanged. */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-xs text-muted">
+        {COMPANY.name} · IČO: {COMPANY.ico} · DIČ: {COMPANY.dic}
+        <span className="hidden sm:inline"> · </span>
+        <br className="sm:hidden" />
+        {COMPANY.addressEn}
+        {" · "}
         <a
           href={INSTAGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Instagram"
-          className="inline-flex items-center justify-center p-3 -m-3 flex-shrink-0 rounded-lg hover:text-[#F59E0B] transition-colors"
+          className="hover:text-[#F59E0B] transition-colors"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-          </svg>
+          Instagram
         </a>
       </div>
     </footer>
