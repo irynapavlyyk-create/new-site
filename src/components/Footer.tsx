@@ -39,6 +39,14 @@ export default function Footer() {
           >
             {SUPPORT_EMAIL}
           </a>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#F59E0B] hover:text-[#FBBF24] transition-colors"
+          >
+            Instagram
+          </a>
         </div>
       </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-xs text-muted">
@@ -46,15 +54,6 @@ export default function Footer() {
         <span className="hidden sm:inline"> · </span>
         <br className="sm:hidden" />
         {COMPANY.addressEn}
-        {" · "}
-        <a
-          href={INSTAGRAM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-[#F59E0B] transition-colors"
-        >
-          Instagram
-        </a>
       </div>
     </footer>
   );
