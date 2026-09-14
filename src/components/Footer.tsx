@@ -43,7 +43,7 @@ export default function Footer() {
             href={INSTAGRAM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#F59E0B] hover:text-[#FBBF24] transition-colors"
+            className="hover:text-ink transition-colors"
           >
             Instagram
           </a>
